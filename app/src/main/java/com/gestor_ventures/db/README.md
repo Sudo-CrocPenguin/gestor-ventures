@@ -98,3 +98,6 @@ com/gestorventures/data/local/
 
 Ajusta el paquete `com.gestorventures` al `applicationId` real del proyecto antes de
 copiar los archivos a `src/main/java/`.
+
+
+hello word
