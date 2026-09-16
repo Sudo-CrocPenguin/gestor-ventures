@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 /** Fila de lista: ícono en recuadro, título, subtítulo y contenido opcional a la derecha. */
 @Composable
@@ -28,7 +29,7 @@ fun ListRow(
     @DrawableRes iconRes: Int,
     modifier: Modifier = Modifier,
     iconContainerColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    iconColor: Color = MaterialTheme.colorScheme.primary,
+    iconColor: Color = GestorVenturesTheme.colors.acento,
     trailing: @Composable (() -> Unit)? = null,
 ) {
     Row(

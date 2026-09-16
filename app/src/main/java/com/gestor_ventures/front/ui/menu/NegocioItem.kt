@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.gestor_ventures.front.components.GvAvatar
 import com.gestor_ventures.front.model.NegocioUi
 import com.gestor_ventures.front.model.RolNegocio
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 /**
  * Fila de un negocio en el menú. El [activo] se distingue por el fondo resaltado; la etiqueta
@@ -65,13 +66,14 @@ fun NegocioItem(
 private fun EtiquetaRol(rol: RolNegocio, modifier: Modifier = Modifier) {
     val esLider = rol == RolNegocio.Lider
     val primary = MaterialTheme.colorScheme.primary
+    val acento = GestorVenturesTheme.colors.acento
     Text(
         text = stringResource(rol.labelRes),
         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-        color = if (esLider) MaterialTheme.colorScheme.onPrimary else primary,
+        color = if (esLider) MaterialTheme.colorScheme.onPrimary else acento,
         modifier = modifier
             .background(if (esLider) primary else Color.Transparent, CircleShape)
-            .then(if (esLider) Modifier else Modifier.border(1.5.dp, primary, CircleShape))
+            .then(if (esLider) Modifier else Modifier.border(1.5.dp, acento, CircleShape))
             .padding(horizontal = 10.dp, vertical = 3.dp),
     )
 }

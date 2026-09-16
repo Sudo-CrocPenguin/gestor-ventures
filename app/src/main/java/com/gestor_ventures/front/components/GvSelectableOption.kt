@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 private val OptionShape = RoundedCornerShape(14.dp)
 
@@ -48,7 +49,7 @@ fun GvSelectableOption(
             .background(if (selected) colors.primaryContainer else colors.surface)
             .border(
                 width = if (selected) 1.5.dp else 1.dp,
-                color = if (selected) colors.primary else colors.outline,
+                color = if (selected) GestorVenturesTheme.colors.acento else colors.outline,
                 shape = OptionShape,
             )
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
@@ -68,7 +69,7 @@ fun GvSelectableOption(
             Icon(
                 painter = painterResource(iconRes),
                 contentDescription = null,
-                tint = if (selected) colors.onPrimary else colors.primary,
+                tint = if (selected) colors.onPrimary else GestorVenturesTheme.colors.acento,
                 modifier = Modifier.size(19.dp),
             )
         }
@@ -89,7 +90,7 @@ fun GvSelectableOption(
                 .size(20.dp)
                 .border(
                     width = if (selected) 6.dp else 1.5.dp,
-                    color = if (selected) colors.primary else colors.outline,
+                    color = if (selected) GestorVenturesTheme.colors.acento else colors.outline,
                     shape = CircleShape,
                 ),
         )

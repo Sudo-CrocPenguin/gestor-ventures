@@ -35,6 +35,7 @@ import com.gestor_ventures.front.components.GvPasoTopBar
 import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvSelectableOption
 import com.gestor_ventures.front.components.GvTextField
+import com.gestor_ventures.front.theme.ColorMarca
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 /** El onboarding del mockup tiene dos pasos; el segundo (base financiera) es HU-06 a HU-09. */
@@ -54,15 +55,21 @@ fun RegistrarNegocioRoute(
         viewModel.negocioCreado.collect { negocioId -> onNegocioCreado(negocioId) }
     }
 
-    RegistrarNegocioScreen(
-        uiState = uiState,
-        onBack = onBack,
-        puedeVolver = puedeVolver,
-        onNombreChange = viewModel::onNombreChange,
-        onCategoriaChange = viewModel::onCategoriaChange,
-        onTipoActividadChange = viewModel::onTipoActividadChange,
-        onGuardar = viewModel::guardar,
-    )
+    // La pantalla ya se ve con el color elegido: así el usuario sabe qué está escogiendo.
+    GestorVenturesTheme(colorMarca = uiState.colorMarca.hex) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            RegistrarNegocioScreen(
+                uiState = uiState,
+                onBack = onBack,
+                puedeVolver = puedeVolver,
+                onNombreChange = viewModel::onNombreChange,
+                onCategoriaChange = viewModel::onCategoriaChange,
+                onTipoActividadChange = viewModel::onTipoActividadChange,
+                onColorMarcaChange = viewModel::onColorMarcaChange,
+                onGuardar = viewModel::guardar,
+            )
+        }
+    }
 }
 
 /**
@@ -77,6 +84,7 @@ fun RegistrarNegocioScreen(
     onNombreChange: (String) -> Unit,
     onCategoriaChange: (String) -> Unit,
     onTipoActividadChange: (TipoActividad) -> Unit,
+    onColorMarcaChange: (ColorMarca) -> Unit,
     onGuardar: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -98,6 +106,7 @@ fun RegistrarNegocioScreen(
         ) {
             Encabezado()
 
+            // 1. Cómo se llama.
             GvTextField(
                 label = stringResource(R.string.negocio_nombre),
                 value = uiState.nombre,
@@ -105,6 +114,7 @@ fun RegistrarNegocioScreen(
                 placeholder = stringResource(R.string.negocio_nombre_placeholder),
             )
 
+            // 2. A qué se dedica, con atajos para no tener que escribir.
             Column {
                 GvTextField(
                     label = stringResource(R.string.negocio_categoria),
@@ -119,9 +129,16 @@ fun RegistrarNegocioScreen(
                 )
             }
 
+            // 3. Cómo trabaja: define los módulos de la agenda.
             TipoDeActividad(
                 seleccionado = uiState.tipoActividad,
                 onTipoActividadChange = onTipoActividadChange,
+            )
+
+            // 4. Al final, lo estético: cómo se va a ver la app.
+            ColorDeMarca(
+                seleccionado = uiState.colorMarca,
+                onColorMarcaChange = onColorMarcaChange,
             )
 
             AnimatedVisibility(visible = uiState.error != null) {
@@ -221,6 +238,24 @@ private fun TipoDeActividad(
 }
 
 @Composable
+private fun ColorDeMarca(
+    seleccionado: ColorMarca,
+    onColorMarcaChange: (ColorMarca) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier) {
+        EtiquetaSeccion(stringResource(R.string.negocio_color))
+        Text(
+            text = stringResource(R.string.negocio_color_ayuda),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 6.dp),
+        )
+        ColorMarcaPicker(seleccionado = seleccionado, onColorChange = onColorMarcaChange)
+    }
+}
+
+@Composable
 private fun EtiquetaSeccion(texto: String, modifier: Modifier = Modifier) {
     Text(
         text = texto.uppercase(),
@@ -239,6 +274,7 @@ private fun RegistrarNegocioScreenPreview() {
             nombre = "Dulce Antojo",
             categoria = "Repostería",
             tipoActividad = TipoActividad.PRODUCTOS,
+            colorMarca = ColorMarca.Menta,
         ),
     )
 }
@@ -265,6 +301,7 @@ private fun VistaPrevia(uiState: RegistrarNegocioUiState) {
                 onNombreChange = {},
                 onCategoriaChange = {},
                 onTipoActividadChange = {},
+                onColorMarcaChange = {},
                 onGuardar = {},
             )
         }

@@ -43,6 +43,11 @@ internal val DangerSoftDark = Color(0xFF331C1C)
 /** Colores del sistema de diseño que no tienen equivalente en el ColorScheme de Material 3. */
 @Immutable
 data class GestorColors(
+    /**
+     * Color de marca para textos e íconos sobre fondos claros. Con el azul de la app es el
+     * mismo primario; con un pastel es su versión oscurecida, para que se lea.
+     */
+    val acento: Color,
     val primaryVariant: Color,
     val success: Color,
     val successContainer: Color,
@@ -51,6 +56,7 @@ data class GestorColors(
 )
 
 internal val LightGestorColors = GestorColors(
+    acento = PrimaryLight,
     primaryVariant = PrimaryVariantLight,
     success = SuccessLight,
     successContainer = SuccessSoftLight,
@@ -59,6 +65,7 @@ internal val LightGestorColors = GestorColors(
 )
 
 internal val DarkGestorColors = GestorColors(
+    acento = PrimaryDark,
     primaryVariant = PrimaryVariantDark,
     success = SuccessDark,
     successContainer = SuccessSoftDark,

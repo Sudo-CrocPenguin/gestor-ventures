@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 /** Barra de pestañas inferior; la pestaña activa lleva un indicador en el borde superior. */
 @Composable
@@ -66,7 +67,7 @@ private fun GvBottomBarItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+    val color = if (selected) GestorVenturesTheme.colors.acento else MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         modifier = modifier
             .selectable(selected = selected, onClick = onClick, role = Role.Tab)
@@ -77,7 +78,7 @@ private fun GvBottomBarItem(
             Modifier
                 .size(width = 24.dp, height = 3.dp)
                 .background(
-                    color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    color = if (selected) GestorVenturesTheme.colors.acento else Color.Transparent,
                     shape = RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp),
                 )
         )

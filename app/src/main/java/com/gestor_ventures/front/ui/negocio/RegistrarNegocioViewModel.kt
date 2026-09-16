@@ -6,6 +6,7 @@ import com.gestor_ventures.back.model.ResultadoNegocio
 import com.gestor_ventures.back.model.TipoActividad
 import com.gestor_ventures.back.repository.NegocioRepository
 import com.gestor_ventures.back.repository.SesionRepository
+import com.gestor_ventures.front.theme.ColorMarca
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +48,11 @@ class RegistrarNegocioViewModel @Inject constructor(
         _uiState.update { it.copy(tipoActividad = tipo) }
     }
 
+    /** HU-05. El color con el que se verá la app; el predeterminado deja el azul de siempre. */
+    fun onColorMarcaChange(color: ColorMarca) {
+        _uiState.update { it.copy(colorMarca = color) }
+    }
+
     fun guardar() {
         val estado = _uiState.value
         if (!estado.puedeGuardar) return
@@ -60,6 +66,7 @@ class RegistrarNegocioViewModel @Inject constructor(
                 categoria = estado.categoria,
                 // El porcentaje de reinversión se configura en HU-09; arranca en cero.
                 porcentajeReinversion = 0.0,
+                colorMarca = estado.colorMarca.hex,
             )
             when (resultado) {
                 is ResultadoNegocio.Exito -> {

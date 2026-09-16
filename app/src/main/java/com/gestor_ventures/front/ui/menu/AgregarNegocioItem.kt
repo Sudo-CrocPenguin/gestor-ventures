@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gestor_ventures.R
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 /** Fila punteada para crear un negocio nuevo, al final de la lista de negocios. */
 @Composable
@@ -51,14 +52,14 @@ fun AgregarNegocioItem(onClick: () -> Unit, modifier: Modifier = Modifier) {
             Icon(
                 painter = painterResource(R.drawable.ic_plus),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = GestorVenturesTheme.colors.acento,
                 modifier = Modifier.size(18.dp),
             )
         }
         Text(
             text = stringResource(R.string.menu_agregar_negocio),
             style = MaterialTheme.typography.labelLarge.copy(fontSize = 15.sp),
-            color = MaterialTheme.colorScheme.primary,
+            color = GestorVenturesTheme.colors.acento,
         )
     }
 }

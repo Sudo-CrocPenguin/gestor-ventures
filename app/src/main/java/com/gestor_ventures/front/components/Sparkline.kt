@@ -12,13 +12,14 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 /** Mini gráfica de tendencia: línea con relleno degradado y un punto en el último valor. */
 @Composable
 fun Sparkline(
     values: List<Double>,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary,
+    color: Color = GestorVenturesTheme.colors.acento,
 ) {
     if (values.size < 2) return
 

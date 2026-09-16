@@ -8,6 +8,8 @@ data class NegocioUi(
     val nombre: String,
     val categoria: String,
     val rol: RolNegocio,
+    /** HU-05. Color de marca en hexadecimal; null = el color por defecto de la app. */
+    val colorMarca: String? = null,
 ) {
     /** "Dulce Antojo" → "DA". */
     val iniciales: String get() = nombre.aIniciales()
