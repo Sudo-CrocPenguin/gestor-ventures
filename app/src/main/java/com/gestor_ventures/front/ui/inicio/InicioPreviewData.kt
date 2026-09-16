@@ -3,12 +3,21 @@ package com.gestor_ventures.front.ui.inicio
 import java.time.LocalDate
 import java.time.LocalTime
 
-/** Datos del mockup, para los @Preview y para arrancar la UI mientras no existan los repositorios. */
+/**
+ * Datos del mockup para los @Preview.
+ *
+ * Los dos primeros valores también los usa la pantalla de verdad, marcados como TEMPORAL:
+ * el saludo espera a HU-01 (la cuenta del usuario) y las alertas a HU-40 (notificaciones).
+ */
 object InicioPreviewData {
+
+    const val NombreTemporal = "Sebastián"
+    const val AlertasTemporales = 2
+
     val uiState = InicioUiState(
-        nombreUsuario = "Sebastián",
+        nombreUsuario = NombreTemporal,
         fecha = LocalDate.now(),
-        alertasNuevas = 2,
+        alertasNuevas = AlertasTemporales,
         resumenHoy = ResumenHoyUi(
             ventas = 148_500.0,
             variacionVentasVsAyer = 12,

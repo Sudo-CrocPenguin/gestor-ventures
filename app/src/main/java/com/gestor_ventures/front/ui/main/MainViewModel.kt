@@ -3,12 +3,12 @@ package com.gestor_ventures.front.ui.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Negocio
+import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
 import com.gestor_ventures.back.repository.SesionRepository
 import com.gestor_ventures.front.model.NegocioUi
 import com.gestor_ventures.front.model.RolNegocio
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -19,19 +19,19 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     negocioRepository: NegocioRepository,
     sesionRepository: SesionRepository,
+    private val negocioActivoRepository: NegocioActivoRepository,
 ) : ViewModel() {
-
-    /** Negocio elegido a mano en el menú; si es nulo manda el primero de la lista. */
-    private val seleccionado = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<MainUiState> = combine(
         negocioRepository.negociosDeUsuario(sesionRepository.usuarioId()),
-        seleccionado,
+        // El negocio elegido a mano lo guarda el repositorio, no esta pantalla: el inicio y el
+        // registro de ventas necesitan saber el mismo.
+        negocioActivoRepository.seleccionado,
     ) { negocios, elegido ->
         MainUiState(
             usuario = MainPreviewData.usuario,
             negocios = negocios.map(::aNegocioUi),
-            negocioActivoId = elegido,
+            negocioActivoId = elegido?.toString(),
             // Las notificaciones (HU-40/HU-41) todavía no tienen datos reales.
             notificacionesSinLeer = MainPreviewData.NOTIFICACIONES_SIN_LEER,
             cargando = false,
@@ -44,7 +44,7 @@ class MainViewModel @Inject constructor(
 
     /** Cambia el negocio activo desde el menú lateral. */
     fun seleccionarNegocio(negocioId: String) {
-        seleccionado.value = negocioId
+        negocioId.toLongOrNull()?.let(negocioActivoRepository::seleccionar)
     }
 }
 

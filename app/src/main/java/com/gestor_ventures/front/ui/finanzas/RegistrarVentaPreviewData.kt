@@ -13,7 +13,6 @@ object RegistrarVentaPreviewData {
         tipoRegistro = TipoRegistroVentaUi.Detallado,
         monto = "85000",
         productoServicio = "Torta personalizada",
-        cliente = "Laura Gómez",
         metodoPago = MetodoPagoUi.Transferencia,
         fechaHora = momento,
     )

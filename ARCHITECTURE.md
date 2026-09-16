@@ -156,6 +156,12 @@ Cada dominio en `back/repository/` corresponde a un grupo de tablas relacionadas
 (`NegocioRepository`, `VentaRepository`, `CajaRepository`, `ClienteRepository`,
 `AsistenteRepository`, etc.).
 
+La excepción es `NegocioActivoRepository`, que no envuelve tablas sino el estado compartido de
+con qué negocio está trabajando el usuario. Vive en `back/` porque no es de ninguna pantalla:
+el menú lateral lo cambia, la barra superior lo muestra, el inicio resume sus ventas y el
+registro de ventas lo necesita para saber a quién apuntarle la venta. Cualquier pantalla nueva
+que trabaje sobre un negocio lo inyecta en vez de recibir el id por la navegación.
+
 ---
 
 ## 5. Responsabilidades por capa
