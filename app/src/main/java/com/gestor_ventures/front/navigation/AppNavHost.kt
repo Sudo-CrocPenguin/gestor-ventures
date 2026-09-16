@@ -11,11 +11,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.gestor_ventures.R
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
+import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
+import com.gestor_ventures.front.ui.negocio.NegocioListoRoute
 import com.gestor_ventures.front.ui.negocio.RegistrarNegocioRoute
 
 /**
@@ -24,7 +28,18 @@ import com.gestor_ventures.front.ui.negocio.RegistrarNegocioRoute
 object Rutas {
     const val RegistrarVenta = "registrar_venta"
     const val RegistrarNegocio = "registrar_negocio"
+
+    /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
+    const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
+    fun baseFinanciera(negocioId: String) = "base_financiera/$negocioId"
+
+    /** Cierre del onboarding con el resumen del negocio. */
+    const val NegocioListo = "negocio_listo/{$ArgumentoNegocioId}"
+    fun negocioListo(negocioId: String) = "negocio_listo/$negocioId"
 }
+
+/** Nombre del id de negocio dentro de la ruta. */
+const val ArgumentoNegocioId = "negocioId"
 
 @Composable
 fun AppNavHost(
@@ -63,14 +78,38 @@ fun AppNavHost(
         }
 
         composable(Rutas.RegistrarNegocio) {
-            val mensajeCreado = stringResource(R.string.negocio_creado)
             RegistrarNegocioRoute(
                 puedeVolver = tieneNegocios,
                 onBack = { navController.popBackStack() },
                 onNegocioCreado = { negocioId ->
                     onNegocioCreado(negocioId.toString())
-                    navController.popBackStack()
-                    mostrarMensaje(mensajeCreado)
+                    // El negocio ya existe: sigue el paso 2, su base financiera.
+                    navController.navigate(Rutas.baseFinanciera(negocioId.toString()))
+                },
+            )
+        }
+
+        composable(
+            route = Rutas.BaseFinanciera,
+            arguments = listOf(navArgument(ArgumentoNegocioId) { type = NavType.StringType }),
+        ) { entrada ->
+            val negocioId = entrada.arguments?.getString(ArgumentoNegocioId).orEmpty()
+            BaseFinancieraRoute(
+                onBack = { navController.popBackStack() },
+                onConfiguracionLista = { navController.navigate(Rutas.negocioListo(negocioId)) },
+            )
+        }
+
+        composable(
+            route = Rutas.NegocioListo,
+            arguments = listOf(navArgument(ArgumentoNegocioId) { type = NavType.StringType }),
+        ) {
+            NegocioListoRoute(
+                onIrAlNegocio = {
+                    // Cierra todo el onboarding: no se vuelve atrás desde el inicio.
+                    navController.navigate(TopLevelDestination.Inicio.route) {
+                        popUpTo(TopLevelDestination.Inicio.route) { inclusive = true }
+                    }
                 },
             )
         }
