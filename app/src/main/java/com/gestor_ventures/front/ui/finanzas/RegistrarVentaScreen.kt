@@ -23,8 +23,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gestor_ventures.R
 import com.gestor_ventures.front.components.GvBackTopBar
 import com.gestor_ventures.front.components.GvChip
@@ -44,29 +45,30 @@ import com.gestor_ventures.front.util.formatLongDate
 fun RegistrarVentaRoute(
     onBack: () -> Unit,
     onVentaGuardada: (TipoRegistroVentaUi) -> Unit,
-    viewModel: RegistrarVentaViewModel = viewModel(),
+    viewModel: RegistrarVentaViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // La pantalla se cierra cuando la venta ya quedó guardada, no cuando se toca el botón.
+    LaunchedEffect(viewModel) {
+        viewModel.ventaGuardada.collect { tipo -> onVentaGuardada(tipo) }
+    }
+
     RegistrarVentaScreen(
         uiState = uiState,
         onBack = onBack,
         onTipoRegistroChange = viewModel::onTipoRegistroChange,
         onMontoChange = viewModel::onMontoChange,
         onProductoServicioChange = viewModel::onProductoServicioChange,
-        onClienteChange = viewModel::onClienteChange,
         onMetodoPagoChange = viewModel::onMetodoPagoChange,
         onNotaChange = viewModel::onNotaChange,
-        onGuardar = {
-            val tipo = uiState.tipoRegistro
-            viewModel.guardar()
-            onVentaGuardada(tipo)
-        },
+        onGuardar = viewModel::guardar,
     )
 }
 
 /**
  * HU-11/HU-12. Registro de venta en dos modalidades:
- * - **Detallada**: monto, qué se vendió, cliente (opcional) y método de pago.
+ * - **Detallada**: monto, qué se vendió y método de pago.
  * - **Rápida**: solo el total vendido y una nota opcional.
  *
  * La fecha y la hora las pone el sistema; se muestran para que el usuario sepa con qué
@@ -79,7 +81,6 @@ fun RegistrarVentaScreen(
     onTipoRegistroChange: (TipoRegistroVentaUi) -> Unit,
     onMontoChange: (String) -> Unit,
     onProductoServicioChange: (String) -> Unit,
-    onClienteChange: (String) -> Unit,
     onMetodoPagoChange: (MetodoPagoUi) -> Unit,
     onNotaChange: (String) -> Unit,
     onGuardar: () -> Unit,
@@ -138,12 +139,6 @@ fun RegistrarVentaScreen(
                     onValueChange = onProductoServicioChange,
                     placeholder = stringResource(R.string.venta_producto_placeholder),
                 )
-                GvTextField(
-                    label = stringResource(R.string.venta_cliente),
-                    value = uiState.cliente,
-                    onValueChange = onClienteChange,
-                    placeholder = stringResource(R.string.venta_cliente_placeholder),
-                )
                 MetodoPago(
                     seleccionado = uiState.metodoPago,
                     onMetodoPagoChange = onMetodoPagoChange,
@@ -154,6 +149,14 @@ fun RegistrarVentaScreen(
                     value = uiState.nota,
                     onValueChange = onNotaChange,
                     placeholder = stringResource(R.string.venta_nota_placeholder),
+                )
+            }
+
+            AnimatedVisibility(visible = uiState.error != null) {
+                GvInfoNote(
+                    text = uiState.error?.let { stringResource(it.mensajeRes()) }.orEmpty(),
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
                 )
             }
         }
@@ -240,7 +243,6 @@ private fun VistaPrevia(uiState: RegistrarVentaUiState) {
                 onTipoRegistroChange = {},
                 onMontoChange = {},
                 onProductoServicioChange = {},
-                onClienteChange = {},
                 onMetodoPagoChange = {},
                 onNotaChange = {},
                 onGuardar = {},

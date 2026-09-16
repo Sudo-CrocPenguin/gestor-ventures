@@ -151,8 +151,11 @@
     <string name="venta_total_vendido">Total vendido</string>
     <string name="venta_producto">¿Qué vendiste?</string>
     <string name="venta_producto_placeholder">Ej. Torta personalizada</string>
-    <string name="venta_cliente">Cliente (opcional)</string>
-    <string name="venta_cliente_placeholder">Buscar o dejar en blanco</string>
+    <string name="venta_error_sin_negocio">Primero crea un negocio para registrarle ventas.</string>
+    <string name="venta_error_monto">Escribe cuánto vendiste.</string>
+    <string name="venta_error_producto">Escribe qué vendiste.</string>
+    <string name="venta_error_metodo_pago">Elige cómo te pagaron.</string>
+    <string name="venta_error_fecha_futura">No puedes registrar una venta con fecha futura.</string>
     <string name="venta_nota">Nota (opcional)</string>
     <string name="venta_nota_placeholder">Ej. Ventas del día en el punto</string>
     <string name="venta_fecha_hora">Fecha y hora</string>

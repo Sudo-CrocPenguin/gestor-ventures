@@ -23,7 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.gestor_ventures.R
 import com.gestor_ventures.front.components.QuickActionButton
 import com.gestor_ventures.front.theme.GestorVenturesTheme
@@ -35,7 +35,7 @@ fun InicioRoute(
     onVerFinanzas: () -> Unit,
     onRegistrarVenta: () -> Unit,
     onAbrirCaja: () -> Unit,
-    viewModel: InicioViewModel = viewModel(),
+    viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     InicioScreen(
