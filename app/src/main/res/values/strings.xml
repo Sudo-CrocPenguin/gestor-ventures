@@ -71,14 +71,14 @@
     <string name="cd_color_elegido">Color elegido</string>
     <string name="color_azul_marino">Azul marino</string>
     <string name="color_rosa_cuarzo">Rosa cuarzo</string>
-    <string name="color_durazno">Durazno</string>
-    <string name="color_mantequilla">Mantequilla</string>
-    <string name="color_salvia">Salvia</string>
-    <string name="color_menta">Menta</string>
-    <string name="color_cielo">Cielo</string>
-    <string name="color_lavanda">Lavanda</string>
-    <string name="color_lila">Lila</string>
-    <string name="color_arena">Arena</string>
+    <string name="color_salvia">Verde salvia</string>
+    <string name="color_personalizado">Personalizado</string>
+    <string name="color_personalizado_titulo">El color de tu marca</string>
+    <string name="color_personalizado_ayuda">Mueve el punto para buscar tu color, o escribe su código si ya lo tienes.</string>
+    <string name="color_personalizado_hex">Código del color</string>
+    <string name="color_personalizado_usar">Usar este color</string>
+    <!-- Letras de muestra sobre el color, para ver si el texto se lee encima. -->
+    <string name="color_personalizado_muestra">Aa</string>
     <string name="negocio_continuar">Continuar</string>
     <string name="negocio_creado">Negocio creado ✓</string>
     <string name="negocio_error_nombre_vacio">Escribe el nombre del negocio.</string>

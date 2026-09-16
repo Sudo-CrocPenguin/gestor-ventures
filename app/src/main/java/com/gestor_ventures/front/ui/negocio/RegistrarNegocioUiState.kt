@@ -5,14 +5,14 @@ import androidx.annotation.StringRes
 import com.gestor_ventures.R
 import com.gestor_ventures.back.model.ErrorNegocio
 import com.gestor_ventures.back.model.TipoActividad
-import com.gestor_ventures.front.theme.ColorMarca
 
 /** HU-05. Estado del formulario de registrar negocio. */
 data class RegistrarNegocioUiState(
     val nombre: String = "",
     val categoria: String = "",
     val tipoActividad: TipoActividad = TipoActividad.PRODUCTOS,
-    val colorMarca: ColorMarca = ColorMarca.Sistema,
+    /** Hexadecimal del color de marca; null es el azul propio de la app. */
+    val colorMarca: String? = null,
     val guardando: Boolean = false,
     val error: ErrorNegocio? = null,
 ) {
