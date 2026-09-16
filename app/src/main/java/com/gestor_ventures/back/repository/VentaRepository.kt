@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.YearMonth
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -74,6 +75,11 @@ class VentaRepository @Inject constructor(
     /** Ventas de un día, de la más reciente a la más antigua. */
     fun ventasDelDia(negocioId: Long, dia: LocalDate = hoy()): Flow<List<Venta>> =
         ventaDao.observarEntre(negocioId, dia.inicio(), dia.fin())
+            .map { entidades -> entidades.map(::aVenta) }
+
+    /** HU-13: las ventas del mes, para cruzarlas con los costos y saber el margen. */
+    fun ventasDelMes(negocioId: Long, mes: YearMonth = YearMonth.from(reloj.ahora())): Flow<List<Venta>> =
+        ventaDao.observarEntre(negocioId, mes.atDay(1).inicio(), mes.atEndOfMonth().fin())
             .map { entidades -> entidades.map(::aVenta) }
 
     /** Cuánto se vendió en un día y en cuántas ventas: lo que muestra el resumen del inicio. */
