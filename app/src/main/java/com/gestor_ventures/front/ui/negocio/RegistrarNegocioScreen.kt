@@ -56,7 +56,7 @@ fun RegistrarNegocioRoute(
     }
 
     // La pantalla ya se ve con el color elegido: así el usuario sabe qué está escogiendo.
-    GestorVenturesTheme(colorMarca = uiState.colorMarca.hex) {
+    GestorVenturesTheme(colorMarca = uiState.colorMarca) {
         Surface(color = MaterialTheme.colorScheme.background) {
             RegistrarNegocioScreen(
                 uiState = uiState,
@@ -84,7 +84,7 @@ fun RegistrarNegocioScreen(
     onNombreChange: (String) -> Unit,
     onCategoriaChange: (String) -> Unit,
     onTipoActividadChange: (TipoActividad) -> Unit,
-    onColorMarcaChange: (ColorMarca) -> Unit,
+    onColorMarcaChange: (String?) -> Unit,
     onGuardar: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -137,7 +137,7 @@ fun RegistrarNegocioScreen(
 
             // 4. Al final, lo estético: cómo se va a ver la app.
             ColorDeMarca(
-                seleccionado = uiState.colorMarca,
+                hexSeleccionado = uiState.colorMarca,
                 onColorMarcaChange = onColorMarcaChange,
             )
 
@@ -239,8 +239,8 @@ private fun TipoDeActividad(
 
 @Composable
 private fun ColorDeMarca(
-    seleccionado: ColorMarca,
-    onColorMarcaChange: (ColorMarca) -> Unit,
+    hexSeleccionado: String?,
+    onColorMarcaChange: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
@@ -251,7 +251,7 @@ private fun ColorDeMarca(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 6.dp),
         )
-        ColorMarcaPicker(seleccionado = seleccionado, onColorChange = onColorMarcaChange)
+        ColorMarcaPicker(hexSeleccionado = hexSeleccionado, onColorChange = onColorMarcaChange)
     }
 }
 
@@ -274,7 +274,7 @@ private fun RegistrarNegocioScreenPreview() {
             nombre = "Dulce Antojo",
             categoria = "Repostería",
             tipoActividad = TipoActividad.PRODUCTOS,
-            colorMarca = ColorMarca.Menta,
+            colorMarca = ColorMarca.Salvia.hex,
         ),
     )
 }
