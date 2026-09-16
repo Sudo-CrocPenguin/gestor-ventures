@@ -10,6 +10,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -17,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -26,6 +27,7 @@ import com.gestor_ventures.front.components.GvTopBar
 import com.gestor_ventures.front.model.NegocioUi
 import com.gestor_ventures.front.navigation.AppNavHost
 import com.gestor_ventures.front.navigation.GvBottomBar
+import com.gestor_ventures.front.navigation.Rutas
 import com.gestor_ventures.front.navigation.destinosLider
 import com.gestor_ventures.front.navigation.navigateToTopLevel
 import com.gestor_ventures.front.ui.menu.MenuLateral
@@ -33,7 +35,7 @@ import com.gestor_ventures.front.ui.menu.OpcionMenu
 import kotlinx.coroutines.launch
 
 @Composable
-fun MainRoute(viewModel: MainViewModel = viewModel()) {
+fun MainRoute(viewModel: MainViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     MainScreen(
         uiState = uiState,
@@ -85,6 +87,13 @@ fun MainScreen(
         }
     }
 
+    // HU-05: sin negocios no hay nada que mostrar, así que se abre el registro de negocio.
+    LaunchedEffect(uiState.sinNegocios, currentRoute) {
+        if (uiState.sinNegocios && currentRoute != Rutas.RegistrarNegocio) {
+            navController.navigate(Rutas.RegistrarNegocio)
+        }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         gesturesEnabled = enPestana,
@@ -93,7 +102,8 @@ fun MainScreen(
                 uiState = uiState.menu,
                 onNegocioClick = { negocio -> cambiarNegocio(negocio) },
                 onAgregarNegocioClick = {
-                    avisarPendiente(context.getString(R.string.menu_agregar_negocio))
+                    scope.launch { drawerState.close() }
+                    navController.navigate(Rutas.RegistrarNegocio)
                 },
                 onOpcionClick = { opcion: OpcionMenu ->
                     avisarPendiente(context.getString(opcion.labelRes))
@@ -132,6 +142,8 @@ fun MainScreen(
             AppNavHost(
                 navController = navController,
                 mostrarMensaje = { mensaje -> scope.launch { snackbarHostState.showSnackbar(mensaje) } },
+                onNegocioCreado = onNegocioSeleccionado,
+                tieneNegocios = uiState.negocios.isNotEmpty(),
                 modifier = Modifier.padding(innerPadding),
             )
         }

@@ -4,12 +4,8 @@ import com.gestor_ventures.back.model.ErrorNegocio
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.ResultadoNegocio
 import com.gestor_ventures.back.model.TipoActividad
-import com.gestor_ventures.db.dao.NegocioDao
-import com.gestor_ventures.db.entity.NegocioEntity
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.gestor_ventures.db.dao.NegocioDaoFalso
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -141,33 +137,3 @@ class NegocioRepositoryTest {
     }
 }
 
-/** DAO de mentiras: guarda en una lista en memoria y respeta el orden por nombre. */
-private class NegocioDaoFalso : NegocioDao {
-
-    val negocios = MutableStateFlow<List<NegocioEntity>>(emptyList())
-    private var siguienteId = 1L
-
-    override suspend fun insertar(negocio: NegocioEntity): Long {
-        val id = siguienteId++
-        negocios.value = negocios.value + negocio.copy(negocioId = id)
-        return id
-    }
-
-    override suspend fun actualizar(negocio: NegocioEntity) {
-        negocios.value = negocios.value.map { if (it.negocioId == negocio.negocioId) negocio else it }
-    }
-
-    override fun observar(negocioId: Long): Flow<NegocioEntity?> =
-        negocios.map { lista -> lista.firstOrNull { it.negocioId == negocioId } }
-
-    override suspend fun obtener(negocioId: Long): NegocioEntity? =
-        negocios.value.firstOrNull { it.negocioId == negocioId }
-
-    override fun observarDeUsuario(usuarioId: Long): Flow<List<NegocioEntity>> =
-        negocios.map { lista ->
-            lista.filter { it.usuarioId == usuarioId }.sortedBy { it.nombreNegocio.lowercase() }
-        }
-
-    override suspend fun contarDeUsuario(usuarioId: Long): Int =
-        negocios.value.count { it.usuarioId == usuarioId }
-}
