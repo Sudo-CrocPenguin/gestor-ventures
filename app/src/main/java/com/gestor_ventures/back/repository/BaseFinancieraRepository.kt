@@ -63,6 +63,34 @@ class BaseFinancieraRepository @Inject constructor(
         return null
     }
 
+    /**
+     * HU-06. Cambia un gasto fijo que ya existe. Valida lo mismo que al crearlo: un gasto sin
+     * nombre o sin monto no sirve, se esté creando o editando.
+     *
+     * Si el gasto ya no existe no hace nada: se pudo borrar desde otra pantalla mientras esta
+     * estaba abierta, y no es un error que el usuario deba resolver.
+     */
+    suspend fun editarGastoFijo(
+        gastoFijoId: Long,
+        nombre: String,
+        monto: Double,
+        frecuencia: Frecuencia,
+    ): ErrorBaseFinanciera? {
+        val nombreLimpio = nombre.trim()
+        if (nombreLimpio.isEmpty()) return ErrorBaseFinanciera.NombreGastoVacio
+        if (monto <= 0.0) return ErrorBaseFinanciera.MontoNoPositivo
+
+        val actual = gastoFijoDao.obtener(gastoFijoId) ?: return null
+        gastoFijoDao.actualizar(
+            actual.copy(
+                nombreGasto = nombreLimpio,
+                monto = monto,
+                frecuencia = frecuencia.aDb(),
+            ),
+        )
+        return null
+    }
+
     suspend fun eliminarGastoFijo(gastoFijoId: Long) {
         gastoFijoDao.obtener(gastoFijoId)?.let { gastoFijoDao.eliminar(it) }
     }
