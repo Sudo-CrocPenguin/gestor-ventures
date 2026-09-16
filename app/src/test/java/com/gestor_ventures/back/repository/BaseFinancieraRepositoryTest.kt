@@ -63,6 +63,43 @@ class BaseFinancieraRepositoryTest {
     }
 
     @Test
+    fun editarGastoFijo_cambiaLoQueSeCorrigeYNoCreaOtro() = runTest {
+        repository.agregarGastoFijo(negocioId, "Arriendo", 300_000.0, Frecuencia.MENSUAL)
+        val gasto = repository.gastosFijosDeNegocio(negocioId).first().first()
+
+        repository.editarGastoFijo(gasto.id, "  Arriendo local  ", 350_000.0, Frecuencia.QUINCENAL)
+
+        val editado = repository.gastosFijosDeNegocio(negocioId).first().single()
+        assertEquals(gasto.id, editado.id)
+        assertEquals("Arriendo local", editado.nombre)
+        assertEquals(350_000.0, editado.monto, 0.001)
+        assertEquals(Frecuencia.QUINCENAL, editado.frecuencia)
+    }
+
+    @Test
+    fun editarGastoFijo_exigeLoMismoQueCrearlo() = runTest {
+        repository.agregarGastoFijo(negocioId, "Arriendo", 300_000.0, Frecuencia.MENSUAL)
+        val gasto = repository.gastosFijosDeNegocio(negocioId).first().first()
+
+        assertEquals(
+            ErrorBaseFinanciera.NombreGastoVacio,
+            repository.editarGastoFijo(gasto.id, "  ", 350_000.0, Frecuencia.MENSUAL),
+        )
+        assertEquals(
+            ErrorBaseFinanciera.MontoNoPositivo,
+            repository.editarGastoFijo(gasto.id, "Arriendo", 0.0, Frecuencia.MENSUAL),
+        )
+        // El gasto original queda intacto: un intento inválido no daña lo que ya estaba bien.
+        assertEquals(300_000.0, repository.gastosFijosDeNegocio(negocioId).first().single().monto, 0.001)
+    }
+
+    @Test
+    fun editarUnGastoQueYaNoExisteNoRompeNada() = runTest {
+        assertNull(repository.editarGastoFijo(99L, "Arriendo", 300_000.0, Frecuencia.MENSUAL))
+        assertEquals(emptyList<Any>(), repository.gastosFijosDeNegocio(negocioId).first())
+    }
+
+    @Test
     fun eliminarGastoFijo_loSacaDeLaLista() = runTest {
         repository.agregarGastoFijo(negocioId, "Arriendo local", 300_000.0, Frecuencia.MENSUAL)
         val gasto = repository.gastosFijosDeNegocio(negocioId).first().first()
