@@ -3,6 +3,8 @@ package com.gestor_ventures.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.gestor_ventures.db.dao.NegocioDao
+import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.entity.AlertaEntity
 import com.gestor_ventures.db.entity.CajaEntity
 import com.gestor_ventures.db.entity.CategoriaEntity
@@ -26,8 +28,9 @@ import com.gestor_ventures.db.entity.VentaEntity
 
 /**
  * Base de datos local (Room/SQLite) de Gestor Ventures. 20 entidades cubriendo las
- * Épicas 1 a 8 (HU-01 a HU-41). Los DAO se agregan en la siguiente etapa, ej.:
- *   abstract fun usuarioDao(): UsuarioDao
+ * Épicas 1 a 8 (HU-01 a HU-41).
+ *
+ * Los DAO se van agregando a medida que cada historia los necesita.
  */
 @Database(
     entities = [
@@ -56,4 +59,9 @@ import com.gestor_ventures.db.entity.VentaEntity
     exportSchema = true
 )
 @TypeConverters(Converters::class)
-abstract class GestorVenturesDatabase : RoomDatabase()
+abstract class GestorVenturesDatabase : RoomDatabase() {
+
+    abstract fun usuarioDao(): UsuarioDao
+
+    abstract fun negocioDao(): NegocioDao
+}
