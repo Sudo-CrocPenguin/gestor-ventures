@@ -1,0 +1,61 @@
+package com.gestor_ventures.front.ui.negocio
+
+import androidx.annotation.StringRes
+import com.gestor_ventures.R
+import com.gestor_ventures.back.model.ErrorBaseFinanciera
+import com.gestor_ventures.back.model.Frecuencia
+import com.gestor_ventures.back.model.GastoFijo
+import com.gestor_ventures.front.util.formatMiles
+import java.time.LocalDate
+
+/**
+ * HU-06, HU-08 y HU-09. Paso 2 del onboarding: gastos fijos, meta de ahorro y reinversión.
+ * Todo es opcional, así que siempre se puede finalizar.
+ */
+data class BaseFinancieraUiState(
+    val gastosFijos: List<GastoFijo> = emptyList(),
+    val metaMonto: String = "",
+    val fechaLimite: LocalDate? = null,
+    val porcentajeReinversion: Int = 0,
+    /** Lo que hay que apartar cada mes para llegar a la meta; null si aún no se puede calcular. */
+    val ahorroMensual: Double? = null,
+    val guardando: Boolean = false,
+    val error: ErrorBaseFinanciera? = null,
+    val formularioGasto: FormularioGastoFijo? = null,
+) {
+    val metaFormateada: String
+        get() = if (metaMonto.isEmpty()) "" else formatMiles(metaMonto.toLongOrNull() ?: 0L)
+
+    val totalGastosFijos: Double get() = gastosFijos.sumOf { it.monto }
+}
+
+/** Formulario emergente para agregar un gasto fijo (HU-06). */
+data class FormularioGastoFijo(
+    val nombre: String = "",
+    val monto: String = "",
+    val frecuencia: Frecuencia = Frecuencia.MENSUAL,
+) {
+    val montoFormateado: String
+        get() = if (monto.isEmpty()) "" else formatMiles(monto.toLongOrNull() ?: 0L)
+
+    val puedeGuardar: Boolean get() = nombre.isNotBlank() && (monto.toLongOrNull() ?: 0L) > 0L
+}
+
+/** Cómo se llama cada frecuencia en pantalla. */
+@StringRes
+fun Frecuencia.labelRes(): Int = when (this) {
+    Frecuencia.SEMANAL -> R.string.frecuencia_semanal
+    Frecuencia.QUINCENAL -> R.string.frecuencia_quincenal
+    Frecuencia.MENSUAL -> R.string.frecuencia_mensual
+    Frecuencia.ANUAL -> R.string.frecuencia_anual
+}
+
+/** Texto que ve el usuario para cada regla que rechaza el repositorio. */
+@StringRes
+fun ErrorBaseFinanciera.mensajeRes(): Int = when (this) {
+    ErrorBaseFinanciera.NombreGastoVacio -> R.string.base_error_nombre_gasto
+    ErrorBaseFinanciera.MontoNoPositivo -> R.string.base_error_monto
+    ErrorBaseFinanciera.MetaSinMonto -> R.string.base_error_meta_monto
+    ErrorBaseFinanciera.FechaLimiteNoPosterior -> R.string.base_error_fecha_limite
+    ErrorBaseFinanciera.PorcentajeFueraDeRango -> R.string.base_error_porcentaje
+}

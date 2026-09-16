@@ -73,6 +73,51 @@
     <string name="negocio_error_porcentaje">El porcentaje de reinversión va de 0 a 100.</string>
     <string name="negocio_error_no_existe">Ese negocio ya no existe.</string>
 
+    <!-- Base financiera, paso 2 del onboarding (HU-06, HU-08, HU-09) -->
+    <string name="base_titulo">Tu base financiera</string>
+    <string name="base_subtitulo">Esto ayuda al asistente a darte mejores recomendaciones. Todo es opcional.</string>
+    <string name="base_gastos_fijos">Gastos fijos mensuales</string>
+    <string name="base_agregar_gasto">Agregar gasto fijo</string>
+    <string name="base_eliminar_gasto">Eliminar %1$s</string>
+    <string name="base_meta">Meta de ahorro</string>
+    <string name="base_meta_ayuda">¿Cuánto quieres ahorrar? Verás tu progreso en el inicio.</string>
+    <string name="base_fecha_limite">Fecha límite de la meta</string>
+    <string name="base_fecha_limite_placeholder">Elige una fecha</string>
+    <string name="base_fecha_limite_ayuda">Debe ser posterior a hoy. Con ella calculamos cuánto necesitas ahorrar por mes.</string>
+    <string name="base_ahorro_mensual">Para llegar a tu meta necesitas apartar %1$s al mes.</string>
+    <string name="base_reinversion">Porcentaje de reinversión</string>
+    <string name="base_reinversion_ayuda">De cada ganancia, reinvierto</string>
+    <string name="base_finalizar">Finalizar configuración</string>
+    <string name="base_error_nombre_gasto">Escribe el nombre del gasto fijo.</string>
+    <string name="base_error_monto">El monto debe ser mayor que cero.</string>
+    <string name="base_error_meta_monto">Escribe cuánto quieres ahorrar.</string>
+    <string name="base_error_fecha_limite">La fecha límite debe ser posterior a hoy.</string>
+    <string name="base_error_porcentaje">El porcentaje de reinversión va de 0 a 100.</string>
+
+    <!-- Gasto fijo (HU-06) -->
+    <string name="gasto_fijo_titulo">Nuevo gasto fijo</string>
+    <string name="gasto_fijo_explicacion">Un pago que se repite cada periodo: arriendo, servicios, internet.</string>
+    <string name="gasto_fijo_nombre">Nombre</string>
+    <string name="gasto_fijo_nombre_placeholder">Ej. Arriendo del local</string>
+    <string name="gasto_fijo_frecuencia">Frecuencia</string>
+    <string name="gasto_fijo_guardar">Guardar gasto fijo</string>
+    <string name="frecuencia_semanal">Semanal</string>
+    <string name="frecuencia_quincenal">Quincenal</string>
+    <string name="frecuencia_mensual">Mensual</string>
+    <string name="frecuencia_anual">Anual</string>
+
+    <!-- Cierre del onboarding (HU-05) -->
+    <string name="listo_titulo">¡Todo listo! 🎉</string>
+    <string name="listo_subtitulo">%1$s quedó configurado. Ya puedes empezar a registrar ventas y gestionar tu negocio.</string>
+    <string name="listo_actividad">Actividad</string>
+    <string name="listo_tipo">Tipo</string>
+    <string name="listo_meta">Meta de ahorro</string>
+    <string name="listo_meta_valor">%1$s · %2$s</string>
+    <string name="listo_reinversion">Reinversión</string>
+    <string name="listo_ir_al_negocio">Ir a mi negocio</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="cancelar">Cancelar</string>
+
     <!-- Formularios -->
     <string name="form_monto">Monto</string>
     <string name="form_monto_placeholder">0</string>
