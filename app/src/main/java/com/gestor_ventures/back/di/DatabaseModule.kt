@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.db.GestorVenturesDatabase
 import com.gestor_ventures.db.SemillaTemporal
+import com.gestor_ventures.db.dao.GastoFijoDao
+import com.gestor_ventures.db.dao.MetaAhorroDao
 import com.gestor_ventures.db.dao.NegocioDao
 import com.gestor_ventures.db.dao.UsuarioDao
 import dagger.Module
@@ -35,6 +37,12 @@ object DatabaseModule {
 
     @Provides
     fun proveerNegocioDao(db: GestorVenturesDatabase): NegocioDao = db.negocioDao()
+
+    @Provides
+    fun proveerGastoFijoDao(db: GestorVenturesDatabase): GastoFijoDao = db.gastoFijoDao()
+
+    @Provides
+    fun proveerMetaAhorroDao(db: GestorVenturesDatabase): MetaAhorroDao = db.metaAhorroDao()
 
     @Provides
     @Singleton
