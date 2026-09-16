@@ -33,6 +33,8 @@ import com.gestor_ventures.db.entity.VentaEntity
  * Épicas 1 a 8 (HU-01 a HU-41).
  *
  * Los DAO se van agregando a medida que cada historia los necesita.
+ *
+ * Versión 2: `negocios.color_marca` (HU-05). Ver [MIGRACION_1_2].
  */
 @Database(
     entities = [
@@ -57,7 +59,7 @@ import com.gestor_ventures.db.entity.VentaEntity
         AlertaEntity::class,
         NotificacionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

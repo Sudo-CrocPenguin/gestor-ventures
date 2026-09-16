@@ -45,14 +45,28 @@ class NegocioDaoTest {
         db.close()
     }
 
-    private fun negocio(nombre: String, usuarioId: Long = SemillaTemporal.USUARIO_ID) = NegocioEntity(
+    private fun negocio(
+        nombre: String,
+        usuarioId: Long = SemillaTemporal.USUARIO_ID,
+        colorMarca: String? = null,
+    ) = NegocioEntity(
         usuarioId = usuarioId,
         nombreNegocio = nombre,
         tipoActividad = TipoActividad.PRODUCTOS,
         categoriaNegocio = "Repostería",
         porcentajeReinversion = 30.0,
+        colorMarca = colorMarca,
         fechaCreacion = ahora,
     )
+
+    @Test
+    fun colorDeMarca_seGuardaYPuedeQuedarVacio() = runTest {
+        val conColor = negocioDao.insertar(negocio("Bella Piel", colorMarca = "#B8E0D2"))
+        val sinColor = negocioDao.insertar(negocio("Dulce Antojo"))
+
+        assertEquals("#B8E0D2", negocioDao.obtener(conColor)?.colorMarca)
+        assertNull(negocioDao.obtener(sinColor)?.colorMarca)
+    }
 
     @Test
     fun laSemillaCreaElUsuarioTemporal() = runTest {

@@ -46,6 +46,14 @@ data class NegocioEntity(
     @ColumnInfo(name = "porcentaje_reinversion")
     val porcentajeReinversion: Double, // rango 0–100, validar en capa de aplicación
 
+    /**
+     * HU-05. Color de marca elegido en el onboarding, en hexadecimal ("#1B2A4A").
+     * Nulo = el color por defecto de la app. Se guarda el hex y no el nombre para poder
+     * admitir colores personalizados sin volver a tocar el esquema.
+     */
+    @ColumnInfo(name = "color_marca")
+    val colorMarca: String? = null,
+
     @ColumnInfo(name = "fecha_creacion")
     val fechaCreacion: LocalDateTime,
 
