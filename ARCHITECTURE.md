@@ -113,6 +113,7 @@ com.gestor_ventures/
 │   └── util/                       Formato de moneda, fecha y hora
 │
 ├── back/                           ← Lógica de negocio y orquestación
+│   ├── model/                      Modelos de dominio (Negocio, Reloj…), sin Room
 │   ├── repository/                 Un repository por dominio
 │   ├── usecase/                    Solo donde hay cálculo/lógica real (§5.2)
 │   ├── network/                    Retrofit: ApiService + DTOs (asistente de IA)
@@ -141,6 +142,10 @@ Cada subcarpeta de `front/ui/` sigue la misma forma (`front/ui/inicio/` es la re
 Una pieza visual que usan dos o más pantallas se mueve a `front/components/`, y un modelo que
 usan dos o más features (`UsuarioUi`, `NegocioUi`, `RolNegocio`) se mueve a `front/model/`, para
 que ninguna feature tenga que importar de otra.
+
+`back/model/` es la frontera entre capas: el repositorio traduce entre esos modelos y las
+entidades de Room, y `front/` nunca ve un `@Entity`. Por eso hay enums parecidos en `db/` y en
+`back/model/`: son la misma idea escrita para dos mundos distintos, y el repositorio los mapea.
 
 Una feature no lleva `ViewModel` propio cuando su estado ya pertenece a otra pantalla. Es el caso
 de `front/ui/menu/`: el menú lateral vive dentro del marco de la app, así que su estado lo arma
