@@ -5,14 +5,18 @@ import com.gestor_ventures.R
 import com.gestor_ventures.back.model.Categoria
 import com.gestor_ventures.back.model.ErrorCategoria
 import com.gestor_ventures.back.model.TipoCategoria
+import java.time.YearMonth
 
 /**
  * HU-15. Categorías del negocio, separadas en gastos y costos porque son dos cuentas
  * distintas: el usuario mira una a la vez.
  */
 data class CategoriasUiState(
+    val mes: YearMonth = YearMonth.now(),
     val tipo: TipoCategoria = TipoCategoria.GASTO,
-    val categorias: List<Categoria> = emptyList(),
+    val categorias: List<CategoriaUi> = emptyList(),
+    /** Lo que se registró este mes sin clasificar. Cero cuando está todo clasificado. */
+    val sinClasificar: Double = 0.0,
     val cargando: Boolean = true,
     val formulario: FormularioCategoria? = null,
     /** La categoria que el usuario toco, mientras elige que hacer con ella. */
@@ -22,7 +26,19 @@ data class CategoriasUiState(
     val error: ErrorCategoria? = null,
 ) {
     val vacio: Boolean get() = !cargando && categorias.isEmpty()
+
+    /** Lo acumulado este mes en todas las categorías, más lo que quedó sin clasificar. */
+    val totalDelMes: Double get() = categorias.sumOf { it.total } + sinClasificar
 }
+
+/**
+ * HU-15. Una categoría con lo que lleva acumulado en el mes: es el resumen agrupado que pide la
+ * historia, puesto donde tiene sentido mirarlo.
+ */
+data class CategoriaUi(
+    val categoria: Categoria,
+    val total: Double,
+)
 
 /**
  * Formulario de una categoría. [categoriaId] nulo significa que se está creando; con id, que se

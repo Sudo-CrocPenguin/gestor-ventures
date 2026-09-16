@@ -3,11 +3,15 @@ package com.gestor_ventures.front.ui.finanzas
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Categoria
+import com.gestor_ventures.back.model.GastoPorCategoria
 import com.gestor_ventures.back.model.TipoCategoria
 import com.gestor_ventures.back.repository.CategoriaRepository
+import com.gestor_ventures.back.repository.CostoRepository
+import com.gestor_ventures.back.repository.GastoRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,8 +24,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** Las categorías del tipo elegido con lo que llevan acumulado, ya emparejadas. */
+private data class DatosDeCategorias(
+    val categorias: List<CategoriaUi> = emptyList(),
+    val sinClasificar: Double = 0.0,
+)
+
 /**
- * HU-15. Categorías del negocio activo.
+ * HU-15. Categorías del negocio activo, con el resumen de lo que lleva cada una en el mes.
  *
  * La lista se vuelve a pedir cuando cambia la pestaña o el negocio: son dos listas distintas,
  * no una filtrada en memoria, porque la consulta ya sabe separarlas por tipo.
@@ -30,10 +40,12 @@ import javax.inject.Inject
 @HiltViewModel
 class CategoriasViewModel @Inject constructor(
     private val repository: CategoriaRepository,
+    private val gastoRepository: GastoRepository,
+    private val costoRepository: CostoRepository,
     private val negocioActivoRepository: NegocioActivoRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CategoriasUiState())
+    private val _uiState = MutableStateFlow(CategoriasUiState(mes = gastoRepository.mesActual()))
     val uiState: StateFlow<CategoriasUiState> = _uiState.asStateFlow()
 
     private val tipo = MutableStateFlow(TipoCategoria.GASTO)
@@ -44,15 +56,50 @@ class CategoriasViewModel @Inject constructor(
                 negocioId to tipo
             }.flatMapLatest { (negocioId, tipo) ->
                 if (negocioId == null) {
-                    flowOf(emptyList())
+                    flowOf(DatosDeCategorias())
                 } else {
-                    repository.categoriasDeNegocio(negocioId, tipo)
+                    combine(
+                        repository.categoriasDeNegocio(negocioId, tipo),
+                        totalesPorCategoria(negocioId, tipo),
+                    ) { categorias, totales -> emparejar(categorias, totales) }
                 }
-            }.collect { categorias ->
-                _uiState.update { it.copy(categorias = categorias, cargando = false) }
+            }.collect { datos ->
+                _uiState.update {
+                    it.copy(
+                        categorias = datos.categorias,
+                        sinClasificar = datos.sinClasificar,
+                        cargando = false,
+                    )
+                }
             }
         }
     }
+
+    /** Lo gastado o lo costeado en el mes, según la pestaña en la que esté el usuario. */
+    private fun totalesPorCategoria(
+        negocioId: Long,
+        tipo: TipoCategoria,
+    ): Flow<List<GastoPorCategoria>> = when (tipo) {
+        TipoCategoria.GASTO -> gastoRepository.totalPorCategoriaDelMes(negocioId)
+        TipoCategoria.COSTO -> costoRepository.totalPorCategoriaDelMes(negocioId)
+    }
+
+    /**
+     * Une cada categoría con su total. Una categoría sin movimientos este mes aparece en cero:
+     * existe aunque todavía no se haya usado.
+     */
+    private fun emparejar(
+        categorias: List<Categoria>,
+        totales: List<GastoPorCategoria>,
+    ) = DatosDeCategorias(
+        categorias = categorias.map { categoria ->
+            CategoriaUi(
+                categoria = categoria,
+                total = totales.firstOrNull { it.categoriaId == categoria.id }?.total ?: 0.0,
+            )
+        },
+        sinClasificar = totales.firstOrNull { it.categoriaId == null }?.total ?: 0.0,
+    )
 
     fun onTipoChange(nuevoTipo: TipoCategoria) {
         tipo.value = nuevoTipo

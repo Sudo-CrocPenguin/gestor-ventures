@@ -34,6 +34,7 @@
     <string name="categoria_tipo_gasto_ayuda">Plata que se va por funcionar: arriendo, transporte, papelería.</string>
     <string name="categoria_tipo_costo_ayuda">Plata que se va por producir lo que vendes: insumos, empaques.</string>
     <string name="categorias_vacio">Todavía no tienes categorías de este tipo. Agrégalas para saber en qué se te va la plata.</string>
+    <string name="categorias_sin_clasificar">Sin clasificar</string>
     <string name="categorias_agregar">Agregar categoría</string>
     <string name="categoria_titulo_nueva">Nueva categoría</string>
     <string name="categoria_titulo_editar">Editar categoría</string>
