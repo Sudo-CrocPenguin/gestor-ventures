@@ -7,6 +7,7 @@ import com.gestor_ventures.db.GestorVenturesDatabase
 import com.gestor_ventures.db.MIGRACIONES
 import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.CategoriaDao
+import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
@@ -57,6 +58,9 @@ object DatabaseModule {
 
     @Provides
     fun proveerGastoDao(db: GestorVenturesDatabase): GastoDao = db.gastoDao()
+
+    @Provides
+    fun proveerCostoDao(db: GestorVenturesDatabase): CostoDao = db.costoDao()
 
     @Provides
     @Singleton
