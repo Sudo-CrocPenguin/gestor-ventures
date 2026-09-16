@@ -59,6 +59,10 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
+    // Room lee los esquemas con kotlinx-serialization en las pruebas de migración, y AGP
+    // obliga a que las pruebas usen la misma versión que la app. Sin esta línea la app se
+    // queda en la versión vieja que arrastra lifecycle, y el helper de migraciones falla.
+    implementation(libs.kotlinx.serialization.core)
     ksp(libs.hilt.compiler)
     ksp(libs.androidx.room.compiler)
     coreLibraryDesugaring(libs.android.desugar.jdk.libs)

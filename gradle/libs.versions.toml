@@ -15,8 +15,11 @@ desugarJdkLibs = "2.1.5"
 hilt = "2.60.1"
 hiltNavigationCompose = "1.4.0"
 coroutines = "1.10.2"
+# La versión que pide Room 2.8 para leer los esquemas en las pruebas de migración.
+kotlinxSerialization = "1.8.1"
 
 [libraries]
+kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

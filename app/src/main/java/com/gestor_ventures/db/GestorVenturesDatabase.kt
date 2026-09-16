@@ -36,6 +36,7 @@ import com.gestor_ventures.db.entity.VentaEntity
  * Los DAO se van agregando a medida que cada historia los necesita.
  *
  * Versión 2: `negocios.color_marca` (HU-05). Ver [MIGRACION_1_2].
+ * Versión 3: `ventas.nota` (HU-11). Ver [MIGRACION_2_3].
  */
 @Database(
     entities = [
@@ -60,7 +61,7 @@ import com.gestor_ventures.db.entity.VentaEntity
         AlertaEntity::class,
         NotificacionEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

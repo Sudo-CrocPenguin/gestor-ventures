@@ -56,7 +56,10 @@ data class VentaEntity(
     val metodoPago: MetodoPago? = null,
 
     @ColumnInfo(name = "fecha_hora")
-    val fechaHora: LocalDateTime
+    val fechaHora: LocalDateTime,
+
+    /** HU-11. Apunte libre del negocio sobre la venta ("pedido para el sábado"). */
+    val nota: String? = null
 )
 
 /** HU-13. Costo directo asociado a un producto/servicio, usado para calcular margen. */
