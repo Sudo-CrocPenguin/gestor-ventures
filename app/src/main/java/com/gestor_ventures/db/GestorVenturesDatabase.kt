@@ -3,6 +3,8 @@ package com.gestor_ventures.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.gestor_ventures.db.dao.GastoFijoDao
+import com.gestor_ventures.db.dao.MetaAhorroDao
 import com.gestor_ventures.db.dao.NegocioDao
 import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.entity.AlertaEntity
@@ -64,4 +66,8 @@ abstract class GestorVenturesDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
 
     abstract fun negocioDao(): NegocioDao
+
+    abstract fun gastoFijoDao(): GastoFijoDao
+
+    abstract fun metaAhorroDao(): MetaAhorroDao
 }
