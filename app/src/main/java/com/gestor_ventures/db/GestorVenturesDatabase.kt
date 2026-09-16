@@ -7,6 +7,7 @@ import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
 import com.gestor_ventures.db.dao.NegocioDao
 import com.gestor_ventures.db.dao.UsuarioDao
+import com.gestor_ventures.db.dao.VentaDao
 import com.gestor_ventures.db.entity.AlertaEntity
 import com.gestor_ventures.db.entity.CajaEntity
 import com.gestor_ventures.db.entity.CategoriaEntity
@@ -72,4 +73,6 @@ abstract class GestorVenturesDatabase : RoomDatabase() {
     abstract fun gastoFijoDao(): GastoFijoDao
 
     abstract fun metaAhorroDao(): MetaAhorroDao
+
+    abstract fun ventaDao(): VentaDao
 }
