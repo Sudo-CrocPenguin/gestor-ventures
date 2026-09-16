@@ -113,7 +113,7 @@ fun BaseFinancieraScreen(
         ) {
             Encabezado()
 
-            GastosFijos(
+            ListaGastosFijos(
                 gastos = uiState.gastosFijos,
                 total = uiState.totalGastosFijos,
                 onAgregar = onAgregarGasto,
@@ -193,76 +193,6 @@ private fun Encabezado(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 4.dp),
-        )
-    }
-}
-
-@Composable
-private fun GastosFijos(
-    gastos: List<GastoFijo>,
-    total: Double,
-    onAgregar: () -> Unit,
-    onEliminar: (Long) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(9.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.base_gastos_fijos).uppercase(),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 12.sp,
-                    letterSpacing = 1.1.sp,
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            if (gastos.isNotEmpty()) {
-                MoneyText(monto = total, style = MaterialTheme.typography.labelMedium)
-            }
-        }
-
-        gastos.forEach { gasto ->
-            GvCard {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            text = gasto.nombre,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = stringResource(gasto.frecuencia.labelRes()),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    MoneyText(monto = gasto.monto)
-                    IconButton(onClick = { onEliminar(gasto.id) }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_trash),
-                            contentDescription = stringResource(
-                                R.string.base_eliminar_gasto,
-                                gasto.nombre,
-                            ),
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(18.dp),
-                        )
-                    }
-                }
-            }
-        }
-
-        GvSoftButton(
-            text = stringResource(R.string.base_agregar_gasto),
-            onClick = onAgregar,
-            iconRes = R.drawable.ic_plus,
         )
     }
 }

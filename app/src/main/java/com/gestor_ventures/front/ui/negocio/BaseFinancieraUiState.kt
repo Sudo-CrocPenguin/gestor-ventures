@@ -3,7 +3,6 @@ package com.gestor_ventures.front.ui.negocio
 import androidx.annotation.StringRes
 import com.gestor_ventures.R
 import com.gestor_ventures.back.model.ErrorBaseFinanciera
-import com.gestor_ventures.back.model.Frecuencia
 import com.gestor_ventures.back.model.GastoFijo
 import com.gestor_ventures.front.util.formatMiles
 import java.time.LocalDate
@@ -27,27 +26,6 @@ data class BaseFinancieraUiState(
         get() = if (metaMonto.isEmpty()) "" else formatMiles(metaMonto.toLongOrNull() ?: 0L)
 
     val totalGastosFijos: Double get() = gastosFijos.sumOf { it.monto }
-}
-
-/** Formulario emergente para agregar un gasto fijo (HU-06). */
-data class FormularioGastoFijo(
-    val nombre: String = "",
-    val monto: String = "",
-    val frecuencia: Frecuencia = Frecuencia.MENSUAL,
-) {
-    val montoFormateado: String
-        get() = if (monto.isEmpty()) "" else formatMiles(monto.toLongOrNull() ?: 0L)
-
-    val puedeGuardar: Boolean get() = nombre.isNotBlank() && (monto.toLongOrNull() ?: 0L) > 0L
-}
-
-/** Cómo se llama cada frecuencia en pantalla. */
-@StringRes
-fun Frecuencia.labelRes(): Int = when (this) {
-    Frecuencia.SEMANAL -> R.string.frecuencia_semanal
-    Frecuencia.QUINCENAL -> R.string.frecuencia_quincenal
-    Frecuencia.MENSUAL -> R.string.frecuencia_mensual
-    Frecuencia.ANUAL -> R.string.frecuencia_anual
 }
 
 /** Texto que ve el usuario para cada regla que rechaza el repositorio. */

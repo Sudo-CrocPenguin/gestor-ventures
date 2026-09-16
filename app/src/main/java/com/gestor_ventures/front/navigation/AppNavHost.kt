@@ -19,6 +19,7 @@ import com.gestor_ventures.front.model.TipoRegistroVentaUi
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
+import com.gestor_ventures.front.ui.negocio.GastosFijosRoute
 import com.gestor_ventures.front.ui.negocio.NegocioListoRoute
 import com.gestor_ventures.front.ui.negocio.RegistrarNegocioRoute
 
@@ -28,6 +29,9 @@ import com.gestor_ventures.front.ui.negocio.RegistrarNegocioRoute
 object Rutas {
     const val RegistrarVenta = "registrar_venta"
     const val RegistrarNegocio = "registrar_negocio"
+
+    /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
+    const val GastosFijos = "gastos_fijos"
 
     /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
     const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
@@ -75,6 +79,10 @@ fun AppNavHost(
                     )
                 },
             )
+        }
+
+        composable(Rutas.GastosFijos) {
+            GastosFijosRoute(onBack = { navController.popBackStack() })
         }
 
         composable(Rutas.RegistrarNegocio) {

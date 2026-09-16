@@ -26,8 +26,9 @@ import com.gestor_ventures.front.components.GvTextField
 import com.gestor_ventures.front.theme.NumericTextStyle
 
 /**
- * HU-06. Hoja para agregar un gasto fijo sin salir del onboarding: nombre, monto y cada
- * cuánto se paga.
+ * HU-06. Hoja para agregar o corregir un gasto fijo sin salir de la pantalla: nombre, monto y
+ * cada cuánto se paga. Es la misma en el onboarding y en la configuración; lo único que cambia
+ * es el título, según el formulario venga vacío o con un gasto que ya existe.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +55,13 @@ fun GastoFijoSheet(
         ) {
             Column {
                 Text(
-                    text = stringResource(R.string.gasto_fijo_titulo),
+                    text = stringResource(
+                        if (formulario.esEdicion) {
+                            R.string.gasto_fijo_titulo_editar
+                        } else {
+                            R.string.gasto_fijo_titulo
+                        },
+                    ),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -106,7 +113,13 @@ fun GastoFijoSheet(
             }
 
             GvPrimaryButton(
-                text = stringResource(R.string.gasto_fijo_guardar),
+                text = stringResource(
+                    if (formulario.esEdicion) {
+                        R.string.gasto_fijo_actualizar
+                    } else {
+                        R.string.gasto_fijo_guardar
+                    },
+                ),
                 onClick = onGuardar,
                 enabled = formulario.puedeGuardar,
             )
