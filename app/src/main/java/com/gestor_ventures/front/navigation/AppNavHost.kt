@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.gestor_ventures.R
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
+import com.gestor_ventures.front.ui.finanzas.CategoriasRoute
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
@@ -32,6 +33,9 @@ object Rutas {
 
     /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
     const val GastosFijos = "gastos_fijos"
+
+    /** HU-15. Categorías con las que el negocio clasifica gastos y costos. */
+    const val Categorias = "categorias"
 
     /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
     const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
@@ -83,6 +87,10 @@ fun AppNavHost(
 
         composable(Rutas.GastosFijos) {
             GastosFijosRoute(onBack = { navController.popBackStack() })
+        }
+
+        composable(Rutas.Categorias) {
+            CategoriasRoute(onBack = { navController.popBackStack() })
         }
 
         composable(Rutas.RegistrarNegocio) {
