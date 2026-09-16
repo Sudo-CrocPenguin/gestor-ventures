@@ -14,6 +14,8 @@ data class Negocio(
     val tipoActividad: TipoActividad,
     val categoria: String,
     val porcentajeReinversion: Double,
+    /** HU-05. Color de marca en hexadecimal; null = el color por defecto de la app. */
+    val colorMarca: String?,
     val fechaCreacion: LocalDateTime,
 )
 

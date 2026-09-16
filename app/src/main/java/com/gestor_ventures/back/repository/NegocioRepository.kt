@@ -46,6 +46,7 @@ class NegocioRepository @Inject constructor(
         tipoActividad: TipoActividad,
         categoria: String,
         porcentajeReinversion: Double,
+        colorMarca: String? = null,
     ): ResultadoNegocio {
         val nombreLimpio = nombre.trim()
         val categoriaLimpia = categoria.trim()
@@ -60,6 +61,7 @@ class NegocioRepository @Inject constructor(
                 tipoActividad = tipoActividad.aDb(),
                 categoriaNegocio = categoriaLimpia,
                 porcentajeReinversion = porcentajeReinversion,
+                colorMarca = colorMarca,
                 fechaCreacion = reloj.ahora(),
             ),
         )
@@ -73,6 +75,7 @@ class NegocioRepository @Inject constructor(
         tipoActividad: TipoActividad,
         categoria: String,
         porcentajeReinversion: Double,
+        colorMarca: String? = null,
     ): ResultadoNegocio {
         val nombreLimpio = nombre.trim()
         val categoriaLimpia = categoria.trim()
@@ -89,6 +92,7 @@ class NegocioRepository @Inject constructor(
                 tipoActividad = tipoActividad.aDb(),
                 categoriaNegocio = categoriaLimpia,
                 porcentajeReinversion = porcentajeReinversion,
+                colorMarca = colorMarca,
                 fechaActualizacion = reloj.ahora(),
             ),
         )
@@ -113,6 +117,7 @@ class NegocioRepository @Inject constructor(
         tipoActividad = entidad.tipoActividad.aDominio(),
         categoria = entidad.categoriaNegocio,
         porcentajeReinversion = entidad.porcentajeReinversion,
+        colorMarca = entidad.colorMarca,
         fechaCreacion = entidad.fechaCreacion,
     )
 }
