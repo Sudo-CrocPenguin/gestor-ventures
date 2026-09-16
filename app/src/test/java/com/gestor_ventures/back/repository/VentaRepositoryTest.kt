@@ -120,6 +120,30 @@ class VentaRepositoryTest {
     }
 
     @Test
+    fun laVentaRapidaSiGuardaLaNota() = runTest {
+        repository.registrarVenta(
+            negocioId = negocioId,
+            tipoRegistro = TipoRegistroVenta.RAPIDO,
+            monto = 8_000.0,
+            nota = "  Día de feria  ",
+        )
+
+        assertEquals("Día de feria", dao.ventas.value.first().nota)
+    }
+
+    @Test
+    fun unaNotaEnBlancoSeGuardaComoNada() = runTest {
+        repository.registrarVenta(
+            negocioId = negocioId,
+            tipoRegistro = TipoRegistroVenta.RAPIDO,
+            monto = 8_000.0,
+            nota = "   ",
+        )
+
+        assertNull(dao.ventas.value.first().nota)
+    }
+
+    @Test
     fun elResumenDelDiaSumaYCuentaSoloLoDeHoy() = runTest {
         registrarDetallada(monto = 25_000.0, fechaHora = ahora.minusHours(6))
         registrarDetallada(monto = 15_000.0, fechaHora = ahora)

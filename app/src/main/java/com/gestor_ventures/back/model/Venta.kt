@@ -17,6 +17,8 @@ data class Venta(
     val productoServicio: String? = null,
     val metodoPago: MetodoPago? = null,
     val clienteId: Long? = null,
+    /** Apunte libre del negocio. La venta rápida lo usa para no perder el detalle del día. */
+    val nota: String? = null,
 )
 
 /** HU-11/HU-12. Detallada pide qué se vendió y cómo pagaron; rápida solo el total. */
