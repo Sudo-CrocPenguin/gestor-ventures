@@ -1,3 +1,101 @@
 <resources>
-    <string name="app_name">gestor-ventures</string>
+    <string name="app_name">Gestor Ventures</string>
+
+    <!-- Navegación -->
+    <string name="destino_inicio">Inicio</string>
+    <string name="destino_finanzas">Finanzas</string>
+    <string name="destino_agenda">Agenda</string>
+    <string name="destino_clientes">Clientes</string>
+    <string name="destino_asistente">Asistente</string>
+    <string name="pantalla_pendiente">%1$s: pantalla en construcción</string>
+
+    <!-- Marco de la app -->
+    <string name="cd_abrir_menu">Abrir menú</string>
+    <string name="cd_notificaciones">Notificaciones</string>
+    <plurals name="cd_notificaciones_sin_leer">
+        <item quantity="one">Notificaciones, %d sin leer</item>
+        <item quantity="other">Notificaciones, %d sin leer</item>
+    </plurals>
+
+    <!-- Roles -->
+    <string name="rol_lider">Líder</string>
+    <string name="rol_vendedor">Vendedor</string>
+
+    <!-- Menú lateral -->
+    <string name="menu_mis_negocios">Mis negocios</string>
+    <string name="menu_agregar_negocio">Agregar negocio</string>
+    <string name="menu_configuracion">Configuración · %1$s</string>
+    <string name="menu_general">General</string>
+    <string name="menu_info_negocio">Información del negocio</string>
+    <string name="menu_gastos_fijos">Gastos fijos y obligaciones</string>
+    <string name="menu_categorias">Categorías</string>
+    <string name="menu_metodos_pago">Métodos de pago</string>
+    <string name="menu_equipo">Equipo (vendedores)</string>
+    <string name="menu_mi_perfil">Mi perfil</string>
+    <string name="menu_notificaciones">Notificaciones</string>
+    <string name="menu_cerrar_sesion">Cerrar sesión</string>
+    <string name="menu_negocio_cambiado">Ahora estás en %1$s · %2$s</string>
+    <string name="cd_desplegar_seccion">Desplegar sección</string>
+    <string name="cd_plegar_seccion">Plegar sección</string>
+
+    <!-- Comunes -->
+    <string name="porcentaje">%1$d%%</string>
+    <string name="cd_volver">Volver</string>
+
+    <!-- Formularios -->
+    <string name="form_monto">Monto</string>
+    <string name="form_monto_placeholder">0</string>
+    <string name="form_moneda_simbolo" translatable="false">$</string>
+    <string name="form_moneda" translatable="false">COP</string>
+    <string name="form_metodo_pago">Método de pago</string>
+    <string name="metodo_pago_efectivo">Efectivo</string>
+    <string name="metodo_pago_transferencia">Transferencia</string>
+    <string name="metodo_pago_tarjeta">Tarjeta</string>
+
+    <!-- Registrar venta (HU-11/HU-12) -->
+    <string name="registrar_venta_titulo">Registrar venta</string>
+    <string name="venta_tipo_detallada">Detallada</string>
+    <string name="venta_tipo_rapida">Rápida</string>
+    <string name="venta_rapida_explicacion">Registra el total vendido sin desglosar. Útil para cerrar el día rápido; luego puedes detallarlo si quieres.</string>
+    <string name="venta_monto">Monto de la venta</string>
+    <string name="venta_total_vendido">Total vendido</string>
+    <string name="venta_producto">¿Qué vendiste?</string>
+    <string name="venta_producto_placeholder">Ej. Torta personalizada</string>
+    <string name="venta_cliente">Cliente (opcional)</string>
+    <string name="venta_cliente_placeholder">Buscar o dejar en blanco</string>
+    <string name="venta_nota">Nota (opcional)</string>
+    <string name="venta_nota_placeholder">Ej. Ventas del día en el punto</string>
+    <string name="venta_fecha_hora">Fecha y hora</string>
+    <string name="registrar_venta_guardar">Guardar venta</string>
+    <string name="registrar_venta_guardada">Venta registrada ✓</string>
+    <string name="registrar_venta_rapida_guardada">Venta rápida registrada ✓</string>
+
+    <!-- Inicio -->
+    <string name="inicio_saludo">Hola, %1$s</string>
+    <string name="inicio_fecha_y_alertas">%1$s · %2$s</string>
+    <plurals name="inicio_alertas_nuevas">
+        <item quantity="one">%d alerta nueva</item>
+        <item quantity="other">%d alertas nuevas</item>
+    </plurals>
+    <string name="inicio_resumen_hoy">Resumen de hoy</string>
+    <string name="inicio_ver_finanzas">Ver finanzas</string>
+    <string name="inicio_ventas">Ventas</string>
+    <string name="inicio_gastos">Gastos</string>
+    <string name="inicio_variacion_sube">▲ %1$d%% vs. ayer</string>
+    <string name="inicio_variacion_baja">▼ %1$d%% vs. ayer</string>
+    <plurals name="inicio_registros">
+        <item quantity="one">%d registro</item>
+        <item quantity="other">%d registros</item>
+    </plurals>
+    <string name="inicio_meta_ahorro">Meta de ahorro</string>
+    <string name="inicio_registrar_venta">Registrar venta</string>
+    <string name="inicio_abrir_caja">Abrir caja</string>
+    <string name="inicio_cajas_activas">Cajas activas · equipo</string>
+    <plurals name="inicio_cajas_abiertas">
+        <item quantity="one">%d abierta</item>
+        <item quantity="other">%d abiertas</item>
+    </plurals>
+    <string name="inicio_caja_responsable">%1$s · turno %2$s</string>
+    <string name="inicio_caja_apertura">Abrió %1$s · inició %2$s</string>
+    <string name="inicio_sin_cajas_abiertas">No hay cajas abiertas en este momento.</string>
 </resources>
