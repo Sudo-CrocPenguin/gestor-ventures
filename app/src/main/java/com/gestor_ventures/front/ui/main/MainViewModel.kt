@@ -57,4 +57,5 @@ private fun aNegocioUi(negocio: Negocio) = NegocioUi(
     nombre = negocio.nombre,
     categoria = negocio.categoria,
     rol = RolNegocio.Lider,
+    colorMarca = negocio.colorMarca,
 )

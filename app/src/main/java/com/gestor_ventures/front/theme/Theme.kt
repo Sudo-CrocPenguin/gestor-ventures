@@ -1,12 +1,14 @@
 package com.gestor_ventures.front.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
@@ -81,16 +83,63 @@ private val DarkColorScheme = darkColorScheme(
 private val LocalGestorColors = staticCompositionLocalOf { LightGestorColors }
 
 /**
+ * Cambia los colores de marca del esquema por el que eligió el usuario. El texto que va encima
+ * y el fondo suave se calculan: un pastel claro necesita tinta oscura para leerse.
+ */
+private fun ColorScheme.conMarca(marca: Color?, oscuro: Boolean): ColorScheme {
+    if (marca == null) return this
+    val tinta = tintaSobre(marca)
+    val fondoSuave = suave(marca, oscuro)
+    return copy(
+        primary = marca,
+        onPrimary = tinta,
+        primaryContainer = fondoSuave,
+        onPrimaryContainer = tintaSobre(fondoSuave),
+        secondary = variante(marca, oscuro),
+        onSecondary = tinta,
+        secondaryContainer = fondoSuave,
+        onSecondaryContainer = tintaSobre(fondoSuave),
+        tertiary = marca,
+        onTertiary = tinta,
+        tertiaryContainer = fondoSuave,
+        onTertiaryContainer = tintaSobre(fondoSuave),
+        surfaceTint = marca,
+    )
+}
+
+private fun GestorColors.conMarca(
+    marca: Color?,
+    oscuro: Boolean,
+    superficie: Color,
+): GestorColors {
+    if (marca == null) return this
+    return copy(
+        acento = acentoSobre(marca, superficie, oscuro),
+        primaryVariant = variante(marca, oscuro),
+    )
+}
+
+/**
  * Tema de la app. No usa color dinámico (Android 12+) para que la marca se vea igual en
  * todos los dispositivos.
+ *
+ * [colorMarca] es el color que el usuario eligió para su negocio (HU-05), en hexadecimal. Si
+ * viene nulo —o es el azul de la app— todo se ve como se diseñó desde el principio.
  */
 @Composable
 fun GestorVenturesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    colorMarca: String? = null,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-    val gestorColors = if (darkTheme) DarkGestorColors else LightGestorColors
+    val base = if (darkTheme) DarkColorScheme else LightColorScheme
+    val baseGestor = if (darkTheme) DarkGestorColors else LightGestorColors
+    val marca = hexAColor(colorMarca)
+
+    val colorScheme = remember(base, marca) { base.conMarca(marca, darkTheme) }
+    val gestorColors = remember(baseGestor, marca) {
+        baseGestor.conMarca(marca, darkTheme, base.surface)
+    }
 
     CompositionLocalProvider(LocalGestorColors provides gestorColors) {
         MaterialTheme(

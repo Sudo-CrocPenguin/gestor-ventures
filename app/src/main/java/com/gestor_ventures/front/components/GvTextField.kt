@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 private val FieldShape = RoundedCornerShape(13.dp)
 
@@ -48,7 +49,7 @@ fun GvTextField(
     val interactionSource = remember { MutableInteractionSource() }
     val enfocado by interactionSource.collectIsFocusedAsState()
     val bordeColor = if (enfocado) {
-        MaterialTheme.colorScheme.primary
+        GestorVenturesTheme.colors.acento
     } else {
         MaterialTheme.colorScheme.outline
     }
@@ -86,7 +87,7 @@ fun GvTextField(
                     textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
                     singleLine = true,
                     cursorBrush = androidx.compose.ui.graphics.SolidColor(
-                        MaterialTheme.colorScheme.primary,
+                        GestorVenturesTheme.colors.acento,
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
                     interactionSource = interactionSource,

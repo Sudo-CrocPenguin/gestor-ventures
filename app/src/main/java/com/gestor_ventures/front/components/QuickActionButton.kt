@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 import androidx.compose.ui.unit.sp
 
 private val ButtonShape = RoundedCornerShape(14.dp)
@@ -43,7 +44,7 @@ fun QuickActionButton(
     val borderColor = if (highlighted) colors.primary else colors.outline
     val contentColor = if (highlighted) colors.onPrimary else colors.onSurface
     val iconContainerColor = if (highlighted) colors.onPrimary.copy(alpha = 0.18f) else colors.primaryContainer
-    val iconColor = if (highlighted) colors.onPrimary else colors.primary
+    val iconColor = if (highlighted) colors.onPrimary else GestorVenturesTheme.colors.acento
 
     Row(
         modifier = modifier

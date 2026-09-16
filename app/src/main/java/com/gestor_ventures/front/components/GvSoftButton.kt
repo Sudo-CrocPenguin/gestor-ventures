@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 /** Botón secundario sobre fondo suave, para acciones de apoyo como "Agregar gasto fijo". */
 @Composable
@@ -43,7 +44,7 @@ fun GvSoftButton(
             Icon(
                 painter = painterResource(iconRes),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = GestorVenturesTheme.colors.acento,
                 modifier = Modifier
                     .size(18.dp)
                     .padding(end = 0.dp),
@@ -52,7 +53,7 @@ fun GvSoftButton(
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp),
-            color = MaterialTheme.colorScheme.primary,
+            color = GestorVenturesTheme.colors.acento,
             modifier = Modifier.padding(start = if (iconRes != null) 9.dp else 0.dp),
         )
     }

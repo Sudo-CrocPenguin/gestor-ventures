@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 private val CardShape = RoundedCornerShape(16.dp)
 
@@ -82,7 +83,7 @@ fun GvTextLink(
     Text(
         text = text,
         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.primary,
+        color = GestorVenturesTheme.colors.acento,
         modifier = modifier
             .clip(RoundedCornerShape(6.dp))
             .clickable(role = Role.Button, onClick = onClick)

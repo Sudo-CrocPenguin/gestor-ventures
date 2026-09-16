@@ -27,7 +27,7 @@ fun GvProgressBar(
 ) {
     val clamped = progress.coerceIn(0f, 1f)
     val fill = Brush.horizontalGradient(
-        listOf(MaterialTheme.colorScheme.primary, GestorVenturesTheme.colors.primaryVariant)
+        listOf(GestorVenturesTheme.colors.acento, GestorVenturesTheme.colors.primaryVariant)
     )
     Box(
         modifier = modifier
