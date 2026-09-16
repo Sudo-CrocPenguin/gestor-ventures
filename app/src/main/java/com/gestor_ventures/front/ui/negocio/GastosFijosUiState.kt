@@ -11,6 +11,8 @@ data class GastosFijosUiState(
     val gastosFijos: List<GastoFijo> = emptyList(),
     val cargando: Boolean = true,
     val formularioGasto: FormularioGastoFijo? = null,
+    /** El gasto que el usuario tocó, mientras elige qué hacer con él. */
+    val acciones: GastoFijo? = null,
     val error: ErrorBaseFinanciera? = null,
 ) {
     val total: Double get() = gastosFijos.sumOf { it.monto }

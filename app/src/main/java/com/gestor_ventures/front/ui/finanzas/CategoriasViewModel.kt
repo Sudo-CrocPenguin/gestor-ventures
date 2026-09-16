@@ -59,6 +59,30 @@ class CategoriasViewModel @Inject constructor(
         _uiState.update { it.copy(tipo = nuevoTipo, cargando = true, error = null) }
     }
 
+    // ---------- Que hacer con una categoria ----------
+
+    /** Tocarla no la edita de una: primero se pregunta que se quiere hacer con ella. */
+    fun abrirAcciones(categoria: Categoria) {
+        _uiState.update { it.copy(acciones = categoria) }
+    }
+
+    fun cerrarAcciones() {
+        _uiState.update { it.copy(acciones = null) }
+    }
+
+    fun editarLaElegida() {
+        val categoria = _uiState.value.acciones ?: return
+        cerrarAcciones()
+        abrirFormularioDe(categoria)
+    }
+
+    /** Borrar sigue pidiendo confirmacion: hay que advertir que pasa con lo ya clasificado. */
+    fun eliminarLaElegida() {
+        val categoria = _uiState.value.acciones ?: return
+        cerrarAcciones()
+        pedirEliminar(categoria)
+    }
+
     // ---------- El formulario ----------
 
     fun abrirFormularioNuevo() {

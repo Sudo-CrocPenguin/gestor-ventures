@@ -178,6 +178,43 @@ class GastosFijosViewModelTest {
     }
 
     @Test
+    fun tocarUnGastoAbreSusOpcionesYNoLoEditaDeUna() = runTest(dispatcher) {
+        agregar("Arriendo", 300_000.0)
+        advanceUntilIdle()
+
+        viewModel.abrirAcciones(estado.gastosFijos.single())
+
+        assertNotNull(estado.acciones)
+        assertNull(estado.formularioGasto)
+    }
+
+    @Test
+    fun elegirEditarAbreElFormularioYCierraElMenu() = runTest(dispatcher) {
+        agregar("Arriendo", 300_000.0)
+        advanceUntilIdle()
+
+        viewModel.abrirAcciones(estado.gastosFijos.single())
+        viewModel.editarElGastoElegido()
+
+        assertNull(estado.acciones)
+        assertEquals("Arriendo", estado.formularioGasto?.nombre)
+        assertTrue(estado.formularioGasto?.esEdicion == true)
+    }
+
+    @Test
+    fun elegirEliminarLoBorra() = runTest(dispatcher) {
+        agregar("Arriendo", 300_000.0)
+        advanceUntilIdle()
+
+        viewModel.abrirAcciones(estado.gastosFijos.single())
+        viewModel.eliminarElGastoElegido()
+        advanceUntilIdle()
+
+        assertNull(estado.acciones)
+        assertTrue(estado.gastosFijos.isEmpty())
+    }
+
+    @Test
     fun cerrarElFormularioNoDejaRastro() = runTest(dispatcher) {
         viewModel.abrirFormularioNuevo()
         viewModel.onNombreChange("Arriendo")

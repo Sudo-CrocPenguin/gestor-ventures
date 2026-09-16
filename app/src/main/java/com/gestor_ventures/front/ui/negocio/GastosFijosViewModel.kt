@@ -53,6 +53,28 @@ class GastosFijosViewModel @Inject constructor(
         }
     }
 
+    // ---------- Qué hacer con un gasto ----------
+
+    /** Tocar un gasto no lo edita de una: primero se pregunta qué se quiere hacer con él. */
+    fun abrirAcciones(gasto: GastoFijo) {
+        _uiState.update { it.copy(acciones = gasto) }
+    }
+
+    fun cerrarAcciones() {
+        _uiState.update { it.copy(acciones = null) }
+    }
+
+    fun editarElGastoElegido() {
+        val gasto = _uiState.value.acciones ?: return
+        _uiState.update { it.copy(acciones = null, formularioGasto = formularioDe(gasto)) }
+    }
+
+    fun eliminarElGastoElegido() {
+        val gasto = _uiState.value.acciones ?: return
+        cerrarAcciones()
+        eliminar(gasto.id)
+    }
+
     // ---------- El formulario ----------
 
     fun abrirFormularioNuevo() {

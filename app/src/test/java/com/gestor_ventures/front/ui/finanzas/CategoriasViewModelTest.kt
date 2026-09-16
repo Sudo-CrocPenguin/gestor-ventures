@@ -168,6 +168,44 @@ class CategoriasViewModelTest {
     }
 
     @Test
+    fun tocarUnaCategoriaAbreSusOpcionesYNoLaEditaDeUna() = runTest(dispatcher) {
+        crear("Transporte", TipoCategoria.GASTO)
+        advanceUntilIdle()
+
+        viewModel.abrirAcciones(estado.categorias.single())
+
+        assertNotNull(estado.acciones)
+        assertNull(estado.formulario)
+    }
+
+    @Test
+    fun elegirEditarAbreElFormularioYCierraElMenu() = runTest(dispatcher) {
+        crear("Transporte", TipoCategoria.GASTO)
+        advanceUntilIdle()
+
+        viewModel.abrirAcciones(estado.categorias.single())
+        viewModel.editarLaElegida()
+
+        assertNull(estado.acciones)
+        assertEquals("Transporte", estado.formulario?.nombre)
+    }
+
+    @Test
+    fun elegirEliminarPideConfirmacionEnVezDeBorrar() = runTest(dispatcher) {
+        crear("Transporte", TipoCategoria.GASTO)
+        advanceUntilIdle()
+
+        viewModel.abrirAcciones(estado.categorias.single())
+        viewModel.eliminarLaElegida()
+        advanceUntilIdle()
+
+        // El menú se cierra, pero todavía hay que advertir qué pasa con lo clasificado.
+        assertNull(estado.acciones)
+        assertNotNull(estado.porEliminar)
+        assertEquals(1, estado.categorias.size)
+    }
+
+    @Test
     fun borrarPideConfirmacionAntes() = runTest(dispatcher) {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
