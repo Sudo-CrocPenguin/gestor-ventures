@@ -17,5 +17,12 @@ val MIGRACION_1_2 = object : Migration(1, 2) {
     }
 }
 
+/** v2 → v3: HU-11/HU-12 agrega la nota de la venta. */
+val MIGRACION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE ventas ADD COLUMN nota TEXT")
+    }
+}
+
 /** Todas las migraciones, en orden, para pasárselas al constructor de la base de datos. */
-val MIGRACIONES = arrayOf(MIGRACION_1_2)
+val MIGRACIONES = arrayOf(MIGRACION_1_2, MIGRACION_2_3)

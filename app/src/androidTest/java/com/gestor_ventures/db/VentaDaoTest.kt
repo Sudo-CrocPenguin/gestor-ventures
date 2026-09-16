@@ -78,6 +78,15 @@ class VentaDaoTest {
     }
 
     @Test
+    fun laNotaSeGuardaYPuedeQuedarVacia() = runTest {
+        val conNota = ventaDao.insertar(venta(monto = 25_000.0, nota = "Pedido para el sábado"))
+        val sinNota = ventaDao.insertar(venta(monto = 10_000.0))
+
+        assertEquals("Pedido para el sábado", ventaDao.obtener(conNota)?.nota)
+        assertNull(ventaDao.obtener(sinNota)?.nota)
+    }
+
+    @Test
     fun laVentaRapidaSoloGuardaMontoYFecha() = runTest {
         val id = ventaDao.insertar(
             VentaEntity(
@@ -172,6 +181,7 @@ class VentaDaoTest {
         fecha: LocalDate = hoy,
         fechaHora: LocalDateTime = fecha.atTime(hora, 0),
         negocio: Long = negocioId,
+        nota: String? = null,
     ) = VentaEntity(
         negocioId = negocio,
         tipoRegistro = TipoRegistroVenta.DETALLADO,
@@ -179,5 +189,6 @@ class VentaDaoTest {
         monto = monto,
         metodoPago = MetodoPago.EFECTIVO,
         fechaHora = fechaHora,
+        nota = nota,
     )
 }
