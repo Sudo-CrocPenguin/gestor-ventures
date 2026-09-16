@@ -28,6 +28,11 @@ fun formatLongDate(fecha: LocalDate): String =
     fecha.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM", LocaleColombia))
         .replaceFirstChar { it.titlecase(LocaleColombia) }
 
+/** 2026-09-01 → "Septiembre 2026". Para encabezados de periodo. */
+fun formatMesLargo(fecha: LocalDate): String =
+    fecha.format(DateTimeFormatter.ofPattern("MMMM yyyy", LocaleColombia))
+        .replaceFirstChar { it.titlecase(LocaleColombia) }
+
 /** 2026-12-31 → "dic 2026". Para resúmenes cortos. */
 fun formatMesYAnio(fecha: LocalDate): String =
     fecha.format(DateTimeFormatter.ofPattern("MMM yyyy", LocaleColombia))
