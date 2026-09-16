@@ -46,6 +46,7 @@ class VentaRepository @Inject constructor(
         productoServicio: String? = null,
         metodoPago: MetodoPago? = null,
         clienteId: Long? = null,
+        nota: String? = null,
     ): ResultadoVenta {
         val esDetallada = tipoRegistro == TipoRegistroVenta.DETALLADO
         val productoLimpio = productoServicio?.trim()?.takeIf { it.isNotEmpty() }
@@ -63,6 +64,8 @@ class VentaRepository @Inject constructor(
                 productoServicio = productoLimpio.takeIf { esDetallada },
                 metodoPago = metodoPago?.aDb().takeIf { esDetallada },
                 clienteId = clienteId.takeIf { esDetallada },
+                // La nota vale en las dos modalidades: no describe el cobro sino la venta.
+                nota = nota?.trim()?.takeIf { it.isNotEmpty() },
             ),
         )
         return ResultadoVenta.Exito(id)
@@ -107,6 +110,7 @@ class VentaRepository @Inject constructor(
         productoServicio = entidad.productoServicio,
         metodoPago = entidad.metodoPago?.aDominio(),
         clienteId = entidad.clienteId,
+        nota = entidad.nota,
     )
 }
 
