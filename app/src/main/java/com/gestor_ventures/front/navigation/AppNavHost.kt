@@ -17,7 +17,7 @@ import androidx.navigation.navArgument
 import com.gestor_ventures.R
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
 import com.gestor_ventures.front.ui.finanzas.CategoriasRoute
-import com.gestor_ventures.front.ui.finanzas.GastosRoute
+import com.gestor_ventures.front.ui.finanzas.FinanzasRoute
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
@@ -90,9 +90,9 @@ fun AppNavHost(
             GastosFijosRoute(onBack = { navController.popBackStack() })
         }
 
-        // HU-14. Primera sección de Finanzas; HU-16 le pondrá el resumen encima.
+        // HU-13 y HU-14. HU-16 le pondrá el resumen encima del selector.
         composable(TopLevelDestination.Finanzas.route) {
-            GastosRoute()
+            FinanzasRoute()
         }
 
         composable(Rutas.Categorias) {
