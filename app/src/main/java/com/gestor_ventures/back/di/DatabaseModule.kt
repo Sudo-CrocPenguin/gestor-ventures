@@ -6,6 +6,7 @@ import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.db.GestorVenturesDatabase
 import com.gestor_ventures.db.MIGRACIONES
 import com.gestor_ventures.db.SemillaTemporal
+import com.gestor_ventures.db.dao.CategoriaDao
 import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
 import com.gestor_ventures.db.dao.NegocioDao
@@ -49,6 +50,9 @@ object DatabaseModule {
 
     @Provides
     fun proveerVentaDao(db: GestorVenturesDatabase): VentaDao = db.ventaDao()
+
+    @Provides
+    fun proveerCategoriaDao(db: GestorVenturesDatabase): CategoriaDao = db.categoriaDao()
 
     @Provides
     @Singleton
