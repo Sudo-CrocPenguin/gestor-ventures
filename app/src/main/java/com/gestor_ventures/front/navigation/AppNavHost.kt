@@ -16,18 +16,22 @@ import com.gestor_ventures.R
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
+import com.gestor_ventures.front.ui.negocio.RegistrarNegocioRoute
 
 /**
  * Rutas que no son pestañas: pantallas de flujo que se abren encima y se cierran al volver.
  */
 object Rutas {
     const val RegistrarVenta = "registrar_venta"
+    const val RegistrarNegocio = "registrar_negocio"
 }
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     mostrarMensaje: (String) -> Unit,
+    onNegocioCreado: (String) -> Unit,
+    tieneNegocios: Boolean,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -54,6 +58,19 @@ fun AppNavHost(
                     mostrarMensaje(
                         if (tipo == TipoRegistroVentaUi.Rapido) mensajeRapida else mensajeDetallada,
                     )
+                },
+            )
+        }
+
+        composable(Rutas.RegistrarNegocio) {
+            val mensajeCreado = stringResource(R.string.negocio_creado)
+            RegistrarNegocioRoute(
+                puedeVolver = tieneNegocios,
+                onBack = { navController.popBackStack() },
+                onNegocioCreado = { negocioId ->
+                    onNegocioCreado(negocioId.toString())
+                    navController.popBackStack()
+                    mostrarMensaje(mensajeCreado)
                 },
             )
         }

@@ -41,6 +41,37 @@
     <!-- Comunes -->
     <string name="porcentaje">%1$d%%</string>
     <string name="cd_volver">Volver</string>
+    <string name="paso_de">Paso %1$d de %2$d</string>
+
+    <!-- Registrar negocio (HU-05) -->
+    <string name="negocio_titulo">Cuéntanos de tu negocio</string>
+    <string name="negocio_subtitulo">Puedes cambiar todo esto después.</string>
+    <string name="negocio_nombre">Nombre del negocio</string>
+    <string name="negocio_nombre_placeholder">Ej. Dulce Antojo</string>
+    <string name="negocio_categoria">¿A qué se dedica?</string>
+    <string name="negocio_categoria_placeholder">Escríbelo libremente</string>
+    <string name="negocio_sugerencias">Sugerencias</string>
+    <string name="negocio_sugerencia_reposteria">Repostería</string>
+    <string name="negocio_sugerencia_belleza">Belleza</string>
+    <string name="negocio_sugerencia_ropa">Ropa</string>
+    <string name="negocio_sugerencia_comida">Comida</string>
+    <string name="negocio_sugerencia_servicios">Servicios</string>
+    <string name="negocio_sugerencia_otro">Otro</string>
+    <string name="negocio_tipo_actividad">Tipo de actividad</string>
+    <string name="negocio_tipo_actividad_ayuda">Define qué módulos verás en la agenda.</string>
+    <string name="negocio_actividad_servicios">Servicios</string>
+    <string name="negocio_actividad_servicios_desc">Agendo citas con hora. Verás la agenda de citas.</string>
+    <string name="negocio_actividad_productos">Productos</string>
+    <string name="negocio_actividad_productos_desc">Vendo cosas con fecha de entrega. Verás los pedidos.</string>
+    <string name="negocio_actividad_mixto">Mixto</string>
+    <string name="negocio_actividad_mixto_desc">Las dos cosas. Citas y pedidos en un solo calendario.</string>
+    <string name="negocio_continuar">Continuar</string>
+    <string name="negocio_creado">Negocio creado ✓</string>
+    <string name="negocio_error_nombre_vacio">Escribe el nombre del negocio.</string>
+    <string name="negocio_error_nombre_largo">El nombre no puede pasar de 100 caracteres.</string>
+    <string name="negocio_error_categoria_vacia">Cuéntanos a qué se dedica tu negocio.</string>
+    <string name="negocio_error_porcentaje">El porcentaje de reinversión va de 0 a 100.</string>
+    <string name="negocio_error_no_existe">Ese negocio ya no existe.</string>
 
     <!-- Formularios -->
     <string name="form_monto">Monto</string>
