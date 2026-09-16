@@ -8,7 +8,11 @@ import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
 import com.gestor_ventures.back.repository.SesionRepository
 import com.gestor_ventures.db.SemillaTemporal
+import com.gestor_ventures.back.repository.CostoRepository
+import com.gestor_ventures.back.repository.GastoRepository
 import com.gestor_ventures.db.dao.CategoriaDaoFalso
+import com.gestor_ventures.db.dao.CostoDaoFalso
+import com.gestor_ventures.db.dao.GastoDaoFalso
 import com.gestor_ventures.db.dao.NegocioDaoFalso
 import com.gestor_ventures.db.entity.NegocioEntity
 import com.gestor_ventures.db.enums.TipoActividad
@@ -36,10 +40,15 @@ class CategoriasViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val ahora = LocalDateTime.of(2026, 9, 16, 10, 0)
     private val reloj = Reloj { ahora }
+    private val hoy = ahora.toLocalDate()
 
     private val categoriaDao = CategoriaDaoFalso()
     private val negocioDao = NegocioDaoFalso()
     private val repository = CategoriaRepository(categoriaDao)
+    private val gastoDao = GastoDaoFalso()
+    private val costoDao = CostoDaoFalso()
+    private val gastoRepository = GastoRepository(gastoDao, reloj)
+    private val costoRepository = CostoRepository(costoDao, reloj)
     private val negocioActivo = NegocioActivoRepository(
         NegocioRepository(negocioDao, reloj),
         SesionRepository(),
@@ -62,7 +71,7 @@ class CategoriasViewModelTest {
                 fechaCreacion = ahora,
             ),
         )
-        viewModel = CategoriasViewModel(repository, negocioActivo)
+        viewModel = CategoriasViewModel(repository, gastoRepository, costoRepository, negocioActivo)
     }
 
     @After
@@ -87,13 +96,58 @@ class CategoriasViewModelTest {
         crear("Insumos", TipoCategoria.COSTO)
         advanceUntilIdle()
 
-        assertEquals(listOf("Transporte"), estado.categorias.map { it.nombre })
+        assertEquals(listOf("Transporte"), estado.categorias.map { it.categoria.nombre })
 
         viewModel.onTipoChange(TipoCategoria.COSTO)
         advanceUntilIdle()
 
-        assertEquals(listOf("Insumos"), estado.categorias.map { it.nombre })
+        assertEquals(listOf("Insumos"), estado.categorias.map { it.categoria.nombre })
         assertFalse(estado.vacio)
+    }
+
+    @Test
+    fun cadaCategoriaMuestraLoQueLlevaEnElMes() = runTest(dispatcher) {
+        crear("Transporte", TipoCategoria.GASTO)
+        crear("Papelería", TipoCategoria.GASTO)
+        advanceUntilIdle()
+        val transporte = estado.categorias.first { it.categoria.nombre == "Transporte" }.categoria
+        gastoRepository.registrarGasto(1L, "Taxi", 8_000.0, hoy, transporte.id)
+        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy, transporte.id)
+        advanceUntilIdle()
+
+        val porNombre = estado.categorias.associate { it.categoria.nombre to it.total }
+        assertEquals(20_000.0, porNombre["Transporte"] ?: 0.0, 0.001)
+        // Una categoría sin movimientos existe igual, en cero.
+        assertEquals(0.0, porNombre["Papelería"] ?: -1.0, 0.001)
+    }
+
+    @Test
+    fun loQueNadieClasificoSeMuestraAparte() = runTest(dispatcher) {
+        crear("Transporte", TipoCategoria.GASTO)
+        advanceUntilIdle()
+        gastoRepository.registrarGasto(1L, "Varios", 5_000.0, hoy, categoriaId = null)
+        advanceUntilIdle()
+
+        assertEquals(5_000.0, estado.sinClasificar, 0.001)
+        assertEquals(5_000.0, estado.totalDelMes, 0.001)
+    }
+
+    @Test
+    fun cadaPestanaResumeLoSuyo() = runTest(dispatcher) {
+        crear("Transporte", TipoCategoria.GASTO)
+        crear("Insumos", TipoCategoria.COSTO)
+        advanceUntilIdle()
+        val transporte = estado.categorias.single().categoria
+        gastoRepository.registrarGasto(1L, "Taxi", 8_000.0, hoy, transporte.id)
+        advanceUntilIdle()
+
+        assertEquals(8_000.0, estado.categorias.single().total, 0.001)
+
+        viewModel.onTipoChange(TipoCategoria.COSTO)
+        advanceUntilIdle()
+
+        // Los gastos no se cuelan en el resumen de costos.
+        assertEquals(0.0, estado.categorias.single().total, 0.001)
     }
 
     @Test
@@ -106,7 +160,7 @@ class CategoriasViewModelTest {
         viewModel.guardarFormulario()
         advanceUntilIdle()
 
-        assertEquals(TipoCategoria.COSTO, estado.categorias.single().tipo)
+        assertEquals(TipoCategoria.COSTO, estado.categorias.single().categoria.tipo)
         // La hoja se cierra sola cuando la categoría quedó guardada.
         assertNull(estado.formulario)
     }
@@ -145,7 +199,7 @@ class CategoriasViewModelTest {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
 
-        viewModel.abrirFormularioDe(estado.categorias.single())
+        viewModel.abrirFormularioDe(estado.categorias.single().categoria)
 
         assertEquals("Transporte", estado.formulario?.nombre)
         assertTrue(estado.formulario?.esEdicion == true)
@@ -155,14 +209,14 @@ class CategoriasViewModelTest {
     fun renombrarCorrigeLaCategoriaEnVezDeCrearOtra() = runTest(dispatcher) {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
-        val original = estado.categorias.single()
+        val original = estado.categorias.single().categoria
 
         viewModel.abrirFormularioDe(original)
         viewModel.onNombreChange("Domicilios")
         viewModel.guardarFormulario()
         advanceUntilIdle()
 
-        val renombrada = estado.categorias.single()
+        val renombrada = estado.categorias.single().categoria
         assertEquals(original.id, renombrada.id)
         assertEquals("Domicilios", renombrada.nombre)
     }
@@ -172,7 +226,7 @@ class CategoriasViewModelTest {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
 
-        viewModel.abrirAcciones(estado.categorias.single())
+        viewModel.abrirAcciones(estado.categorias.single().categoria)
 
         assertNotNull(estado.acciones)
         assertNull(estado.formulario)
@@ -183,7 +237,7 @@ class CategoriasViewModelTest {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
 
-        viewModel.abrirAcciones(estado.categorias.single())
+        viewModel.abrirAcciones(estado.categorias.single().categoria)
         viewModel.editarLaElegida()
 
         assertNull(estado.acciones)
@@ -195,7 +249,7 @@ class CategoriasViewModelTest {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
 
-        viewModel.abrirAcciones(estado.categorias.single())
+        viewModel.abrirAcciones(estado.categorias.single().categoria)
         viewModel.eliminarLaElegida()
         advanceUntilIdle()
 
@@ -210,7 +264,7 @@ class CategoriasViewModelTest {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
 
-        viewModel.pedirEliminar(estado.categorias.single())
+        viewModel.pedirEliminar(estado.categorias.single().categoria)
 
         // Todavía no se borró nada: primero hay que advertir qué pasa con lo clasificado.
         assertNotNull(estado.porEliminar)
@@ -222,7 +276,7 @@ class CategoriasViewModelTest {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
 
-        viewModel.pedirEliminar(estado.categorias.single())
+        viewModel.pedirEliminar(estado.categorias.single().categoria)
         viewModel.cancelarEliminar()
         advanceUntilIdle()
 
@@ -235,7 +289,7 @@ class CategoriasViewModelTest {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
 
-        viewModel.pedirEliminar(estado.categorias.single())
+        viewModel.pedirEliminar(estado.categorias.single().categoria)
         viewModel.confirmarEliminar()
         advanceUntilIdle()
 

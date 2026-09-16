@@ -38,7 +38,9 @@ import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvSegmentedToggle
+import com.gestor_ventures.front.components.MoneyText
 import com.gestor_ventures.front.theme.GestorVenturesTheme
+import com.gestor_ventures.front.util.formatMesLargo
 
 @Composable
 fun CategoriasRoute(
@@ -110,12 +112,35 @@ fun CategoriasScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            // HU-15: el resumen agrupado. El encabezado dice de qué mes se está hablando.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = formatMesLargo(uiState.mes.atDay(1)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                MoneyText(monto = uiState.totalDelMes, style = MaterialTheme.typography.titleMedium)
+            }
+
             AnimatedVisibility(visible = uiState.vacio) {
                 GvInfoNote(stringResource(R.string.categorias_vacio))
             }
 
-            uiState.categorias.forEach { categoria ->
-                FilaCategoria(categoria = categoria, onClick = { onAbrirAcciones(categoria) })
+            uiState.categorias.forEach { categoriaUi ->
+                FilaCategoria(
+                    categoriaUi = categoriaUi,
+                    onClick = { onAbrirAcciones(categoriaUi.categoria) },
+                )
+            }
+
+            // Lo que se registró sin clasificar también es parte del resumen: esconderlo haría
+            // que las cuentas no cuadren con el total del mes.
+            if (uiState.sinClasificar > 0) {
+                FilaSinClasificar(uiState.sinClasificar)
             }
         }
 
@@ -168,14 +193,18 @@ fun CategoriasScreen(
     }
 }
 
-/** La fila muestra la categoría; lo que se puede hacer con ella sale al tocarla. */
+/**
+ * La fila muestra la categoría con lo que lleva acumulado en el mes; lo que se puede hacer con
+ * ella sale al tocarla.
+ */
 @Composable
 private fun FilaCategoria(
-    categoria: Categoria,
+    categoriaUi: CategoriaUi,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val etiqueta = stringResource(R.string.categoria_acciones, categoria.nombre)
+    val etiqueta = stringResource(R.string.categoria_acciones, categoriaUi.categoria.nombre)
+    val sinMovimientos = categoriaUi.total <= 0.0
 
     GvCard(modifier) {
         Row(
@@ -184,13 +213,43 @@ private fun FilaCategoria(
                 .clickable(onClick = onClick)
                 .semantics { contentDescription = etiqueta },
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = categoria.nombre,
+                text = categoriaUi.categoria.nombre,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
+            // Una categoría sin movimientos este mes se muestra apagada, no en cero llamativo.
+            MoneyText(
+                monto = categoriaUi.total,
+                color = if (sinMovimientos) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+            )
+        }
+    }
+}
+
+/** El montón de lo que nadie clasificó. No se puede editar ni borrar: no es una categoría. */
+@Composable
+private fun FilaSinClasificar(total: Double, modifier: Modifier = Modifier) {
+    GvCard(modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.categorias_sin_clasificar),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            MoneyText(monto = total, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -245,10 +304,11 @@ private fun CategoriasScreenPreview() {
         CategoriasUiState(
             cargando = false,
             categorias = listOf(
-                Categoria(1, "Arriendo", TipoCategoria.GASTO),
-                Categoria(2, "Servicios públicos", TipoCategoria.GASTO),
-                Categoria(3, "Transporte", TipoCategoria.GASTO),
+                CategoriaUi(Categoria(1, "Arriendo", TipoCategoria.GASTO), 300_000.0),
+                CategoriaUi(Categoria(2, "Servicios públicos", TipoCategoria.GASTO), 85_000.0),
+                CategoriaUi(Categoria(3, "Transporte", TipoCategoria.GASTO), 0.0),
             ),
+            sinClasificar = 12_000.0,
         ),
     )
 }
