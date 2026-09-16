@@ -10,6 +10,7 @@ import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
 import com.gestor_ventures.db.dao.NegocioDao
 import com.gestor_ventures.db.dao.UsuarioDao
+import com.gestor_ventures.db.dao.VentaDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,6 +46,9 @@ object DatabaseModule {
 
     @Provides
     fun proveerMetaAhorroDao(db: GestorVenturesDatabase): MetaAhorroDao = db.metaAhorroDao()
+
+    @Provides
+    fun proveerVentaDao(db: GestorVenturesDatabase): VentaDao = db.ventaDao()
 
     @Provides
     @Singleton
