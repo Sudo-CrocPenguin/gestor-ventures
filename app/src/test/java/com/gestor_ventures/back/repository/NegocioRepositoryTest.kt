@@ -8,6 +8,7 @@ import com.gestor_ventures.db.dao.NegocioDaoFalso
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDateTime
@@ -29,13 +30,26 @@ class NegocioRepositoryTest {
         nombre: String = "Dulce Antojo",
         categoria: String = "Repostería",
         porcentaje: Double = 30.0,
+        colorMarca: String? = null,
     ) = repository.crearNegocio(
         usuarioId = usuarioId,
         nombre = nombre,
         tipoActividad = TipoActividad.PRODUCTOS,
         categoria = categoria,
         porcentajeReinversion = porcentaje,
+        colorMarca = colorMarca,
     )
+
+    @Test
+    fun crearNegocio_guardaElColorDeMarcaYAdmiteNinguno() = runTest {
+        crear(colorMarca = "#B8E0D2")
+
+        assertEquals("#B8E0D2", repository.observarNegocio(1L).first()?.colorMarca)
+
+        crear(nombre = "Bella Piel")
+
+        assertNull(repository.observarNegocio(2L).first()?.colorMarca)
+    }
 
     @Test
     fun crearNegocio_guardaYDevuelveElId() = runTest {

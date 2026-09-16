@@ -192,6 +192,7 @@ private fun NegocioListoScreenPreview() {
                         tipoActividad = TipoActividad.MIXTO,
                         categoria = "Repostería artesanal",
                         porcentajeReinversion = 20.0,
+                        colorMarca = null,
                         fechaCreacion = LocalDateTime.of(2026, 9, 16, 10, 0),
                     ),
                     meta = MetaAhorro(
