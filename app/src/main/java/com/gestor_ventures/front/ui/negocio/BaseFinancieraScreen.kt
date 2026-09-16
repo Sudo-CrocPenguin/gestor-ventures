@@ -39,6 +39,8 @@ import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPasoTopBar
 import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvSoftButton
+import com.gestor_ventures.front.components.AccionSheet
+import com.gestor_ventures.front.components.GvAccionesSheet
 import com.gestor_ventures.front.components.GvDateField
 import com.gestor_ventures.front.components.GvTextField
 import com.gestor_ventures.front.components.MoneyText
@@ -66,12 +68,32 @@ fun BaseFinancieraRoute(
         uiState = uiState,
         onBack = onBack,
         onAgregarGasto = viewModel::abrirFormularioGasto,
-        onEliminarGasto = viewModel::eliminarGastoFijo,
+        onAccionesGasto = viewModel::abrirAccionesGasto,
         onMetaMontoChange = viewModel::onMetaMontoChange,
         onFechaLimiteChange = viewModel::onFechaLimiteChange,
         onPorcentajeChange = viewModel::onPorcentajeReinversionChange,
         onFinalizar = viewModel::finalizar,
     )
+
+    uiState.accionesGasto?.let { gasto ->
+        GvAccionesSheet(
+            titulo = gasto.nombre,
+            acciones = listOf(
+                AccionSheet(
+                    texto = stringResource(R.string.base_accion_editar_gasto),
+                    iconRes = R.drawable.ic_pencil,
+                    onClick = viewModel::editarElGastoElegido,
+                ),
+                AccionSheet(
+                    texto = stringResource(R.string.base_accion_eliminar_gasto),
+                    iconRes = R.drawable.ic_trash,
+                    destructiva = true,
+                    onClick = viewModel::eliminarElGastoElegido,
+                ),
+            ),
+            onCerrar = viewModel::cerrarAccionesGasto,
+        )
+    }
 
     uiState.formularioGasto?.let { formulario ->
         GastoFijoSheet(
@@ -95,7 +117,7 @@ fun BaseFinancieraScreen(
     uiState: BaseFinancieraUiState,
     onBack: () -> Unit,
     onAgregarGasto: () -> Unit,
-    onEliminarGasto: (Long) -> Unit,
+    onAccionesGasto: (GastoFijo) -> Unit,
     onMetaMontoChange: (String) -> Unit,
     onFechaLimiteChange: (LocalDate) -> Unit,
     onPorcentajeChange: (Int) -> Unit,
@@ -114,12 +136,18 @@ fun BaseFinancieraScreen(
         ) {
             Encabezado()
 
-            ListaGastosFijos(
-                gastos = uiState.gastosFijos,
-                total = uiState.totalGastosFijos,
-                onAgregar = onAgregarGasto,
-                onEliminar = onEliminarGasto,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                ListaGastosFijos(
+                    gastos = uiState.gastosFijos,
+                    total = uiState.totalGastosFijos,
+                    onAcciones = onAccionesGasto,
+                )
+                GvSoftButton(
+                    text = stringResource(R.string.base_agregar_gasto),
+                    onClick = onAgregarGasto,
+                    iconRes = R.drawable.ic_plus,
+                )
+            }
 
             Column {
                 GvTextField(
@@ -276,7 +304,7 @@ private fun BaseFinancieraScreenPreview() {
                 ),
                 onBack = {},
                 onAgregarGasto = {},
-                onEliminarGasto = {},
+                onAccionesGasto = {},
                 onMetaMontoChange = {},
                 onFechaLimiteChange = {},
                 onPorcentajeChange = {},

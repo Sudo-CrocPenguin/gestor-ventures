@@ -9,13 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,8 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -33,11 +31,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
 import com.gestor_ventures.back.model.Categoria
 import com.gestor_ventures.back.model.TipoCategoria
+import com.gestor_ventures.front.components.AccionSheet
+import com.gestor_ventures.front.components.GvAccionesSheet
 import com.gestor_ventures.front.components.GvBackTopBar
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvInfoNote
+import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvSegmentedToggle
-import com.gestor_ventures.front.components.GvSoftButton
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 @Composable
@@ -52,11 +52,13 @@ fun CategoriasRoute(
         onBack = onBack,
         onTipoChange = viewModel::onTipoChange,
         onAgregar = viewModel::abrirFormularioNuevo,
-        onEditar = viewModel::abrirFormularioDe,
+        onAbrirAcciones = viewModel::abrirAcciones,
+        onEditar = viewModel::editarLaElegida,
+        onCerrarAcciones = viewModel::cerrarAcciones,
         onNombreChange = viewModel::onNombreChange,
         onGuardarFormulario = viewModel::guardarFormulario,
         onCerrarFormulario = viewModel::cerrarFormulario,
-        onPedirEliminar = viewModel::pedirEliminar,
+        onPedirEliminar = viewModel::eliminarLaElegida,
         onConfirmarEliminar = viewModel::confirmarEliminar,
         onCancelarEliminar = viewModel::cancelarEliminar,
     )
@@ -73,11 +75,13 @@ fun CategoriasScreen(
     onBack: () -> Unit,
     onTipoChange: (TipoCategoria) -> Unit,
     onAgregar: () -> Unit,
-    onEditar: (Categoria) -> Unit,
+    onAbrirAcciones: (Categoria) -> Unit,
+    onEditar: () -> Unit,
+    onCerrarAcciones: () -> Unit,
     onNombreChange: (String) -> Unit,
     onGuardarFormulario: () -> Unit,
     onCerrarFormulario: () -> Unit,
-    onPedirEliminar: (Categoria) -> Unit,
+    onPedirEliminar: () -> Unit,
     onConfirmarEliminar: () -> Unit,
     onCancelarEliminar: () -> Unit,
     modifier: Modifier = Modifier,
@@ -85,8 +89,10 @@ fun CategoriasScreen(
     Column(modifier.fillMaxSize()) {
         GvBackTopBar(titulo = stringResource(R.string.menu_categorias), onBack = onBack)
 
+        // La lista se desplaza; el botón no. Agregar es la acción principal de la pantalla.
         Column(
             modifier = Modifier
+                .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -109,19 +115,37 @@ fun CategoriasScreen(
             }
 
             uiState.categorias.forEach { categoria ->
-                FilaCategoria(
-                    categoria = categoria,
-                    onEditar = { onEditar(categoria) },
-                    onEliminar = { onPedirEliminar(categoria) },
-                )
+                FilaCategoria(categoria = categoria, onClick = { onAbrirAcciones(categoria) })
             }
+        }
 
-            GvSoftButton(
+        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
+            GvPrimaryButton(
                 text = stringResource(R.string.categorias_agregar),
                 onClick = onAgregar,
-                iconRes = R.drawable.ic_plus,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
         }
+    }
+
+    uiState.acciones?.let { categoria ->
+        GvAccionesSheet(
+            titulo = categoria.nombre,
+            acciones = listOf(
+                AccionSheet(
+                    texto = stringResource(R.string.categoria_accion_editar),
+                    iconRes = R.drawable.ic_pencil,
+                    onClick = onEditar,
+                ),
+                AccionSheet(
+                    texto = stringResource(R.string.categoria_accion_eliminar),
+                    iconRes = R.drawable.ic_trash,
+                    destructiva = true,
+                    onClick = onPedirEliminar,
+                ),
+            ),
+            onCerrar = onCerrarAcciones,
+        )
     }
 
     uiState.formulario?.let { formulario ->
@@ -144,20 +168,22 @@ fun CategoriasScreen(
     }
 }
 
+/** La fila muestra la categoría; lo que se puede hacer con ella sale al tocarla. */
 @Composable
 private fun FilaCategoria(
     categoria: Categoria,
-    onEditar: () -> Unit,
-    onEliminar: () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val etiqueta = stringResource(R.string.categoria_acciones, categoria.nombre)
+
     GvCard(modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onEditar),
+                .clickable(onClick = onClick)
+                .semantics { contentDescription = etiqueta },
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
                 text = categoria.nombre,
@@ -165,17 +191,6 @@ private fun FilaCategoria(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
-            IconButton(onClick = onEliminar) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_trash),
-                    contentDescription = stringResource(
-                        R.string.categoria_eliminar,
-                        categoria.nombre,
-                    ),
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
         }
     }
 }
@@ -253,7 +268,9 @@ private fun VistaPrevia(uiState: CategoriasUiState) {
                 onBack = {},
                 onTipoChange = {},
                 onAgregar = {},
+                onAbrirAcciones = {},
                 onEditar = {},
+                onCerrarAcciones = {},
                 onNombreChange = {},
                 onGuardarFormulario = {},
                 onCerrarFormulario = {},

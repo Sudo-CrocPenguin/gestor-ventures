@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -22,8 +23,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
 import com.gestor_ventures.back.model.Frecuencia
 import com.gestor_ventures.back.model.GastoFijo
+import com.gestor_ventures.front.components.AccionSheet
+import com.gestor_ventures.front.components.GvAccionesSheet
 import com.gestor_ventures.front.components.GvBackTopBar
+import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvInfoNote
+import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 @Composable
@@ -37,8 +42,10 @@ fun GastosFijosRoute(
         uiState = uiState,
         onBack = onBack,
         onAgregar = viewModel::abrirFormularioNuevo,
-        onEditar = viewModel::abrirFormularioDe,
-        onEliminar = viewModel::eliminar,
+        onAbrirAcciones = viewModel::abrirAcciones,
+        onEditar = viewModel::editarElGastoElegido,
+        onEliminar = viewModel::eliminarElGastoElegido,
+        onCerrarAcciones = viewModel::cerrarAcciones,
         onNombreChange = viewModel::onNombreChange,
         onMontoChange = viewModel::onMontoChange,
         onFrecuenciaChange = viewModel::onFrecuenciaChange,
@@ -57,8 +64,10 @@ fun GastosFijosScreen(
     uiState: GastosFijosUiState,
     onBack: () -> Unit,
     onAgregar: () -> Unit,
-    onEditar: (GastoFijo) -> Unit,
-    onEliminar: (Long) -> Unit,
+    onAbrirAcciones: (GastoFijo) -> Unit,
+    onEditar: () -> Unit,
+    onEliminar: () -> Unit,
+    onCerrarAcciones: () -> Unit,
     onNombreChange: (String) -> Unit,
     onMontoChange: (String) -> Unit,
     onFrecuenciaChange: (Frecuencia) -> Unit,
@@ -72,8 +81,10 @@ fun GastosFijosScreen(
             onBack = onBack,
         )
 
+        // La lista se desplaza; el botón no. Agregar es la acción principal de la pantalla.
         Column(
             modifier = Modifier
+                .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -84,8 +95,6 @@ fun GastosFijosScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            // El aviso va antes de la lista: si no hay nada, lo primero que se lee es por qué
-            // vale la pena agregarlos, y no el botón suelto.
             AnimatedVisibility(visible = uiState.vacio) {
                 GvInfoNote(stringResource(R.string.gastos_fijos_vacio))
             }
@@ -93,11 +102,37 @@ fun GastosFijosScreen(
             ListaGastosFijos(
                 gastos = uiState.gastosFijos,
                 total = uiState.total,
-                onAgregar = onAgregar,
-                onEditar = onEditar,
-                onEliminar = onEliminar,
+                onAcciones = onAbrirAcciones,
             )
         }
+
+        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
+            GvPrimaryButton(
+                text = stringResource(R.string.base_agregar_gasto),
+                onClick = onAgregar,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            )
+        }
+    }
+
+    uiState.acciones?.let { gasto ->
+        GvAccionesSheet(
+            titulo = gasto.nombre,
+            acciones = listOf(
+                AccionSheet(
+                    texto = stringResource(R.string.base_accion_editar_gasto),
+                    iconRes = R.drawable.ic_pencil,
+                    onClick = onEditar,
+                ),
+                AccionSheet(
+                    texto = stringResource(R.string.base_accion_eliminar_gasto),
+                    iconRes = R.drawable.ic_trash,
+                    destructiva = true,
+                    onClick = onEliminar,
+                ),
+            ),
+            onCerrar = onCerrarAcciones,
+        )
     }
 
     uiState.formularioGasto?.let { formulario ->
@@ -148,8 +183,10 @@ private fun VistaPrevia(uiState: GastosFijosUiState) {
                 uiState = uiState,
                 onBack = {},
                 onAgregar = {},
+                onAbrirAcciones = {},
                 onEditar = {},
                 onEliminar = {},
+                onCerrarAcciones = {},
                 onNombreChange = {},
                 onMontoChange = {},
                 onFrecuenciaChange = {},

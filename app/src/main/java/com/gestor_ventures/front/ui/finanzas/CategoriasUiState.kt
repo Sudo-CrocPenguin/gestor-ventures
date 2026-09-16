@@ -15,6 +15,8 @@ data class CategoriasUiState(
     val categorias: List<Categoria> = emptyList(),
     val cargando: Boolean = true,
     val formulario: FormularioCategoria? = null,
+    /** La categoria que el usuario toco, mientras elige que hacer con ella. */
+    val acciones: Categoria? = null,
     /** La categoría que el usuario pidió borrar, mientras confirma. */
     val porEliminar: Categoria? = null,
     val error: ErrorCategoria? = null,

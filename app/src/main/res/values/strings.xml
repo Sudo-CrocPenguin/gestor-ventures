@@ -41,7 +41,9 @@
     <string name="categoria_nombre_placeholder">Ej. Insumos</string>
     <string name="categoria_guardar">Guardar categoría</string>
     <string name="categoria_guardar_cambios">Guardar cambios</string>
-    <string name="categoria_eliminar">Eliminar %1$s</string>
+    <string name="categoria_acciones">Opciones de %1$s</string>
+    <string name="categoria_accion_editar">Editar categoría</string>
+    <string name="categoria_accion_eliminar">Eliminar categoría</string>
     <string name="categoria_eliminar_titulo">¿Eliminar %1$s?</string>
     <string name="categoria_eliminar_ayuda">Los gastos y costos que estaban en esta categoría no se borran: quedan sin categoría y siguen contando en tus finanzas.</string>
     <string name="categoria_eliminar_confirmar">Eliminar</string>
@@ -130,7 +132,9 @@
     <string name="base_subtitulo">Esto ayuda al asistente a darte mejores recomendaciones. Todo es opcional.</string>
     <string name="base_gastos_fijos">Gastos fijos mensuales</string>
     <string name="base_agregar_gasto">Agregar gasto fijo</string>
-    <string name="base_eliminar_gasto">Eliminar %1$s</string>
+    <string name="base_acciones_gasto">Opciones de %1$s</string>
+    <string name="base_accion_editar_gasto">Editar gasto fijo</string>
+    <string name="base_accion_eliminar_gasto">Eliminar gasto fijo</string>
     <string name="base_meta">Meta de ahorro</string>
     <string name="base_meta_ayuda">¿Cuánto quieres ahorrar? Verás tu progreso en el inicio.</string>
     <string name="base_fecha_limite">Fecha límite de la meta</string>

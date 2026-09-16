@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Frecuencia
+import com.gestor_ventures.back.model.GastoFijo
 import com.gestor_ventures.back.repository.BaseFinancieraRepository
 import com.gestor_ventures.back.usecase.CalcularAhorroMensual
 import com.gestor_ventures.front.navigation.ArgumentoNegocioId
@@ -88,6 +89,26 @@ class BaseFinancieraViewModel @Inject constructor(
         _uiState.update { it.copy(formularioGasto = FormularioGastoFijo()) }
     }
 
+    /** Tocar un gasto no lo edita de una: primero se pregunta qué se quiere hacer con él. */
+    fun abrirAccionesGasto(gasto: GastoFijo) {
+        _uiState.update { it.copy(accionesGasto = gasto) }
+    }
+
+    fun cerrarAccionesGasto() {
+        _uiState.update { it.copy(accionesGasto = null) }
+    }
+
+    fun editarElGastoElegido() {
+        val gasto = _uiState.value.accionesGasto ?: return
+        _uiState.update { it.copy(accionesGasto = null, formularioGasto = formularioDe(gasto)) }
+    }
+
+    fun eliminarElGastoElegido() {
+        val gasto = _uiState.value.accionesGasto ?: return
+        cerrarAccionesGasto()
+        eliminarGastoFijo(gasto.id)
+    }
+
     fun cerrarFormularioGasto() {
         _uiState.update { it.copy(formularioGasto = null) }
     }
@@ -112,12 +133,21 @@ class BaseFinancieraViewModel @Inject constructor(
         if (!formulario.puedeGuardar) return
 
         viewModelScope.launch {
-            val error = repository.agregarGastoFijo(
-                negocioId = negocioId,
-                nombre = formulario.nombre,
-                monto = formulario.monto.toLong().toDouble(),
-                frecuencia = formulario.frecuencia,
-            )
+            val error = if (formulario.gastoFijoId == null) {
+                repository.agregarGastoFijo(
+                    negocioId = negocioId,
+                    nombre = formulario.nombre,
+                    monto = formulario.montoValor.toDouble(),
+                    frecuencia = formulario.frecuencia,
+                )
+            } else {
+                repository.editarGastoFijo(
+                    gastoFijoId = formulario.gastoFijoId,
+                    nombre = formulario.nombre,
+                    monto = formulario.montoValor.toDouble(),
+                    frecuencia = formulario.frecuencia,
+                )
+            }
             _uiState.update { it.copy(error = error, formularioGasto = if (error == null) null else formulario) }
         }
     }

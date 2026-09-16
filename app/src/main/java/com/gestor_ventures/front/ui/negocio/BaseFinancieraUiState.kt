@@ -21,6 +21,8 @@ data class BaseFinancieraUiState(
     val guardando: Boolean = false,
     val error: ErrorBaseFinanciera? = null,
     val formularioGasto: FormularioGastoFijo? = null,
+    /** El gasto fijo que el usuario tocó, mientras elige qué hacer con él. */
+    val accionesGasto: GastoFijo? = null,
 ) {
     val metaFormateada: String
         get() = if (metaMonto.isEmpty()) "" else formatMiles(metaMonto.toLongOrNull() ?: 0L)
