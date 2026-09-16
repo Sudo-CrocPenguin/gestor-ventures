@@ -1,5 +1,6 @@
 package com.gestor_ventures.front.ui.negocio
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,8 +20,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.ErrorBaseFinanciera
 import com.gestor_ventures.back.model.Frecuencia
 import com.gestor_ventures.front.components.GvChip
+import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvTextField
 import com.gestor_ventures.front.theme.NumericTextStyle
@@ -29,12 +32,16 @@ import com.gestor_ventures.front.theme.NumericTextStyle
  * HU-06. Hoja para agregar o corregir un gasto fijo sin salir de la pantalla: nombre, monto y
  * cada cuánto se paga. Es la misma en el onboarding y en la configuración; lo único que cambia
  * es el título, según el formulario venga vacío o con un gasto que ya existe.
+ *
+ * El error se muestra acá adentro y no en la pantalla: con la hoja abierta, un aviso detrás de
+ * ella no lo ve nadie.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GastoFijoSheet(
     formulario: FormularioGastoFijo,
     onNombreChange: (String) -> Unit,
+    error: ErrorBaseFinanciera? = null,
     onMontoChange: (String) -> Unit,
     onFrecuenciaChange: (Frecuencia) -> Unit,
     onGuardar: () -> Unit,
@@ -110,6 +117,14 @@ fun GastoFijoSheet(
                         )
                     }
                 }
+            }
+
+            AnimatedVisibility(visible = error != null) {
+                GvInfoNote(
+                    text = error?.let { stringResource(it.mensajeRes()) }.orEmpty(),
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                )
             }
 
             GvPrimaryButton(
