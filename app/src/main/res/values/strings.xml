@@ -115,6 +115,10 @@
     <string name="gasto_fijo_nombre_placeholder">Ej. Arriendo del local</string>
     <string name="gasto_fijo_frecuencia">Frecuencia</string>
     <string name="gasto_fijo_guardar">Guardar gasto fijo</string>
+    <string name="gasto_fijo_titulo_editar">Editar gasto fijo</string>
+    <string name="gasto_fijo_actualizar">Guardar cambios</string>
+    <string name="gastos_fijos_explicacion">Los pagos que se repiten cada periodo. Tócalos para corregirlos.</string>
+    <string name="gastos_fijos_vacio">Todavía no tienes gastos fijos. Agrégalos para saber cuánto necesitas vender.</string>
     <string name="frecuencia_semanal">Semanal</string>
     <string name="frecuencia_quincenal">Quincenal</string>
     <string name="frecuencia_mensual">Mensual</string>

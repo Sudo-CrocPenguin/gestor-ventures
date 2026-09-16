@@ -73,6 +73,20 @@ fun MainScreen(
         }
     }
 
+    /** Las opciones que ya tienen pantalla navegan; las demás siguen avisando que faltan. */
+    fun abrirOpcion(opcion: OpcionMenu) {
+        val ruta = when (opcion) {
+            OpcionMenu.GastosFijos -> Rutas.GastosFijos
+            else -> null
+        }
+        if (ruta == null) {
+            avisarPendiente(context.getString(opcion.labelRes))
+            return
+        }
+        scope.launch { drawerState.close() }
+        navController.navigate(ruta)
+    }
+
     fun cambiarNegocio(negocio: NegocioUi) {
         onNegocioSeleccionado(negocio.id)
         scope.launch {
@@ -105,9 +119,7 @@ fun MainScreen(
                     scope.launch { drawerState.close() }
                     navController.navigate(Rutas.RegistrarNegocio)
                 },
-                onOpcionClick = { opcion: OpcionMenu ->
-                    avisarPendiente(context.getString(opcion.labelRes))
-                },
+                onOpcionClick = { opcion: OpcionMenu -> abrirOpcion(opcion) },
             )
         },
     ) {
