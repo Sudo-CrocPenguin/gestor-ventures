@@ -12,6 +12,7 @@ import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
 import com.gestor_ventures.db.dao.NegocioDao
+import com.gestor_ventures.db.dao.ObligacionDao
 import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.dao.VentaDao
 import dagger.Module
@@ -61,6 +62,9 @@ object DatabaseModule {
 
     @Provides
     fun proveerCostoDao(db: GestorVenturesDatabase): CostoDao = db.costoDao()
+
+    @Provides
+    fun proveerObligacionDao(db: GestorVenturesDatabase): ObligacionDao = db.obligacionDao()
 
     @Provides
     @Singleton
