@@ -76,6 +76,7 @@ fun BaseFinancieraRoute(
     uiState.formularioGasto?.let { formulario ->
         GastoFijoSheet(
             formulario = formulario,
+            error = uiState.error,
             onNombreChange = viewModel::onNombreGastoChange,
             onMontoChange = viewModel::onMontoGastoChange,
             onFrecuenciaChange = viewModel::onFrecuenciaGastoChange,
@@ -158,7 +159,8 @@ fun BaseFinancieraScreen(
                 onPorcentajeChange = onPorcentajeChange,
             )
 
-            AnimatedVisibility(visible = uiState.error != null) {
+            // Mientras la hoja está abierta el aviso se muestra dentro de ella, no detrás.
+            AnimatedVisibility(visible = uiState.error != null && uiState.formularioGasto == null) {
                 GvInfoNote(
                     text = uiState.error?.let { stringResource(it.mensajeRes()) }.orEmpty(),
                     containerColor = MaterialTheme.colorScheme.errorContainer,

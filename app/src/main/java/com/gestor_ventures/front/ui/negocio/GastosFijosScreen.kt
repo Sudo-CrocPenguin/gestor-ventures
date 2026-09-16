@@ -97,20 +97,13 @@ fun GastosFijosScreen(
                 onEditar = onEditar,
                 onEliminar = onEliminar,
             )
-
-            AnimatedVisibility(visible = uiState.error != null) {
-                GvInfoNote(
-                    text = uiState.error?.let { stringResource(it.mensajeRes()) }.orEmpty(),
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                )
-            }
         }
     }
 
     uiState.formularioGasto?.let { formulario ->
         GastoFijoSheet(
             formulario = formulario,
+            error = uiState.error,
             onNombreChange = onNombreChange,
             onMontoChange = onMontoChange,
             onFrecuenciaChange = onFrecuenciaChange,
