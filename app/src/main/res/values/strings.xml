@@ -185,6 +185,32 @@
     <string name="gasto_fijo_guardar">Guardar gasto fijo</string>
     <string name="gasto_fijo_titulo_editar">Editar gasto fijo</string>
     <string name="gasto_fijo_actualizar">Guardar cambios</string>
+    <string name="compromisos_seccion_fijos">Gastos fijos</string>
+    <string name="compromisos_seccion_obligaciones">Obligaciones</string>
+    <string name="obligaciones_vacio">Todavía no tienes obligaciones registradas. Agrégalas para no pasarte de una fecha de pago.</string>
+    <string name="obligaciones_agregar">Agregar obligación</string>
+    <string name="obligaciones_total_pendiente">Pendiente por pagar</string>
+    <string name="obligaciones_proximas">Próximas a vencer</string>
+    <string name="obligaciones_todas">Todas</string>
+    <string name="obligacion_titulo_nueva">Nueva obligación</string>
+    <string name="obligacion_titulo_editar">Editar obligación</string>
+    <string name="obligacion_explicacion">Un compromiso que ya adquiriste: un préstamo, una cuota, un pago recurrente.</string>
+    <string name="obligacion_nombre">¿Qué debes?</string>
+    <string name="obligacion_nombre_placeholder">Ej. Cuota del horno</string>
+    <string name="obligacion_vencimiento">Fecha de vencimiento</string>
+    <string name="obligacion_vencimiento_placeholder">Elige una fecha</string>
+    <string name="obligacion_guardar">Guardar obligación</string>
+    <string name="obligacion_guardar_cambios">Guardar cambios</string>
+    <string name="obligacion_acciones_de">Opciones de %1$s</string>
+    <string name="obligacion_accion_pagada">Marcar como pagada</string>
+    <string name="obligacion_accion_pendiente">Marcar como pendiente</string>
+    <string name="obligacion_accion_editar">Editar obligación</string>
+    <string name="obligacion_accion_eliminar">Eliminar obligación</string>
+    <string name="obligacion_pagada">Pagada</string>
+    <string name="obligacion_pagada_el">Pagada · vencía el %1$s</string>
+    <string name="obligacion_vence_hoy">Vence hoy</string>
+    <string name="obligacion_error_nombre">Escribe qué es lo que debes.</string>
+    <string name="obligacion_error_monto">Escribe cuánto debes.</string>
     <string name="gastos_fijos_explicacion">Los pagos que se repiten cada periodo. Tócalos para corregirlos.</string>
     <string name="gastos_fijos_vacio">Todavía no tienes gastos fijos. Agrégalos para saber cuánto necesitas vender.</string>
     <string name="frecuencia_semanal">Semanal</string>
@@ -263,4 +289,12 @@
     <string name="inicio_caja_responsable">%1$s · turno %2$s</string>
     <string name="inicio_caja_apertura">Abrió %1$s · inició %2$s</string>
     <string name="inicio_sin_cajas_abiertas">No hay cajas abiertas en este momento.</string>
+    <plurals name="obligacion_vence_en">
+        <item quantity="one">Vence mañana</item>
+        <item quantity="other">Vence en %1$d días</item>
+    </plurals>
+    <plurals name="obligacion_vencida_hace">
+        <item quantity="one">Vencida ayer</item>
+        <item quantity="other">Vencida hace %1$d días</item>
+    </plurals>
 </resources>

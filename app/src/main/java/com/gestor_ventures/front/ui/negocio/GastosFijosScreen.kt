@@ -25,22 +25,16 @@ import com.gestor_ventures.back.model.Frecuencia
 import com.gestor_ventures.back.model.GastoFijo
 import com.gestor_ventures.front.components.AccionSheet
 import com.gestor_ventures.front.components.GvAccionesSheet
-import com.gestor_ventures.front.components.GvBackTopBar
-import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 @Composable
-fun GastosFijosRoute(
-    onBack: () -> Unit,
-    viewModel: GastosFijosViewModel = hiltViewModel(),
-) {
+fun GastosFijosRoute(viewModel: GastosFijosViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     GastosFijosScreen(
         uiState = uiState,
-        onBack = onBack,
         onAgregar = viewModel::abrirFormularioNuevo,
         onAbrirAcciones = viewModel::abrirAcciones,
         onEditar = viewModel::editarElGastoElegido,
@@ -62,7 +56,6 @@ fun GastosFijosRoute(
 @Composable
 fun GastosFijosScreen(
     uiState: GastosFijosUiState,
-    onBack: () -> Unit,
     onAgregar: () -> Unit,
     onAbrirAcciones: (GastoFijo) -> Unit,
     onEditar: () -> Unit,
@@ -76,11 +69,6 @@ fun GastosFijosScreen(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize()) {
-        GvBackTopBar(
-            titulo = stringResource(R.string.menu_gastos_fijos),
-            onBack = onBack,
-        )
-
         // La lista se desplaza; el botón no. Agregar es la acción principal de la pantalla.
         Column(
             modifier = Modifier
@@ -181,7 +169,6 @@ private fun VistaPrevia(uiState: GastosFijosUiState) {
         Surface(color = MaterialTheme.colorScheme.background) {
             GastosFijosScreen(
                 uiState = uiState,
-                onBack = {},
                 onAgregar = {},
                 onAbrirAcciones = {},
                 onEditar = {},

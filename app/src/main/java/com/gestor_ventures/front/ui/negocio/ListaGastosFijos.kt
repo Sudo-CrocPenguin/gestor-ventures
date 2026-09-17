@@ -34,6 +34,9 @@ fun ListaGastosFijos(
     onAcciones: (GastoFijo) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Sin gastos no hay lista que encabezar: el aviso de la pantalla ya explica qué falta.
+    if (gastos.isEmpty()) return
+
     Column(modifier, verticalArrangement = Arrangement.spacedBy(9.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -48,9 +51,7 @@ fun ListaGastosFijos(
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (gastos.isNotEmpty()) {
-                MoneyText(monto = total, style = MaterialTheme.typography.labelMedium)
-            }
+            MoneyText(monto = total, style = MaterialTheme.typography.labelMedium)
         }
 
         gastos.forEach { gasto ->

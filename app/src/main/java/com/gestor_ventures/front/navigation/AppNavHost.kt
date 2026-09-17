@@ -21,7 +21,7 @@ import com.gestor_ventures.front.ui.finanzas.FinanzasRoute
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
-import com.gestor_ventures.front.ui.negocio.GastosFijosRoute
+import com.gestor_ventures.front.ui.negocio.GastosYObligacionesRoute
 import com.gestor_ventures.front.ui.negocio.NegocioListoRoute
 import com.gestor_ventures.front.ui.negocio.RegistrarNegocioRoute
 
@@ -86,8 +86,9 @@ fun AppNavHost(
             )
         }
 
+        // HU-06 y HU-07: los gastos fijos y las obligaciones viven en la misma pantalla.
         composable(Rutas.GastosFijos) {
-            GastosFijosRoute(onBack = { navController.popBackStack() })
+            GastosYObligacionesRoute(onBack = { navController.popBackStack() })
         }
 
         // HU-13 y HU-14. HU-16 le pondrá el resumen encima del selector.
