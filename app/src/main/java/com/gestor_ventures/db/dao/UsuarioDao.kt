@@ -26,4 +26,12 @@ interface UsuarioDao {
 
     @Query("SELECT * FROM usuarios WHERE correo = :correo")
     suspend fun obtenerPorCorreo(correo: String): UsuarioEntity?
+
+    /**
+     * Para [com.gestor_ventures.back.repository.SesionRepository]: reaccionar por `Flow` (en
+     * vez de una consulta puntual) evita que quede sin resolver el instante entre que Firebase
+     * confirma el login y este perfil se guarda en Room.
+     */
+    @Query("SELECT * FROM usuarios WHERE correo = :correo")
+    fun observarPorCorreo(correo: String): Flow<UsuarioEntity?>
 }

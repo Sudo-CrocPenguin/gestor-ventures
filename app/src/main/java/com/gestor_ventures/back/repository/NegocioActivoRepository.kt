@@ -1,11 +1,14 @@
 package com.gestor_ventures.back.repository
 
 import com.gestor_ventures.back.model.Negocio
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,6 +21,7 @@ import javax.inject.Singleton
  * saber a quién apuntarle la venta. Si cada pantalla guardara el suyo, tarde o temprano dos
  * dirían cosas distintas.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class NegocioActivoRepository @Inject constructor(
     private val negocioRepository: NegocioRepository,
@@ -32,9 +36,14 @@ class NegocioActivoRepository @Inject constructor(
     /**
      * El negocio activo: el elegido a mano y, si no hay ninguno, el primero de la lista. Así la
      * app funciona desde el primer momento sin obligar a elegir.
+     *
+     * Sigue a [SesionRepository.observarUsuarioId] en vez de leerlo una sola vez: si nadie tiene
+     * sesión abierta (o se cierra), no hay negocios que mostrar.
      */
     val negocioActivo: Flow<Negocio?> = combine(
-        negocioRepository.negociosDeUsuario(sesionRepository.usuarioId()),
+        sesionRepository.observarUsuarioId().flatMapLatest { usuarioId ->
+            usuarioId?.let(negocioRepository::negociosDeUsuario) ?: flowOf(emptyList())
+        },
         elegido,
     ) { negocios, elegidoId ->
         negocios.firstOrNull { it.id == elegidoId } ?: negocios.firstOrNull()

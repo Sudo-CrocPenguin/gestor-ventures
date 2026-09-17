@@ -4,18 +4,18 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
- * TEMPORAL — BORRAR CUANDO EXISTA HU-01 (registro e inicio de sesión).
+ * HU-01 ya existe (`AuthRepository`/`SesionRepository`), así que la base de datos de producción
+ * ya no usa [callback]: cada usuario se crea al registrarse de verdad.
  *
- * La tabla `negocios` exige un usuario dueño, y mientras no haya pantallas de cuenta no hay
- * forma de crearlo. Esta semilla inserta un único usuario al crear la base de datos, para que
- * HU-05 (registrar negocio) y HU-11/HU-12 (registrar venta) puedan funcionar.
- *
- * Cuando HU-01 esté lista: se elimina este archivo, se quita el `addCallback` del módulo que
- * construye la base de datos y el usuario pasa a salir de la sesión real.
+ * Este archivo se conserva solo como fixture para pruebas (unitarias y `androidTest`) que
+ * necesitan *algún* usuario dueño de un negocio y no les importa la autenticación — son
+ * decenas de pruebas de otras épicas (HU-05 en adelante) que darían mucho más ruido si cada
+ * una tuviera que armar su propia sesión. [USUARIO_ID] es el id que ese usuario de prueba
+ * siempre recibe.
  */
 object SemillaTemporal {
 
-    /** Id fijo del usuario sembrado; hasta HU-01, es "el usuario" de toda la app. */
+    /** Id fijo del usuario sembrado, para pruebas que necesitan un usuario dueño cualquiera. */
     const val USUARIO_ID: Long = 1L
 
     private const val NOMBRE = "Usuario de prueba"

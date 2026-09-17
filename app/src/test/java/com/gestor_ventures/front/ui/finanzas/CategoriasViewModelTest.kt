@@ -6,7 +6,7 @@ import com.gestor_ventures.back.model.TipoCategoria
 import com.gestor_ventures.back.repository.CategoriaRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
-import com.gestor_ventures.back.repository.SesionRepository
+import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.back.repository.CostoRepository
 import com.gestor_ventures.back.repository.GastoRepository
@@ -51,7 +51,7 @@ class CategoriasViewModelTest {
     private val costoRepository = CostoRepository(costoDao, reloj)
     private val negocioActivo = NegocioActivoRepository(
         NegocioRepository(negocioDao, reloj),
-        SesionRepository(),
+        sesionRepositoryDePrueba(),
     )
 
     private lateinit var viewModel: CategoriasViewModel

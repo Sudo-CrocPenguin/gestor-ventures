@@ -5,7 +5,7 @@ import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
 import com.gestor_ventures.back.repository.ObligacionRepository
-import com.gestor_ventures.back.repository.SesionRepository
+import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.NegocioDaoFalso
 import com.gestor_ventures.db.dao.ObligacionDaoFalso
@@ -43,7 +43,7 @@ class ObligacionesViewModelTest {
     private val repository = ObligacionRepository(obligacionDao, reloj)
     private val negocioActivo = NegocioActivoRepository(
         NegocioRepository(negocioDao, reloj),
-        SesionRepository(),
+        sesionRepositoryDePrueba(),
     )
 
     private lateinit var viewModel: ObligacionesViewModel

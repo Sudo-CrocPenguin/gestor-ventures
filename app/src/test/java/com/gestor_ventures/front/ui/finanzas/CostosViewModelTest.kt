@@ -9,7 +9,7 @@ import com.gestor_ventures.back.repository.CategoriaRepository
 import com.gestor_ventures.back.repository.CostoRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
-import com.gestor_ventures.back.repository.SesionRepository
+import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.back.repository.VentaRepository
 import com.gestor_ventures.back.usecase.CalcularMargen
 import com.gestor_ventures.db.SemillaTemporal
@@ -53,7 +53,7 @@ class CostosViewModelTest {
     private val categoriaRepository = CategoriaRepository(categoriaDao)
     private val negocioActivo = NegocioActivoRepository(
         NegocioRepository(negocioDao, reloj),
-        SesionRepository(),
+        sesionRepositoryDePrueba(),
     )
 
     private lateinit var viewModel: CostosViewModel

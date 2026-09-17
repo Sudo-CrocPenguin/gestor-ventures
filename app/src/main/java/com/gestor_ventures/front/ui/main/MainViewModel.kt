@@ -9,12 +9,16 @@ import com.gestor_ventures.back.repository.SesionRepository
 import com.gestor_ventures.front.model.NegocioUi
 import com.gestor_ventures.front.model.RolNegocio
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MainViewModel @Inject constructor(
     negocioRepository: NegocioRepository,
@@ -23,7 +27,9 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<MainUiState> = combine(
-        negocioRepository.negociosDeUsuario(sesionRepository.usuarioId()),
+        sesionRepository.observarUsuarioId().flatMapLatest { usuarioId ->
+            usuarioId?.let(negocioRepository::negociosDeUsuario) ?: flowOf(emptyList())
+        },
         // El negocio elegido a mano lo guarda el repositorio, no esta pantalla: el inicio y el
         // registro de ventas necesitan saber el mismo.
         negocioActivoRepository.seleccionado,

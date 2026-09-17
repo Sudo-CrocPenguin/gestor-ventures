@@ -5,7 +5,7 @@ import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.repository.BaseFinancieraRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
-import com.gestor_ventures.back.repository.SesionRepository
+import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.GastoFijoDaoFalso
 import com.gestor_ventures.db.dao.MetaAhorroDaoFalso
@@ -47,7 +47,7 @@ class GastosFijosViewModelTest {
     )
     private val negocioActivo = NegocioActivoRepository(
         NegocioRepository(negocioDao, reloj),
-        SesionRepository(),
+        sesionRepositoryDePrueba(),
     )
 
     private lateinit var viewModel: GastosFijosViewModel
