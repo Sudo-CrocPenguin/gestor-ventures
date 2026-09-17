@@ -17,22 +17,22 @@ import com.gestor_ventures.R
 import com.gestor_ventures.front.components.GvSegmentedToggle
 
 /**
- * Las dos caras de lo que sale del negocio: lo que se va por funcionar (HU-14) y lo que se va
- * por producir lo que se vende (HU-13).
+ * Las tres preguntas que se le hacen a las finanzas del negocio: cómo va el mes (HU-16), en qué
+ * se va la plata de funcionar (HU-14) y cuánto cuesta producir lo que se vende (HU-13).
  *
- * Son dos preguntas distintas y el emprendedor mira una a la vez, igual que en categorías.
+ * El resumen va primero porque es la pregunta con la que se entra a esta pestaña; el detalle se
+ * mira después y de a una sección a la vez, igual que en categorías.
  */
 enum class SeccionFinanzas(@param:StringRes val labelRes: Int) {
+    Resumen(R.string.finanzas_seccion_resumen),
     Gastos(R.string.finanzas_seccion_gastos),
     Costos(R.string.finanzas_seccion_costos),
 }
 
-/**
- * Pestaña de Finanzas. HU-16 le pondrá el resumen del periodo encima de este selector.
- */
+/** Pestaña de Finanzas: el resumen del mes y el detalle de lo que lo compone. */
 @Composable
 fun FinanzasRoute(modifier: Modifier = Modifier) {
-    var seccion by rememberSaveable { mutableStateOf(SeccionFinanzas.Gastos) }
+    var seccion by rememberSaveable { mutableStateOf(SeccionFinanzas.Resumen) }
 
     Column(modifier.fillMaxSize()) {
         GvSegmentedToggle(
@@ -46,6 +46,7 @@ fun FinanzasRoute(modifier: Modifier = Modifier) {
         // Cada sección trae su propio contenido desplazable y su botón fijo abajo.
         Box(Modifier.weight(1f)) {
             when (seccion) {
+                SeccionFinanzas.Resumen -> ResumenFinancieroRoute()
                 SeccionFinanzas.Gastos -> GastosRoute()
                 SeccionFinanzas.Costos -> CostosRoute()
             }
