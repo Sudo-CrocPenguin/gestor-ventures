@@ -3,7 +3,7 @@ package com.gestor_ventures.front.ui.finanzas
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
-import com.gestor_ventures.back.repository.SesionRepository
+import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.back.repository.VentaRepository
 import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.NegocioDaoFalso
@@ -45,7 +45,7 @@ class RegistrarVentaViewModelTest {
     private val negocioDao = NegocioDaoFalso()
     private val negocioActivo = NegocioActivoRepository(
         NegocioRepository(negocioDao, reloj),
-        SesionRepository(),
+        sesionRepositoryDePrueba(),
     )
 
     private lateinit var viewModel: RegistrarVentaViewModel

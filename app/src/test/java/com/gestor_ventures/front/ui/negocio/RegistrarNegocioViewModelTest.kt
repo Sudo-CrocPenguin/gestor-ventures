@@ -4,7 +4,8 @@ import com.gestor_ventures.back.model.ErrorNegocio
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.TipoActividad
 import com.gestor_ventures.back.repository.NegocioRepository
-import com.gestor_ventures.back.repository.SesionRepository
+import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
+import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.NegocioDaoFalso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,7 +32,7 @@ class RegistrarNegocioViewModelTest {
     private val dao = NegocioDaoFalso()
     private val momento = LocalDateTime.of(2026, 9, 16, 10, 0)
     private val repository = NegocioRepository(dao, Reloj { momento })
-    private val viewModel = RegistrarNegocioViewModel(repository, SesionRepository())
+    private val viewModel = RegistrarNegocioViewModel(repository, sesionRepositoryDePrueba())
 
     private val estado get() = viewModel.uiState.value
 
@@ -75,7 +76,7 @@ class RegistrarNegocioViewModelTest {
         viewModel.guardar()
         advanceUntilIdle()
 
-        val negocios = repository.negociosDeUsuario(SesionRepository().usuarioId()).first()
+        val negocios = repository.negociosDeUsuario(SemillaTemporal.USUARIO_ID).first()
         assertEquals(1, negocios.size)
         assertEquals("Dulce Antojo", negocios.first().nombre)
         assertEquals("Repostería", negocios.first().categoria)
@@ -122,7 +123,7 @@ class RegistrarNegocioViewModelTest {
         viewModel.guardar()
         advanceUntilIdle()
 
-        val negocio = repository.negociosDeUsuario(SesionRepository().usuarioId()).first().first()
+        val negocio = repository.negociosDeUsuario(SemillaTemporal.USUARIO_ID).first().first()
         assertEquals(0.0, negocio.porcentajeReinversion, 0.001)
     }
 }

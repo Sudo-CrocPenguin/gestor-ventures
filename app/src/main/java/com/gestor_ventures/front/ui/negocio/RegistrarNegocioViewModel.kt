@@ -60,8 +60,16 @@ class RegistrarNegocioViewModel @Inject constructor(
 
         _uiState.update { it.copy(guardando = true, error = null) }
         viewModelScope.launch {
+            val usuarioId = sesionRepository.usuarioId()
+            if (usuarioId == null) {
+                // No debería pasar: para llegar acá ya se tuvo que iniciar sesión. Si pasa
+                // (p. ej. expiró por inactividad justo ahora), no hay a quién dueño ponerle el
+                // negocio.
+                _uiState.update { it.copy(guardando = false) }
+                return@launch
+            }
             val resultado = negocioRepository.crearNegocio(
-                usuarioId = sesionRepository.usuarioId(),
+                usuarioId = usuarioId,
                 nombre = estado.nombre,
                 tipoActividad = estado.tipoActividad,
                 categoria = estado.categoria,

@@ -7,7 +7,7 @@ import com.gestor_ventures.back.repository.CategoriaRepository
 import com.gestor_ventures.back.repository.GastoRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
-import com.gestor_ventures.back.repository.SesionRepository
+import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.CategoriaDaoFalso
 import com.gestor_ventures.db.dao.GastoDaoFalso
@@ -47,7 +47,7 @@ class GastosViewModelTest {
     private val categoriaRepository = CategoriaRepository(categoriaDao)
     private val negocioActivo = NegocioActivoRepository(
         NegocioRepository(negocioDao, reloj),
-        SesionRepository(),
+        sesionRepositoryDePrueba(),
     )
 
     private lateinit var viewModel: GastosViewModel

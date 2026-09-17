@@ -35,4 +35,7 @@ class UsuarioDaoFalso : UsuarioDao {
 
     override suspend fun obtenerPorCorreo(correo: String): UsuarioEntity? =
         usuarios.value.firstOrNull { it.correo == correo }
+
+    override fun observarPorCorreo(correo: String): Flow<UsuarioEntity?> =
+        usuarios.map { lista -> lista.firstOrNull { it.correo == correo } }
 }

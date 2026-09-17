@@ -5,7 +5,6 @@ import androidx.room.Room
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.db.GestorVenturesDatabase
 import com.gestor_ventures.db.MIGRACIONES
-import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.CategoriaDao
 import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.dao.GastoDao
@@ -34,8 +33,6 @@ object DatabaseModule {
     @Singleton
     fun proveerBaseDeDatos(@ApplicationContext context: Context): GestorVenturesDatabase =
         Room.databaseBuilder(context, GestorVenturesDatabase::class.java, NombreBaseDeDatos)
-            // TEMPORAL — se quita junto con SemillaTemporal cuando exista HU-01.
-            .addCallback(SemillaTemporal.callback)
             .addMigrations(*MIGRACIONES)
             .build()
 

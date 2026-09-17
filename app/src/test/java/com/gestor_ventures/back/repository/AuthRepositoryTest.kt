@@ -4,6 +4,7 @@ import com.gestor_ventures.back.model.ErrorAuth
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.ResultadoAuth
 import com.gestor_ventures.db.dao.UsuarioDaoFalso
+import com.gestor_ventures.db.entity.UsuarioEntity
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -46,7 +47,8 @@ class AuthRepositoryTest {
         assertNotNull(usuario)
         assertEquals(nombre, usuario?.nombre)
         assertEquals(momentoRegistro, usuario?.fechaCreacion)
-        assertNull(usuario?.fechaUltimoAcceso)
+        // Firebase deja la cuenta con la sesión abierta al crearla (HU-01/HU-02).
+        assertEquals(momentoRegistro, usuario?.fechaUltimoAcceso)
     }
 
     @Test
@@ -200,7 +202,7 @@ class AuthRepositoryTest {
         ahora = momentoLogin.plusDays(1)
 
         assertEquals(true, repository.sesionActiva(1L))
-        assertEquals(false, autenticador.sesionCerrada)
+        assertEquals(correo, autenticador.sesion.value)
     }
 
     @Test
@@ -211,12 +213,21 @@ class AuthRepositoryTest {
         ahora = momentoLogin.plusDays(7).plusMinutes(1)
 
         assertEquals(false, repository.sesionActiva(1L))
-        assertEquals(true, autenticador.sesionCerrada)
+        assertNull(autenticador.sesion.value)
     }
 
     @Test
-    fun sesionActiva_siNuncaInicioSesion_devuelveFalso() = runTest {
-        registrar()
+    fun sesionActiva_conUsuarioSinFechaDeUltimoAcceso_devuelveFalso() = runTest {
+        // No se llega a este estado por AuthRepository (registrar ya deja la fecha puesta);
+        // puede pasar con una fila sembrada directo en la tabla, como SemillaTemporal.
+        usuarioDao.insertar(
+            UsuarioEntity(
+                nombre = nombre,
+                correo = correo,
+                contrasenaHash = "",
+                fechaCreacion = momentoRegistro,
+            ),
+        )
 
         assertEquals(false, repository.sesionActiva(1L))
     }

@@ -9,8 +9,8 @@ import com.gestor_ventures.back.repository.GastoRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
 import com.gestor_ventures.back.repository.ObligacionRepository
-import com.gestor_ventures.back.repository.SesionRepository
 import com.gestor_ventures.back.repository.VentaRepository
+import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.back.usecase.CalcularAhorroMensual
 import com.gestor_ventures.back.usecase.CalcularResumenFinanciero
 import com.gestor_ventures.db.SemillaTemporal
@@ -60,7 +60,7 @@ class ResumenFinancieroViewModelTest {
     private val negocioRepository = NegocioRepository(negocioDao, reloj)
     private val baseFinancieraRepository =
         BaseFinancieraRepository(gastoFijoDao, metaAhorroDao, negocioDao, reloj)
-    private val negocioActivo = NegocioActivoRepository(negocioRepository, SesionRepository())
+    private val negocioActivo = NegocioActivoRepository(negocioRepository, sesionRepositoryDePrueba())
 
     private val calcularResumen = CalcularResumenFinanciero(
         ventaRepository = ventaRepository,

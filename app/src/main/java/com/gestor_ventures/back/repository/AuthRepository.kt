@@ -46,13 +46,16 @@ class AuthRepository @Inject constructor(
 
         return when (autenticador.crearCuenta(correoLimpio, contrasena)) {
             ResultadoAutenticador.Exito -> {
+                val ahora = reloj.ahora()
                 val usuarioId = usuarioDao.insertar(
                     UsuarioEntity(
                         nombre = nombreLimpio,
                         correo = correoLimpio,
                         // La contraseña la hashea y guarda Firebase Authentication, no Room.
                         contrasenaHash = "",
-                        fechaCreacion = reloj.ahora(),
+                        fechaCreacion = ahora,
+                        // Firebase deja la cuenta con la sesión abierta al crearla (HU-01/HU-02).
+                        fechaUltimoAcceso = ahora,
                     ),
                 )
                 ResultadoAuth.Exito(usuarioId)
