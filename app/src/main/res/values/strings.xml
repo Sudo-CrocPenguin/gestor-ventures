@@ -318,4 +318,41 @@
         <item quantity="one">Vencida ayer</item>
         <item quantity="other">Vencida hace %1$d días</item>
     </plurals>
+
+    <!-- Autenticación: HU-01, HU-02, HU-03 -->
+    <string name="auth_eslogan">Tu negocio, bajo control</string>
+    <string name="auth_correo">Correo electrónico</string>
+    <string name="auth_correo_placeholder">tucorreo@ejemplo.com</string>
+    <string name="auth_contrasena">Contraseña</string>
+    <string name="cd_mostrar_contrasena">Mostrar contraseña</string>
+    <string name="cd_ocultar_contrasena">Ocultar contraseña</string>
+
+    <string name="login_titulo">Bienvenido de vuelta</string>
+    <string name="login_subtitulo">Ingresa para gestionar tus negocios</string>
+    <string name="login_correo_placeholder">sebastian@correo.com</string>
+    <string name="login_recordarme">Recordarme</string>
+    <string name="login_olvidaste_contrasena">¿Olvidaste tu contraseña?</string>
+    <string name="login_iniciar_sesion">Iniciar sesión</string>
+    <string name="login_continua_con">o continúa con</string>
+    <string name="login_google">Google</string>
+    <string name="login_no_tienes_cuenta">¿No tienes cuenta?</string>
+    <string name="login_crear_cuenta">Crear cuenta</string>
+
+    <string name="registro_titulo">Crea tu cuenta</string>
+    <string name="registro_subtitulo">Empieza a gestionar tu negocio en minutos</string>
+    <string name="registro_nombre">Nombre completo</string>
+    <string name="registro_nombre_placeholder">Ej. Sebastián Orrego</string>
+    <string name="registro_contrasena_placeholder">Mínimo 8 caracteres</string>
+    <string name="registro_fortaleza_ayuda">Usa 8+ caracteres con números</string>
+    <string name="registro_confirmar_contrasena">Confirmar contraseña</string>
+    <string name="registro_confirmar_contrasena_placeholder">Repite tu contraseña</string>
+    <string name="registro_acepto_terminos">Acepto términos y privacidad</string>
+    <string name="registro_crear_cuenta">Crear cuenta</string>
+    <string name="registro_ya_tienes_cuenta">¿Ya tienes cuenta?</string>
+    <string name="registro_iniciar_sesion">Iniciar sesión</string>
+
+    <string name="recuperar_titulo">¿Olvidaste tu contraseña?</string>
+    <string name="recuperar_subtitulo">Escribe tu correo y te enviaremos un código de verificación de 6 dígitos.</string>
+    <string name="recuperar_enviar_codigo">Enviar código</string>
+    <string name="recuperar_volver_a_iniciar_sesion">Volver a iniciar sesión</string>
 </resources>

@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gestor_ventures.front.theme.GestorVenturesTheme
@@ -42,6 +43,7 @@ fun GvTextField(
     modifier: Modifier = Modifier,
     placeholder: String = "",
     keyboardType: KeyboardType = KeyboardType.Text,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     textStyle: TextStyle = LocalTextStyle.current.copy(fontSize = 15.sp),
     leading: @Composable (() -> Unit)? = null,
     trailing: @Composable (() -> Unit)? = null,
@@ -90,6 +92,7 @@ fun GvTextField(
                         GestorVenturesTheme.colors.acento,
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                    visualTransformation = visualTransformation,
                     interactionSource = interactionSource,
                 )
             }
