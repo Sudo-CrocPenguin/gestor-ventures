@@ -189,4 +189,40 @@ class AuthRepositoryTest {
 
         assertEquals(ResultadoAuth.Invalido(ErrorAuth.CorreoInvalido), resultado)
     }
+
+    // --- HU-02: expiración de sesión por inactividad ---
+
+    @Test
+    fun sesionActiva_conUnDiaDeInactividad_siguenActiva() = runTest {
+        registrar()
+        ahora = momentoLogin
+        repository.iniciarSesion(correo, contrasenaValida)
+        ahora = momentoLogin.plusDays(1)
+
+        assertEquals(true, repository.sesionActiva(1L))
+        assertEquals(false, autenticador.sesionCerrada)
+    }
+
+    @Test
+    fun sesionActiva_conMasDeUnaSemanaDeInactividad_expiraYCierraSesion() = runTest {
+        registrar()
+        ahora = momentoLogin
+        repository.iniciarSesion(correo, contrasenaValida)
+        ahora = momentoLogin.plusDays(7).plusMinutes(1)
+
+        assertEquals(false, repository.sesionActiva(1L))
+        assertEquals(true, autenticador.sesionCerrada)
+    }
+
+    @Test
+    fun sesionActiva_siNuncaInicioSesion_devuelveFalso() = runTest {
+        registrar()
+
+        assertEquals(false, repository.sesionActiva(1L))
+    }
+
+    @Test
+    fun sesionActiva_conUsuarioInexistente_devuelveFalso() = runTest {
+        assertEquals(false, repository.sesionActiva(99L))
+    }
 }

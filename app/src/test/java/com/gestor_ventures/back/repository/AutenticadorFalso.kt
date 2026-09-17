@@ -11,6 +11,8 @@ class AutenticadorFalso : Autenticador {
     var siguienteCrearCuenta: ResultadoAutenticador? = null
     var siguienteIniciarSesion: ResultadoAutenticador? = null
     var siguienteEnviarCorreo: ResultadoAutenticador? = null
+    var sesionCerrada = false
+        private set
 
     override suspend fun crearCuenta(correo: String, contrasena: String): ResultadoAutenticador {
         siguienteCrearCuenta?.let { return it }
@@ -36,5 +38,9 @@ class AutenticadorFalso : Autenticador {
         } else {
             ResultadoAutenticador.CorreoNoRegistrado
         }
+    }
+
+    override fun cerrarSesion() {
+        sesionCerrada = true
     }
 }

@@ -50,4 +50,6 @@ class FirebaseAutenticador @Inject constructor(
         } catch (e: Exception) {
             ResultadoAutenticador.ErrorDeRed
         }
+
+    override fun cerrarSesion() = firebaseAuth.signOut()
 }

@@ -5,6 +5,7 @@ import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.ResultadoAuth
 import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.entity.UsuarioEntity
+import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,6 +15,9 @@ private val FormatoCorreo = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
 
 /** 8-25 caracteres, con al menos una mayúscula, una minúscula y un símbolo. */
 private val FormatoContrasena = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*[^A-Za-z0-9]).{8,25}$")
+
+/** HU-02. Tras una semana sin actividad, la sesión expira automáticamente. */
+private val TiempoMaximoInactividad: Duration = Duration.ofDays(7)
 
 /**
  * HU-01, HU-02 y HU-03. Única puerta de entrada a la autenticación.
@@ -91,6 +95,18 @@ class AuthRepository @Inject constructor(
             ResultadoAutenticador.CorreoNoRegistrado -> ResultadoAuth.Invalido(ErrorAuth.CorreoNoRegistrado)
             else -> ResultadoAuth.Invalido(ErrorAuth.ErrorDeRed)
         }
+    }
+
+    /**
+     * HU-02. Si pasó más de una semana desde el último acceso de [usuarioId], cierra la sesión
+     * y devuelve `false`. Quien controla el ciclo de vida de la app (a qué pantalla mandar al
+     * usuario al abrirla) es quien debe llamar esto y actuar según el resultado.
+     */
+    suspend fun sesionActiva(usuarioId: Long): Boolean {
+        val ultimoAcceso = usuarioDao.obtener(usuarioId)?.fechaUltimoAcceso ?: return false
+        val inactivo = Duration.between(ultimoAcceso, reloj.ahora()) > TiempoMaximoInactividad
+        if (inactivo) autenticador.cerrarSesion()
+        return !inactivo
     }
 
     private fun validarRegistro(nombre: String, correo: String, contrasena: String): ErrorAuth? = when {

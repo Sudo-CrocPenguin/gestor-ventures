@@ -17,6 +17,9 @@ interface Autenticador {
 
     /** HU-03. Pide al proveedor que mande el enlace de recuperación al correo indicado. */
     suspend fun enviarCorreoDeRecuperacion(correo: String): ResultadoAutenticador
+
+    /** HU-02. Cierra la sesión: cierre manual o expiración por inactividad. */
+    fun cerrarSesion()
 }
 
 /** Resultado de una operación contra el proveedor de identidad, sin exponer sus excepciones. */
