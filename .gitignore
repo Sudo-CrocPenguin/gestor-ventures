@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Credenciales de Firebase — cada dev/entorno pone las suyas, no se versionan.
+/app/google-services.json
+.env
+.env.*
