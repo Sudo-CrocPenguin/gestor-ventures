@@ -46,7 +46,17 @@ class BaseFinancieraRepositoryTest {
 
         val gastos = repository.gastosFijosDeNegocio(negocioId).first()
         assertEquals(2, gastos.size)
-        assertEquals(420_000.0, repository.totalGastosFijos(negocioId).first(), 0.001)
+        assertEquals(420_000.0, repository.gastosFijosMensuales(negocioId).first(), 0.001)
+    }
+
+    @Test
+    fun elTotalMensualLlevaCadaGastoFijoASuEquivalenteDeUnMes() = runTest {
+        repository.agregarGastoFijo(negocioId, "Arriendo", 800_000.0, Frecuencia.MENSUAL)
+        repository.agregarGastoFijo(negocioId, "Empaques", 50_000.0, Frecuencia.SEMANAL)
+
+        // Los empaques se pagan 52 veces al año, no 12: sumarlos crudos subestimaría el mes.
+        val esperado = 800_000.0 + 50_000.0 * 52 / 12
+        assertEquals(esperado, repository.gastosFijosMensuales(negocioId).first(), 0.001)
     }
 
     @Test

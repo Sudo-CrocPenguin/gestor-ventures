@@ -1,5 +1,6 @@
 package com.gestor_ventures.back.usecase
 
+import com.gestor_ventures.back.model.DiasPorMes
 import com.gestor_ventures.back.model.Reloj
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -26,10 +27,5 @@ class CalcularAhorroMensual @Inject constructor(
         val dias = ChronoUnit.DAYS.between(hoy, fechaLimite)
         val meses = ceil(dias / DiasPorMes).coerceAtLeast(1.0)
         return montoObjetivo / meses
-    }
-
-    private companion object {
-        /** Promedio de días por mes: evita saltos raros entre meses de 28 y de 31 días. */
-        const val DiasPorMes = 30.44
     }
 }

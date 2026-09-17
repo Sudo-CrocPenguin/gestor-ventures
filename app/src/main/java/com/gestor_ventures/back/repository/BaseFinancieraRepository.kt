@@ -37,9 +37,15 @@ class BaseFinancieraRepository @Inject constructor(
     fun gastosFijosDeNegocio(negocioId: Long): Flow<List<GastoFijo>> =
         gastoFijoDao.observarDeNegocio(negocioId).map { lista -> lista.map(::aGastoFijo) }
 
-    /** HU-16: cuánto pesa lo fijo dentro del dinero disponible. */
-    fun totalGastosFijos(negocioId: Long): Flow<Double> =
-        gastoFijoDao.observarTotalDeNegocio(negocioId)
+    /**
+     * HU-06/HU-16: cuánto pesa lo fijo en un mes.
+     *
+     * No es la suma de los montos: se lleva cada gasto a su equivalente mensual primero. Sumar
+     * un arriendo mensual con unos empaques semanales daría un número que no es de ningún
+     * periodo, y el resumen financiero habla de meses.
+     */
+    fun gastosFijosMensuales(negocioId: Long): Flow<Double> =
+        gastosFijosDeNegocio(negocioId).map { gastos -> gastos.sumOf { it.montoMensual } }
 
     suspend fun agregarGastoFijo(
         negocioId: Long,
@@ -153,6 +159,7 @@ class BaseFinancieraRepository @Inject constructor(
         id = entidad.metaAhorroId,
         montoObjetivo = entidad.montoObjetivo,
         fechaLimite = entidad.fechaLimite,
+        fechaCreacion = entidad.fechaCreacion.toLocalDate(),
     )
 }
 

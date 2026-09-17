@@ -88,6 +88,10 @@ class GastoRepository @Inject constructor(
     fun totalDelMes(negocioId: Long, mes: YearMonth = mesActual()): Flow<Double> =
         gastoDao.observarTotalEntre(negocioId, mes.atDay(1), mes.atEndOfMonth())
 
+    /** HU-08: lo gastado entre dos días, para medir el progreso de la meta. */
+    fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
+        gastoDao.observarTotalEntre(negocioId, desde, hasta)
+
     /** HU-15: cuánto se gastó en cada categoría durante el mes. */
     fun totalPorCategoriaDelMes(
         negocioId: Long,

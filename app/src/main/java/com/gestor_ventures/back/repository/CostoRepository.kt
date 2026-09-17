@@ -8,6 +8,7 @@ import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.entity.CostoEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
@@ -86,6 +87,10 @@ class CostoRepository @Inject constructor(
     /** HU-16: cuánto costó producir en el mes. */
     fun totalDelMes(negocioId: Long, mes: YearMonth = mesActual()): Flow<Double> =
         costoDao.observarTotalEntre(negocioId, mes.inicio(), mes.fin())
+
+    /** HU-08: lo costeado entre dos días, para medir el progreso de la meta. */
+    fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
+        costoDao.observarTotalEntre(negocioId, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX))
 
     /** HU-15: cuánto se costeó en cada categoría durante el mes. */
     fun totalPorCategoriaDelMes(
