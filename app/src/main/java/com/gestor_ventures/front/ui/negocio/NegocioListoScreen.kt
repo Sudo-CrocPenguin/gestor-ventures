@@ -199,6 +199,7 @@ private fun NegocioListoScreenPreview() {
                         id = 1,
                         montoObjetivo = 2_000_000.0,
                         fechaLimite = LocalDate.of(2026, 12, 31),
+                        fechaCreacion = LocalDate.of(2026, 9, 16),
                     ),
                 ),
                 onIrAlNegocio = {},

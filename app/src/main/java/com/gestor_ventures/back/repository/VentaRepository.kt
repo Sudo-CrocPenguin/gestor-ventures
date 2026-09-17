@@ -82,6 +82,14 @@ class VentaRepository @Inject constructor(
         ventaDao.observarEntre(negocioId, mes.atDay(1).inicio(), mes.atEndOfMonth().fin())
             .map { entidades -> entidades.map(::aVenta) }
 
+    /** HU-16: cuánto se vendió en el mes. */
+    fun totalDelMes(negocioId: Long, mes: YearMonth = mesActual()): Flow<Double> =
+        totalEntre(negocioId, mes.atDay(1), mes.atEndOfMonth())
+
+    /** HU-08: lo vendido entre dos días, para medir el progreso de la meta desde que se creó. */
+    fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
+        ventaDao.observarTotalEntre(negocioId, desde.inicio(), hasta.fin())
+
     /** Cuánto se vendió en un día y en cuántas ventas: lo que muestra el resumen del inicio. */
     fun resumenDelDia(negocioId: Long, dia: LocalDate = hoy()): Flow<ResumenVentas> =
         combine(
@@ -91,6 +99,9 @@ class VentaRepository @Inject constructor(
 
     /** El día de hoy según el reloj de la app, que en las pruebas se puede fijar. */
     fun hoy(): LocalDate = reloj.ahora().toLocalDate()
+
+    /** El mes en curso, para que el resumen no tenga que averiguar solo en qué mes está. */
+    fun mesActual(): YearMonth = YearMonth.from(reloj.ahora())
 
     private fun validar(
         esDetallada: Boolean,
