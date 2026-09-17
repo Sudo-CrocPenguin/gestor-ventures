@@ -1,6 +1,7 @@
 package com.gestor_ventures.front.ui.auth
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
+import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvTextField
 import com.gestor_ventures.front.theme.GestorVenturesTheme
@@ -43,7 +45,6 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 @Composable
 fun RecuperarContrasenaRoute(
     onBack: () -> Unit,
-    onCodigoEnviado: () -> Unit,
     viewModel: RecuperarContrasenaViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -52,10 +53,7 @@ fun RecuperarContrasenaRoute(
         uiState = uiState,
         onBack = onBack,
         onCorreoChange = viewModel::onCorreoChange,
-        onEnviarCodigo = {
-            viewModel.enviarCodigo()
-            onCodigoEnviado()
-        },
+        onEnviarCodigo = viewModel::enviarCodigo,
     )
 }
 
@@ -139,6 +137,24 @@ fun RecuperarContrasenaScreen(
                     onClick = onEnviarCodigo,
                     enabled = uiState.puedeEnviarCodigo,
                 )
+
+                AnimatedVisibility(visible = uiState.enviado) {
+                    GvInfoNote(
+                        text = stringResource(R.string.recuperar_enviado),
+                        containerColor = GestorVenturesTheme.colors.successContainer,
+                        contentColor = GestorVenturesTheme.colors.success,
+                        modifier = Modifier.padding(top = 14.dp),
+                    )
+                }
+
+                AnimatedVisibility(visible = uiState.error != null) {
+                    GvInfoNote(
+                        text = uiState.error?.let { stringResource(it.mensajeRes()) }.orEmpty(),
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(top = 14.dp),
+                    )
+                }
             }
 
             Row(

@@ -352,7 +352,21 @@
     <string name="registro_iniciar_sesion">Iniciar sesión</string>
 
     <string name="recuperar_titulo">¿Olvidaste tu contraseña?</string>
-    <string name="recuperar_subtitulo">Escribe tu correo y te enviaremos un código de verificación de 6 dígitos.</string>
-    <string name="recuperar_enviar_codigo">Enviar código</string>
+    <!-- HU-03 se conecta a Firebase Authentication: manda un enlace, no un código de 6 dígitos
+         como decía el mockup original. -->
+    <string name="recuperar_subtitulo">Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.</string>
+    <string name="recuperar_enviar_codigo">Enviar enlace</string>
     <string name="recuperar_volver_a_iniciar_sesion">Volver a iniciar sesión</string>
+    <!-- No confirma si el correo existe: Firebase evita revelarlo por seguridad. -->
+    <string name="recuperar_enviado">Si el correo está registrado, te llegará un enlace para restablecer tu contraseña.</string>
+
+    <string name="auth_error_nombre_vacio">Escribe tu nombre completo.</string>
+    <string name="auth_error_nombre_largo">El nombre no puede tener más de 50 caracteres.</string>
+    <string name="auth_error_correo_invalido">Escribe un correo válido, como usuario@dominio.com.</string>
+    <string name="auth_error_correo_ya_registrado">Ya existe una cuenta con ese correo.</string>
+    <string name="auth_error_contrasena_invalida">La contraseña debe tener entre 8 y 25 caracteres, con mayúscula, minúscula y símbolo.</string>
+    <string name="auth_error_credenciales_invalidas">Correo o contraseña incorrectos.</string>
+    <string name="auth_error_correo_no_registrado">No encontramos una cuenta con ese correo.</string>
+    <string name="auth_error_red">No pudimos conectarnos. Intenta de nuevo.</string>
+    <string name="registro_error_contrasenas_no_coinciden">Las contraseñas no coinciden.</string>
 </resources>

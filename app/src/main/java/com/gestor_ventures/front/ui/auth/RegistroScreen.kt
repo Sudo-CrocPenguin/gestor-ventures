@@ -1,6 +1,7 @@
 package com.gestor_ventures.front.ui.auth
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
 import com.gestor_ventures.front.components.GvCheckbox
+import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPasswordToggle
 import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvTextField
@@ -45,7 +47,6 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 @Composable
 fun RegistroRoute(
-    onCuentaCreada: () -> Unit,
     onIniciarSesion: () -> Unit,
     viewModel: RegistroViewModel = hiltViewModel(),
 ) {
@@ -60,10 +61,7 @@ fun RegistroRoute(
         onMostrarContrasenaChange = viewModel::onMostrarContrasenaChange,
         onMostrarConfirmarContrasenaChange = viewModel::onMostrarConfirmarContrasenaChange,
         onAceptaTerminosChange = viewModel::onAceptaTerminosChange,
-        onCrearCuenta = {
-            viewModel.crearCuenta()
-            onCuentaCreada()
-        },
+        onCrearCuenta = viewModel::crearCuenta,
         onIniciarSesion = onIniciarSesion,
     )
 }
@@ -179,6 +177,15 @@ fun RegistroScreen(
                 },
             )
 
+            AnimatedVisibility(visible = uiState.contrasenasNoCoinciden) {
+                Text(
+                    text = stringResource(R.string.registro_error_contrasenas_no_coinciden),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+
             Spacer(Modifier.height(16.dp))
 
             GvCheckbox(
@@ -186,6 +193,15 @@ fun RegistroScreen(
                 onCheckedChange = onAceptaTerminosChange,
                 label = stringResource(R.string.registro_acepto_terminos),
             )
+
+            AnimatedVisibility(visible = uiState.error != null) {
+                GvInfoNote(
+                    text = uiState.error?.let { stringResource(it.mensajeRes()) }.orEmpty(),
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(top = 14.dp),
+                )
+            }
 
             Spacer(Modifier.height(20.dp))
 

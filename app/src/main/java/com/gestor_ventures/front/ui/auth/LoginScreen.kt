@@ -1,6 +1,7 @@
 package com.gestor_ventures.front.ui.auth
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,7 +43,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.ErrorAuth
 import com.gestor_ventures.front.components.GvCheckbox
+import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPasswordToggle
 import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.GvTextField
@@ -50,7 +53,6 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 @Composable
 fun LoginRoute(
-    onIniciarSesion: () -> Unit,
     onOlvidasteContrasena: () -> Unit,
     onCrearCuenta: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel(),
@@ -63,10 +65,7 @@ fun LoginRoute(
         onContrasenaChange = viewModel::onContrasenaChange,
         onMostrarContrasenaChange = viewModel::onMostrarContrasenaChange,
         onRecordarmeChange = viewModel::onRecordarmeChange,
-        onIniciarSesion = {
-            viewModel.iniciarSesion()
-            onIniciarSesion()
-        },
+        onIniciarSesion = viewModel::iniciarSesion,
         onOlvidasteContrasena = onOlvidasteContrasena,
         onCrearCuenta = onCrearCuenta,
     )
@@ -164,6 +163,15 @@ fun LoginScreen(
                         role = Role.Button,
                         onClick = onOlvidasteContrasena,
                     ),
+                )
+            }
+
+            AnimatedVisibility(visible = uiState.error != null) {
+                GvInfoNote(
+                    text = uiState.error?.let { stringResource(it.mensajeRes()) }.orEmpty(),
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(top = 14.dp),
                 )
             }
 
@@ -288,6 +296,27 @@ private fun LoginScreenPreview() {
     GestorVenturesTheme {
         LoginScreen(
             uiState = LoginUiState(correo = "sebastian@correo.com", contrasena = "12345678"),
+            onCorreoChange = {},
+            onContrasenaChange = {},
+            onMostrarContrasenaChange = {},
+            onRecordarmeChange = {},
+            onIniciarSesion = {},
+            onOlvidasteContrasena = {},
+            onCrearCuenta = {},
+        )
+    }
+}
+
+@Preview(name = "Con error", widthDp = 375, heightDp = 900)
+@Composable
+private fun LoginScreenErrorPreview() {
+    GestorVenturesTheme {
+        LoginScreen(
+            uiState = LoginUiState(
+                correo = "sebastian@correo.com",
+                contrasena = "incorrecta",
+                error = ErrorAuth.CredencialesInvalidas,
+            ),
             onCorreoChange = {},
             onContrasenaChange = {},
             onMostrarContrasenaChange = {},
