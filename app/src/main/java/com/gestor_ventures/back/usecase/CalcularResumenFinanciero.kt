@@ -90,8 +90,11 @@ class CalcularResumenFinanciero @Inject constructor(
      * Se mide desde el día en que se definió: la ganancia de antes es de otra historia. Los
      * gastos fijos no están registrados como movimientos —son configuración— así que se cobran
      * a razón de su equivalente mensual por el tiempo que lleva corriendo la meta.
+     *
+     * Es público porque el inicio también muestra el progreso, y ahí no hace falta cruzar
+     * obligaciones ni reinversión para responder "¿cómo voy?".
      */
-    private fun progresoDeLaMeta(negocioId: Long): Flow<ProgresoMeta?> =
+    fun progresoDeLaMeta(negocioId: Long): Flow<ProgresoMeta?> =
         baseFinancieraRepository.metaActiva(negocioId).flatMapLatest { meta ->
             if (meta == null) flowOf(null) else acumuladoDesde(negocioId, meta.fechaCreacion)
                 .map { acumulado ->

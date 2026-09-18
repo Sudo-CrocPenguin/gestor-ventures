@@ -189,9 +189,10 @@ class CalcularResumenFinancieroTest {
 
         assertEquals(1_000_000.0, resumen.ganancia, 0.001)
         assertEquals(200_000.0, resumen.obligacionesPendientes, 0.001)
-        assertEquals(200_000.0, resumen.apartadoParaMeta, 0.001)
+        // Tres meses justos para 600.000: algo más de 200.000 al mes.
+        assertEquals(200_700.0, resumen.apartadoParaMeta, 500.0)
         assertEquals(100_000.0, resumen.reinversion, 0.001)
-        assertEquals(500_000.0, resumen.disponible, 0.001)
+        assertEquals(499_300.0, resumen.disponible, 500.0)
     }
 
     @Test

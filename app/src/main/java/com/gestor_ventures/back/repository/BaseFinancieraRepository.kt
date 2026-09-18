@@ -108,6 +108,11 @@ class BaseFinancieraRepository @Inject constructor(
 
     /**
      * Guarda la meta del negocio. La fecha límite debe ser posterior a hoy, como pide HU-08.
+     *
+     * Corregir una meta que ya existe la cambia en su sitio en vez de crear otra: si cada
+     * ajuste dejara una fila nueva, el negocio terminaría con un historial de metas que nunca
+     * tuvo. La fecha de creación se conserva a propósito —subir el objetivo no borra lo que ya
+     * se llevaba ahorrado— y por eso el progreso sigue contando desde el día original.
      */
     suspend fun definirMetaAhorro(
         negocioId: Long,
@@ -119,14 +124,21 @@ class BaseFinancieraRepository @Inject constructor(
             return ErrorBaseFinanciera.FechaLimiteNoPosterior
         }
 
-        metaAhorroDao.insertar(
-            MetaAhorroEntity(
-                negocioId = negocioId,
-                montoObjetivo = montoObjetivo,
-                fechaLimite = fechaLimite,
-                fechaCreacion = reloj.ahora(),
-            ),
-        )
+        val actual = metaAhorroDao.obtenerActivaDeNegocio(negocioId)
+        if (actual == null) {
+            metaAhorroDao.insertar(
+                MetaAhorroEntity(
+                    negocioId = negocioId,
+                    montoObjetivo = montoObjetivo,
+                    fechaLimite = fechaLimite,
+                    fechaCreacion = reloj.ahora(),
+                ),
+            )
+        } else {
+            metaAhorroDao.actualizar(
+                actual.copy(montoObjetivo = montoObjetivo, fechaLimite = fechaLimite),
+            )
+        }
         return null
     }
 
