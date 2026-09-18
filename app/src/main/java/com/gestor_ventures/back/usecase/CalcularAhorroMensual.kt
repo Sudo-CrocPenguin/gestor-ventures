@@ -5,14 +5,19 @@ import com.gestor_ventures.back.model.Reloj
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
-import kotlin.math.ceil
 
 /**
  * HU-08. Cuánto hay que apartar cada mes para llegar a la meta antes de su fecha límite.
  *
  * Es el mensaje del onboarding: "Para llegar a $2.000.000 antes del 31 de diciembre necesitas
- * apartar $500.000 al mes". Los meses que faltan se redondean hacia arriba: si faltan mes y
- * medio, hay que repartir en dos meses.
+ * apartar $574.400 al mes".
+ *
+ * Los meses que faltan no se redondean. Repartir en más meses de los que hay da una cuota más
+ * cómoda de la que sirve: si faltan tres meses y medio y se reparte en cuatro, el usuario aparta
+ * lo que le decimos todos los meses y aun así llega corto a la fecha.
+ *
+ * El único piso es un mes: con menos, la cuenta diría "aparta el triple de la meta este mes", y
+ * lo que hay que entender es simplemente que queda menos de un mes.
  */
 class CalcularAhorroMensual @Inject constructor(
     private val reloj: Reloj,
@@ -25,7 +30,7 @@ class CalcularAhorroMensual @Inject constructor(
         if (!fechaLimite.isAfter(hoy)) return null
 
         val dias = ChronoUnit.DAYS.between(hoy, fechaLimite)
-        val meses = ceil(dias / DiasPorMes).coerceAtLeast(1.0)
+        val meses = (dias / DiasPorMes).coerceAtLeast(1.0)
         return montoObjetivo / meses
     }
 }

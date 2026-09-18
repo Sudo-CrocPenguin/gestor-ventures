@@ -144,6 +144,29 @@ class BaseFinancieraRepositoryTest {
         assertNull(repository.metaActiva(negocioId).first())
     }
 
+    @Test
+    fun corregirLaMetaLaCambiaEnSuSitioYNoCreaOtra() = runTest {
+        repository.definirMetaAhorro(negocioId, 2_000_000.0, LocalDate.of(2026, 12, 31))
+        repository.definirMetaAhorro(negocioId, 3_000_000.0, LocalDate.of(2027, 3, 31))
+
+        // Si cada ajuste dejara una fila nueva, el negocio tendría un historial que nunca tuvo.
+        assertEquals(1, metaAhorroDao.metas.value.size)
+        val meta = repository.metaActiva(negocioId).first()
+        assertEquals(3_000_000.0, meta?.montoObjetivo ?: 0.0, 0.001)
+        assertEquals(LocalDate.of(2027, 3, 31), meta?.fechaLimite)
+    }
+
+    @Test
+    fun subirElObjetivoNoBorraLoQueYaSeLlevabaAhorrado() = runTest {
+        repository.definirMetaAhorro(negocioId, 2_000_000.0, LocalDate.of(2026, 12, 31))
+        val creacion = repository.metaActiva(negocioId).first()?.fechaCreacion
+
+        repository.definirMetaAhorro(negocioId, 5_000_000.0, LocalDate.of(2027, 6, 30))
+
+        // El progreso se cuenta desde el día original: la meta se ajustó, no se empezó de cero.
+        assertEquals(creacion, repository.metaActiva(negocioId).first()?.fechaCreacion)
+    }
+
     // ---------- Reinversión ----------
 
     @Test
