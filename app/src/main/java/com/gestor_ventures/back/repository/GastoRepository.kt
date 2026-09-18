@@ -88,6 +88,10 @@ class GastoRepository @Inject constructor(
     fun totalDelMes(negocioId: Long, mes: YearMonth = mesActual()): Flow<Double> =
         gastoDao.observarTotalEntre(negocioId, mes.atDay(1), mes.atEndOfMonth())
 
+    /** HU-17: los gastos de un rango de días, del más reciente al más antiguo. */
+    fun gastosEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Gasto>> =
+        gastoDao.observarEntre(negocioId, desde, hasta).map { it.map(::aGasto) }
+
     /** HU-08: lo gastado entre dos días, para medir el progreso de la meta. */
     fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
         gastoDao.observarTotalEntre(negocioId, desde, hasta)

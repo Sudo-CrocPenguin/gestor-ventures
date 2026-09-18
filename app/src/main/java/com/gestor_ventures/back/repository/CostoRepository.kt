@@ -88,6 +88,11 @@ class CostoRepository @Inject constructor(
     fun totalDelMes(negocioId: Long, mes: YearMonth = mesActual()): Flow<Double> =
         costoDao.observarTotalEntre(negocioId, mes.inicio(), mes.fin())
 
+    /** HU-17: los costos de un rango de días, del más reciente al más antiguo. */
+    fun costosEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Costo>> =
+        costoDao.observarEntre(negocioId, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX))
+            .map { entidades -> entidades.map(::aCosto) }
+
     /** HU-08: lo costeado entre dos días, para medir el progreso de la meta. */
     fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
         costoDao.observarTotalEntre(negocioId, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX))

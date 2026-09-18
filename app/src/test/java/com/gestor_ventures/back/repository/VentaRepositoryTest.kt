@@ -190,6 +190,135 @@ class VentaRepositoryTest {
         assertEquals(1, resumen.cantidad)
     }
 
+    // ---------- HU-17: corregir y borrar ----------
+
+    @Test
+    fun corregirUnaVentaLaCambiaEnSuSitioYNoCreaOtra() = runTest {
+        registrarDetallada(monto = 25_000.0)
+
+        repository.editarVenta(
+            ventaId = 1L,
+            tipoRegistro = TipoRegistroVenta.DETALLADO,
+            monto = 52_000.0,
+            fechaHora = ahora,
+            productoServicio = "Torta grande",
+            metodoPago = MetodoPago.TRANSFERENCIA,
+        )
+
+        assertEquals(1, dao.ventas.value.size)
+        val venta = dao.ventas.value.single()
+        assertEquals(52_000.0, venta.monto, 0.001)
+        assertEquals("Torta grande", venta.productoServicio)
+    }
+
+    @Test
+    fun corregirValidaLoMismoQueRegistrar() = runTest {
+        registrarDetallada(monto = 25_000.0)
+
+        val enCero = repository.editarVenta(
+            ventaId = 1L,
+            tipoRegistro = TipoRegistroVenta.DETALLADO,
+            monto = 0.0,
+            fechaHora = ahora,
+            productoServicio = "Torta",
+            metodoPago = MetodoPago.EFECTIVO,
+        )
+        val enElFuturo = repository.editarVenta(
+            ventaId = 1L,
+            tipoRegistro = TipoRegistroVenta.DETALLADO,
+            monto = 30_000.0,
+            fechaHora = ahora.plusDays(1),
+            productoServicio = "Torta",
+            metodoPago = MetodoPago.EFECTIVO,
+        )
+
+        assertEquals(invalido(ErrorVenta.MontoNoPositivo), enCero)
+        assertEquals(invalido(ErrorVenta.FechaEnElFuturo), enElFuturo)
+        // La venta original queda intacta: un intento inválido no la daña.
+        assertEquals(25_000.0, dao.ventas.value.single().monto, 0.001)
+    }
+
+    @Test
+    fun pasarUnaVentaDeDetalladaARapidaSueltaLoQueYaNoAplica() = runTest {
+        registrarDetallada(monto = 25_000.0)
+
+        repository.editarVenta(
+            ventaId = 1L,
+            tipoRegistro = TipoRegistroVenta.RAPIDO,
+            monto = 25_000.0,
+            fechaHora = ahora,
+            productoServicio = "Torta de chocolate",
+            metodoPago = MetodoPago.EFECTIVO,
+            clienteId = 7L,
+        )
+
+        // Dejarlos colgando sería guardar datos que la pantalla ya no muestra ni deja editar.
+        val venta = dao.ventas.value.single()
+        assertNull(venta.productoServicio)
+        assertNull(venta.metodoPago)
+        assertNull(venta.clienteId)
+    }
+
+    @Test
+    fun corregirLaFechaSacaLaVentaDelDiaEnQueEstaba() = runTest {
+        registrarDetallada(monto = 25_000.0)
+
+        repository.editarVenta(
+            ventaId = 1L,
+            tipoRegistro = TipoRegistroVenta.DETALLADO,
+            monto = 25_000.0,
+            fechaHora = ahora.minusDays(1),
+            productoServicio = "Torta",
+            metodoPago = MetodoPago.EFECTIVO,
+        )
+
+        // Registrar hoy una venta de ayer es de lo más común al cerrar la jornada.
+        assertTrue(repository.ventasDelDia(negocioId, ahora.toLocalDate()).first().isEmpty())
+        assertEquals(
+            25_000.0,
+            repository.resumenDelDia(negocioId, ahora.toLocalDate().minusDays(1)).first().total,
+            0.001,
+        )
+    }
+
+    @Test
+    fun corregirUnaVentaQueYaNoExisteNoRompeNada() = runTest {
+        val resultado = repository.editarVenta(
+            ventaId = 99L,
+            tipoRegistro = TipoRegistroVenta.DETALLADO,
+            monto = 25_000.0,
+            fechaHora = ahora,
+            productoServicio = "Torta",
+            metodoPago = MetodoPago.EFECTIVO,
+        )
+
+        // Se pudo borrar desde el historial mientras el formulario estaba abierto.
+        assertEquals(ResultadoVenta.Exito(99L), resultado)
+        assertTrue(dao.ventas.value.isEmpty())
+    }
+
+    @Test
+    fun eliminarSacaLaVentaYSuPlataDeLosTotales() = runTest {
+        registrarDetallada(monto = 25_000.0)
+        registrarDetallada(monto = 15_000.0)
+
+        repository.eliminarVenta(1L)
+
+        assertEquals(1, dao.ventas.value.size)
+        val resumen = repository.resumenDelDia(negocioId, ahora.toLocalDate()).first()
+        assertEquals(15_000.0, resumen.total, 0.001)
+        assertEquals(1, resumen.cantidad)
+    }
+
+    @Test
+    fun eliminarUnaVentaQueYaNoExisteNoRompeNada() = runTest {
+        registrarDetallada(monto = 25_000.0)
+
+        repository.eliminarVenta(99L)
+
+        assertEquals(1, dao.ventas.value.size)
+    }
+
     private fun invalido(error: ErrorVenta) = ResultadoVenta.Invalido(error)
 
     private suspend fun registrarDetallada(
