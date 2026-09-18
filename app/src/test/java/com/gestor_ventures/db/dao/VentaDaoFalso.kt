@@ -21,6 +21,14 @@ class VentaDaoFalso : VentaDao {
         return id
     }
 
+    override suspend fun actualizar(venta: VentaEntity) {
+        ventas.value = ventas.value.map { if (it.ventaId == venta.ventaId) venta else it }
+    }
+
+    override suspend fun eliminar(venta: VentaEntity) {
+        ventas.value = ventas.value.filterNot { it.ventaId == venta.ventaId }
+    }
+
     override suspend fun obtener(ventaId: Long): VentaEntity? =
         ventas.value.firstOrNull { it.ventaId == ventaId }
 

@@ -72,6 +72,59 @@ class VentaRepository @Inject constructor(
         return ResultadoVenta.Exito(id)
     }
 
+    /**
+     * HU-17. Corrige una venta ya registrada, con las mismas reglas que al crearla: un monto en
+     * cero o una fecha futura no valen, se esté registrando o corrigiendo.
+     *
+     * Si la venta ya no existe no hace nada: se pudo borrar desde el historial mientras el
+     * formulario estaba abierto, y eso no es un error que el usuario deba resolver.
+     *
+     * Cambiar de detallada a rápida borra el producto, el método de pago y el cliente. Es lo
+     * mismo que hace el registro, y dejarlos colgando sería guardar datos que la pantalla ya no
+     * muestra ni deja editar.
+     */
+    suspend fun editarVenta(
+        ventaId: Long,
+        tipoRegistro: TipoRegistroVenta,
+        monto: Double,
+        fechaHora: LocalDateTime,
+        productoServicio: String? = null,
+        metodoPago: MetodoPago? = null,
+        clienteId: Long? = null,
+        nota: String? = null,
+    ): ResultadoVenta {
+        val esDetallada = tipoRegistro == TipoRegistroVenta.DETALLADO
+        val productoLimpio = productoServicio?.trim()?.takeIf { it.isNotEmpty() }
+
+        validar(esDetallada, monto, productoLimpio, metodoPago, fechaHora)?.let {
+            return ResultadoVenta.Invalido(it)
+        }
+
+        val actual = ventaDao.obtener(ventaId) ?: return ResultadoVenta.Exito(ventaId)
+        ventaDao.actualizar(
+            actual.copy(
+                tipoRegistro = tipoRegistro.aDb(),
+                monto = monto,
+                fechaHora = fechaHora,
+                productoServicio = productoLimpio.takeIf { esDetallada },
+                metodoPago = metodoPago?.aDb().takeIf { esDetallada },
+                clienteId = clienteId.takeIf { esDetallada },
+                nota = nota?.trim()?.takeIf { it.isNotEmpty() },
+            ),
+        )
+        return ResultadoVenta.Exito(ventaId)
+    }
+
+    /**
+     * HU-17. Borra una venta del historial.
+     *
+     * No queda rastro: el registro se va y con él su plata de todos los totales. Por eso la
+     * pantalla pregunta antes, y no al revés.
+     */
+    suspend fun eliminarVenta(ventaId: Long) {
+        ventaDao.obtener(ventaId)?.let { ventaDao.eliminar(it) }
+    }
+
     /** Ventas de un día, de la más reciente a la más antigua. */
     fun ventasDelDia(negocioId: Long, dia: LocalDate = hoy()): Flow<List<Venta>> =
         ventaDao.observarEntre(negocioId, dia.inicio(), dia.fin())
@@ -89,6 +142,11 @@ class VentaRepository @Inject constructor(
     /** HU-08: lo vendido entre dos días, para medir el progreso de la meta desde que se creó. */
     fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
         ventaDao.observarTotalEntre(negocioId, desde.inicio(), hasta.fin())
+
+    /** HU-17: las ventas de un rango de días, de la más reciente a la más antigua. */
+    fun ventasEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Venta>> =
+        ventaDao.observarEntre(negocioId, desde.inicio(), hasta.fin())
+            .map { entidades -> entidades.map(::aVenta) }
 
     /** Cuánto se vendió en un día y en cuántas ventas: lo que muestra el resumen del inicio. */
     fun resumenDelDia(negocioId: Long, dia: LocalDate = hoy()): Flow<ResumenVentas> =
