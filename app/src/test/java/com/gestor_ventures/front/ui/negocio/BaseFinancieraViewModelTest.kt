@@ -67,7 +67,8 @@ class BaseFinancieraViewModelTest {
         viewModel.onFechaLimiteChange(LocalDate.of(2026, 12, 31))
 
         assertEquals("2.000.000", estado.metaFormateada)
-        assertEquals(500_000.0, estado.ahorroMensual ?: 0.0, 1.0)
+        // Del 16 de septiembre al 31 de diciembre faltan 3,48 meses, no 4.
+        assertEquals(574_340.0, estado.ahorroMensual ?: 0.0, 500.0)
     }
 
     @Test

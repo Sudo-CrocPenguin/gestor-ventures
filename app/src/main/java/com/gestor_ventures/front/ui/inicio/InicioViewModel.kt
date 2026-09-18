@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.VentaRepository
+import com.gestor_ventures.back.usecase.CalcularResumenFinanciero
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -21,15 +22,16 @@ import kotlin.math.roundToInt
 /**
  * HU-16. Resumen del día del negocio activo.
  *
- * Hoy solo las ventas son reales (HU-11/HU-12). Los gastos, las cajas del equipo y el progreso
- * de la meta se muestran vacíos a propósito: preferimos que la pantalla diga "todavía no hay"
- * y no un número inventado que el usuario tome por bueno.
+ * Las ventas (HU-11/HU-12) y la meta de ahorro (HU-08) son reales. Los gastos del día y las
+ * cajas del equipo se muestran vacíos a propósito: preferimos que la pantalla diga "todavía no
+ * hay" y no un número inventado que el usuario tome por bueno.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class InicioViewModel @Inject constructor(
     negocioActivoRepository: NegocioActivoRepository,
     private val ventaRepository: VentaRepository,
+    private val calcularResumenFinanciero: CalcularResumenFinanciero,
     private val reloj: Reloj,
 ) : ViewModel() {
 
@@ -50,13 +52,16 @@ class InicioViewModel @Inject constructor(
             ventaRepository.ventasDelDia(negocioId, hoy),
             ventaRepository.resumenDelDia(negocioId, hoy),
             ventaRepository.resumenDelDia(negocioId, hoy.minusDays(1)),
-        ) { ventasDeHoy, resumenHoy, resumenAyer ->
+            calcularResumenFinanciero.progresoDeLaMeta(negocioId),
+        ) { ventasDeHoy, resumenHoy, resumenAyer, progresoMeta ->
             estadoBase(hoy).copy(
                 resumenHoy = ResumenHoyUi(
                     ventas = resumenHoy.total,
                     variacionVentasVsAyer = variacion(resumenHoy.total, resumenAyer.total),
                     tendenciaVentas = tendenciaPorFranja(ventasDeHoy),
+                    progresoMetaAhorro = progresoMeta?.fraccion,
                 ),
+                metaCumplida = progresoMeta?.cumplida == true,
             )
         }
     }

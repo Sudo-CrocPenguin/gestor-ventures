@@ -28,6 +28,7 @@
     <string name="menu_general">General</string>
     <string name="menu_info_negocio">Información del negocio</string>
     <string name="menu_gastos_fijos">Gastos fijos y obligaciones</string>
+    <string name="menu_meta_ahorro">Meta de ahorro y reinversión</string>
     <string name="menu_categorias">Categorías</string>
     <string name="categoria_tipo_gasto">Gastos</string>
     <string name="categoria_tipo_costo">Costos</string>
@@ -175,6 +176,15 @@
     <string name="negocio_error_no_existe">Ese negocio ya no existe.</string>
 
     <!-- Base financiera, paso 2 del onboarding (HU-06, HU-08, HU-09) -->
+    <string name="inicio_meta_cumplida_titulo">¡Llegaste a tu meta!</string>
+    <string name="inicio_meta_cumplida_accion">Definir otra</string>
+    <string name="inicio_meta_cumplida_detalle">Tu negocio ya alcanzó lo que te propusiste ahorrar. Ponte la siguiente para seguir midiendo el progreso.</string>
+    <string name="meta_progreso_titulo">Tu meta hoy</string>
+    <string name="meta_reinversion_ayuda">Las dos son opcionales. La meta te sirve para ver cuánto llevas ahorrado; la reinversión, para saber cuánto devolverle al negocio antes de sacar plata.</string>
+    <string name="meta_incompleta">Una meta necesita monto y fecha límite. Llena las dos o déjalas vacías.</string>
+    <string name="meta_cumplida_corto">¡Ya llegaste a tu meta! Define una nueva para seguir.</string>
+    <string name="meta_guardar">Guardar cambios</string>
+    <string name="meta_guardada">Meta y reinversión guardadas</string>
     <string name="base_titulo">Tu base financiera</string>
     <string name="base_subtitulo">Esto ayuda al asistente a darte mejores recomendaciones. Todo es opcional.</string>
     <string name="base_gastos_fijos">Gastos fijos mensuales</string>

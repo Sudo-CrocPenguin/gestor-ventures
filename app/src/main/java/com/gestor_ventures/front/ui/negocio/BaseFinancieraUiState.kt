@@ -27,7 +27,11 @@ data class BaseFinancieraUiState(
     val metaFormateada: String
         get() = if (metaMonto.isEmpty()) "" else formatMiles(metaMonto.toLongOrNull() ?: 0L)
 
-    val totalGastosFijos: Double get() = gastosFijos.sumOf { it.monto }
+    /**
+     * HU-06. El encabezado dice "gastos fijos mensuales", así que el total tiene que serlo:
+     * cada gasto entra por su equivalente de un mes, no por el monto que se paga cada vez.
+     */
+    val totalGastosFijos: Double get() = gastosFijos.sumOf { it.montoMensual }
 }
 
 /** Texto que ve el usuario para cada regla que rechaza el repositorio. */
