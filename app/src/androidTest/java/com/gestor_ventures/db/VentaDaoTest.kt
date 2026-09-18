@@ -175,6 +175,55 @@ class VentaDaoTest {
         assertEquals(1, ventaDao.contarEntre(negocioId, desde, hasta).first())
     }
 
+    @Test
+    fun corregirUnaVentaCambiaLaQueEstabaYNoCreaOtra() = runTest {
+        val id = ventaDao.insertar(venta(monto = 25_000.0, hora = 10))
+
+        val guardada = ventaDao.obtener(id)!!
+        ventaDao.actualizar(guardada.copy(monto = 52_000.0, productoServicio = "Torta grande"))
+
+        val delDia = ventaDao.observarEntre(negocioId, desde, hasta).first()
+        assertEquals(1, delDia.size)
+        assertEquals(52_000.0, delDia.first().monto, 0.001)
+        assertEquals("Torta grande", delDia.first().productoServicio)
+    }
+
+    @Test
+    fun corregirElMontoMueveElTotalDelDia() = runTest {
+        val id = ventaDao.insertar(venta(monto = 25_000.0, hora = 10))
+        ventaDao.insertar(venta(monto = 15_000.0, hora = 11))
+
+        ventaDao.actualizar(ventaDao.obtener(id)!!.copy(monto = 5_000.0))
+
+        // De este total cuelgan el resumen del día, la ganancia del mes y la meta.
+        assertEquals(20_000.0, ventaDao.observarTotalEntre(negocioId, desde, hasta).first(), 0.001)
+    }
+
+    @Test
+    fun eliminarUnaVentaLaSacaDelHistorialYDelTotal() = runTest {
+        val id = ventaDao.insertar(venta(monto = 25_000.0, hora = 10))
+        ventaDao.insertar(venta(monto = 15_000.0, hora = 11))
+
+        ventaDao.eliminar(ventaDao.obtener(id)!!)
+
+        assertNull(ventaDao.obtener(id))
+        assertEquals(1, ventaDao.contarEntre(negocioId, desde, hasta).first())
+        assertEquals(15_000.0, ventaDao.observarTotalEntre(negocioId, desde, hasta).first(), 0.001)
+    }
+
+    @Test
+    fun corregirLaFechaMueveLaVentaDeDia() = runTest {
+        val id = ventaDao.insertar(venta(monto = 25_000.0, hora = 10))
+
+        // Registrar una venta de ayer por error es de lo más común al final del día.
+        ventaDao.actualizar(
+            ventaDao.obtener(id)!!.copy(fechaHora = hoy.minusDays(1).atTime(10, 0)),
+        )
+
+        assertEquals(0, ventaDao.contarEntre(negocioId, desde, hasta).first())
+        assertEquals(0.0, ventaDao.observarTotalEntre(negocioId, desde, hasta).first(), 0.001)
+    }
+
     private fun venta(
         monto: Double,
         hora: Int = 12,

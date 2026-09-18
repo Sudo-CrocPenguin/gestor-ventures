@@ -1,8 +1,10 @@
 package com.gestor_ventures.db.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.gestor_ventures.db.entity.VentaEntity
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
@@ -20,6 +22,17 @@ interface VentaDao {
 
     @Insert
     suspend fun insertar(venta: VentaEntity): Long
+
+    /**
+     * HU-17. Corrige una venta ya registrada. Hasta ahora una venta era definitiva: un monto mal
+     * escrito se quedaba mal, y de ese monto cuelgan el resumen del día, la ganancia del mes y
+     * el progreso de la meta.
+     */
+    @Update
+    suspend fun actualizar(venta: VentaEntity)
+
+    @Delete
+    suspend fun eliminar(venta: VentaEntity)
 
     @Query("SELECT * FROM ventas WHERE venta_id = :ventaId")
     suspend fun obtener(ventaId: Long): VentaEntity?
