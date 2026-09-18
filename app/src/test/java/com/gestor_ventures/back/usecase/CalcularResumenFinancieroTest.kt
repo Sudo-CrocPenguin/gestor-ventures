@@ -217,7 +217,7 @@ class CalcularResumenFinancieroTest {
     }
 
     @Test
-    fun laMetaAvanzaConLaGananciaDesdeQueSeDefinio() = runTest {
+    fun laMetaAvanzaConLoQueElNegocioDejaLibre() = runTest {
         crearNegocio()
         baseFinancieraRepository.definirMetaAhorro(negocioId, 1_000_000.0, hoy.plusMonths(6))
         vender(700_000.0)
@@ -230,6 +230,32 @@ class CalcularResumenFinancieroTest {
         assertEquals(0.5f, progreso?.fraccion ?: 0f, 0.001f)
         assertEquals(500_000.0, progreso?.falta ?: 0.0, 0.001)
         assertFalse(progreso?.cumplida ?: true)
+    }
+
+    @Test
+    fun elProgresoDeLaMetaDescuentaObligacionesYReinversion() = runTest {
+        crearNegocio(porcentajeReinversion = 10.0)
+        baseFinancieraRepository.definirMetaAhorro(negocioId, 1_000_000.0, hoy.plusMonths(3))
+        vender(1_000_000.0)
+        obligacionRepository.registrarObligacion(negocioId, "Cuota", 200_000.0, hoy.plusDays(10))
+
+        // Lo que se debe y lo que vuelve al negocio no se puede ahorrar: 1.000.000 - 200.000 - 100.000.
+        assertEquals(700_000.0, resumen().progresoMeta?.acumulado ?: 0.0, 0.001)
+    }
+
+    @Test
+    fun elProgresoNoSeDescuentaASiMismo() = runTest {
+        crearNegocio()
+        baseFinancieraRepository.definirMetaAhorro(negocioId, 1_000_000.0, hoy.plusMonths(3))
+        vender(1_000_000.0)
+
+        val resumen = resumen()
+
+        // El dinero disponible ya le restó lo apartado para la meta. Medir la meta con ese
+        // número descontaría dos veces el mismo ahorro y el progreso nunca llegaría.
+        assertTrue(resumen.apartadoParaMeta > 0.0)
+        assertEquals(1_000_000.0, resumen.progresoMeta?.acumulado ?: 0.0, 0.001)
+        assertEquals(resumen.disponible + resumen.apartadoParaMeta, resumen.libreParaAhorrar, 0.001)
     }
 
     @Test
