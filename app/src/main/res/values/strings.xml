@@ -70,7 +70,7 @@
     <string name="resumen_meta_de">%1$s de %2$s</string>
     <string name="resumen_meta_falta">Te faltan %1$s para llegar antes de %2$s.</string>
     <string name="resumen_meta_cumplida">¡Llegaste a tu meta de %1$s! Ya puedes definir la siguiente.</string>
-    <string name="resumen_meta_explicacion">El progreso se mide con la ganancia que llevas acumulada desde que definiste la meta.</string>
+    <string name="resumen_meta_explicacion">El progreso se mide con el dinero que el negocio te ha dejado libre desde que definiste la meta: la ganancia, menos lo que debes y menos lo que reinviertes.</string>
     <string name="resumen_sin_reinversion">Define un porcentaje de reinversión y la app calcula sola cuánto puedes devolverle al negocio.</string>
     <string name="costos_vacio">Todavía no has registrado costos este mes. Regístralos para saber cuánto te deja cada producto.</string>
     <string name="costos_agregar">Registrar costo</string>
