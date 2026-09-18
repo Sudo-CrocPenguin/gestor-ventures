@@ -36,6 +36,7 @@ class MenuLateralUiStateTest {
             listOf(
                 OpcionMenu.InformacionNegocio,
                 OpcionMenu.GastosFijos,
+                OpcionMenu.MetaYReinversion,
                 OpcionMenu.Categorias,
                 OpcionMenu.MetodosPago,
                 OpcionMenu.Equipo,

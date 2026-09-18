@@ -149,40 +149,16 @@ fun BaseFinancieraScreen(
                 )
             }
 
-            Column {
-                GvTextField(
-                    label = stringResource(R.string.base_meta),
-                    value = uiState.metaFormateada,
-                    onValueChange = onMetaMontoChange,
-                    placeholder = stringResource(R.string.form_monto_placeholder),
-                    keyboardType = KeyboardType.Number,
-                    textStyle = NumericTextStyle.copy(fontSize = 17.sp),
-                    leading = { TextoAyuda(stringResource(R.string.form_moneda_simbolo)) },
-                    trailing = { TextoAyuda(stringResource(R.string.form_moneda)) },
-                )
-                Ayuda(stringResource(R.string.base_meta_ayuda))
-            }
+            CamposMetaAhorro(
+                monto = uiState.metaMonto,
+                montoFormateado = uiState.metaFormateada,
+                fechaLimite = uiState.fechaLimite,
+                ahorroMensual = uiState.ahorroMensual,
+                onMontoChange = onMetaMontoChange,
+                onFechaChange = onFechaLimiteChange,
+            )
 
-            Column {
-                GvDateField(
-                    label = stringResource(R.string.base_fecha_limite),
-                    fecha = uiState.fechaLimite,
-                    onFechaChange = onFechaLimiteChange,
-                    placeholder = stringResource(R.string.base_fecha_limite_placeholder),
-                )
-                Ayuda(stringResource(R.string.base_fecha_limite_ayuda))
-            }
-
-            AnimatedVisibility(visible = uiState.ahorroMensual != null) {
-                GvInfoNote(
-                    text = stringResource(
-                        R.string.base_ahorro_mensual,
-                        formatPesos(uiState.ahorroMensual ?: 0.0),
-                    ),
-                )
-            }
-
-            Reinversion(
+            CampoReinversion(
                 porcentaje = uiState.porcentajeReinversion,
                 onPorcentajeChange = onPorcentajeChange,
             )
@@ -225,64 +201,6 @@ private fun Encabezado(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(top = 4.dp),
         )
     }
-}
-
-@Composable
-private fun Reinversion(
-    porcentaje: Int,
-    onPorcentajeChange: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier) {
-        Text(
-            text = stringResource(R.string.base_reinversion),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 7.dp),
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.base_reinversion_ayuda),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = stringResource(R.string.porcentaje, porcentaje),
-                style = MaterialTheme.typography.titleLarge.merge(NumericTextStyle),
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
-        Slider(
-            value = porcentaje.toFloat(),
-            onValueChange = { onPorcentajeChange(it.toInt()) },
-            valueRange = 0f..100f,
-            steps = 19,
-        )
-    }
-}
-
-@Composable
-private fun Ayuda(texto: String) {
-    Text(
-        text = texto,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 6.dp),
-    )
-}
-
-@Composable
-private fun TextoAyuda(texto: String) {
-    Text(
-        text = texto,
-        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
 }
 
 @Preview(name = "Claro", widthDp = 380, heightDp = 900)

@@ -10,6 +10,8 @@ data class InicioUiState(
     val alertasNuevas: Int = 0,
     val resumenHoy: ResumenHoyUi = ResumenHoyUi(),
     val cajasActivas: List<CajaActivaUi> = emptyList(),
+    /** HU-08. La meta llegó al 100 % y el usuario todavía no ha definido la siguiente. */
+    val metaCumplida: Boolean = false,
 )
 
 /** HU-16. Totales del día para la tarjeta "Resumen de hoy". */

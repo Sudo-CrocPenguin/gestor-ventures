@@ -15,6 +15,7 @@ enum class OpcionMenu(
 ) {
     InformacionNegocio(R.string.menu_info_negocio, R.drawable.ic_building),  // HU-05
     GastosFijos(R.string.menu_gastos_fijos, R.drawable.ic_box),              // HU-06, HU-07
+    MetaYReinversion(R.string.menu_meta_ahorro, R.drawable.ic_chart_line),   // HU-08, HU-09
     Categorias(R.string.menu_categorias, R.drawable.ic_list),                // HU-15
     MetodosPago(R.string.menu_metodos_pago, R.drawable.ic_card),             // HU-11
     Equipo(R.string.menu_equipo, R.drawable.ic_team),
@@ -31,6 +32,7 @@ fun opcionesDeConfiguracion(rol: RolNegocio): List<OpcionMenu> = when (rol) {
     RolNegocio.Lider -> listOf(
         OpcionMenu.InformacionNegocio,
         OpcionMenu.GastosFijos,
+        OpcionMenu.MetaYReinversion,
         OpcionMenu.Categorias,
         OpcionMenu.MetodosPago,
         OpcionMenu.Equipo,

@@ -22,6 +22,7 @@ import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
 import com.gestor_ventures.front.ui.negocio.GastosYObligacionesRoute
+import com.gestor_ventures.front.ui.negocio.MetaYReinversionRoute
 import com.gestor_ventures.front.ui.negocio.NegocioListoRoute
 import com.gestor_ventures.front.ui.negocio.RegistrarNegocioRoute
 
@@ -37,6 +38,9 @@ object Rutas {
 
     /** HU-15. Categorías con las que el negocio clasifica gastos y costos. */
     const val Categorias = "categorias"
+
+    /** HU-08 y HU-09. Meta de ahorro y reinversión del negocio activo, fuera del onboarding. */
+    const val MetaYReinversion = "meta_y_reinversion"
 
     /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
     const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
@@ -69,6 +73,7 @@ fun AppNavHost(
                 onRegistrarVenta = { navController.navigate(Rutas.RegistrarVenta) },
                 // Abrir caja (Épica 4) aún no tiene pantalla.
                 onAbrirCaja = {},
+                onDefinirMeta = { navController.navigate(Rutas.MetaYReinversion) },
             )
         }
 
@@ -98,6 +103,18 @@ fun AppNavHost(
 
         composable(Rutas.Categorias) {
             CategoriasRoute(onBack = { navController.popBackStack() })
+        }
+
+        // HU-08 y HU-09: el paso 2 del onboarding, convertido en configuración del negocio.
+        composable(Rutas.MetaYReinversion) {
+            val mensaje = stringResource(R.string.meta_guardada)
+            MetaYReinversionRoute(
+                onBack = { navController.popBackStack() },
+                onGuardado = {
+                    navController.popBackStack()
+                    mostrarMensaje(mensaje)
+                },
+            )
         }
 
         composable(Rutas.RegistrarNegocio) {

@@ -77,6 +77,7 @@ fun MainScreen(
     fun abrirOpcion(opcion: OpcionMenu) {
         val ruta = when (opcion) {
             OpcionMenu.GastosFijos -> Rutas.GastosFijos
+            OpcionMenu.MetaYReinversion -> Rutas.MetaYReinversion
             OpcionMenu.Categorias -> Rutas.Categorias
             else -> null
         }

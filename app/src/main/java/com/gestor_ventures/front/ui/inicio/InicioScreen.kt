@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.gestor_ventures.R
+import com.gestor_ventures.front.components.GvCard
+import com.gestor_ventures.front.components.GvCardHeader
+import com.gestor_ventures.front.components.GvTextLink
 import com.gestor_ventures.front.components.QuickActionButton
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.util.formatLongDate
@@ -35,6 +38,7 @@ fun InicioRoute(
     onVerFinanzas: () -> Unit,
     onRegistrarVenta: () -> Unit,
     onAbrirCaja: () -> Unit,
+    onDefinirMeta: () -> Unit,
     viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -43,6 +47,7 @@ fun InicioRoute(
         onVerFinanzas = onVerFinanzas,
         onRegistrarVenta = onRegistrarVenta,
         onAbrirCaja = onAbrirCaja,
+        onDefinirMeta = onDefinirMeta,
     )
 }
 
@@ -52,6 +57,7 @@ fun InicioScreen(
     onVerFinanzas: () -> Unit,
     onRegistrarVenta: () -> Unit,
     onAbrirCaja: () -> Unit,
+    onDefinirMeta: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -66,9 +72,37 @@ fun InicioScreen(
             fecha = uiState.fecha,
             alertasNuevas = uiState.alertasNuevas,
         )
+        // HU-08. El aviso de meta cumplida va antes que las acciones: es la noticia del día.
+        if (uiState.metaCumplida) {
+            MetaCumplidaCard(onDefinirMeta = onDefinirMeta)
+        }
         ResumenHoyCard(resumen = uiState.resumenHoy, onVerFinanzas = onVerFinanzas)
         AccionesRapidas(onRegistrarVenta = onRegistrarVenta, onAbrirCaja = onAbrirCaja)
         CajasActivasCard(cajas = uiState.cajasActivas)
+    }
+}
+
+/**
+ * HU-08. El aviso de que la meta se cumplió.
+ *
+ * Es lo más cerca que se puede estar de una notificación mientras la Épica 8 no exista, y no
+ * necesita recordar si ya se mostró: desaparece solo cuando el usuario define la meta
+ * siguiente, que es justamente lo que el aviso le pide hacer.
+ */
+@Composable
+private fun MetaCumplidaCard(onDefinirMeta: () -> Unit, modifier: Modifier = Modifier) {
+    GvCard(modifier) {
+        GvCardHeader(title = stringResource(R.string.inicio_meta_cumplida_titulo)) {
+            GvTextLink(
+                text = stringResource(R.string.inicio_meta_cumplida_accion),
+                onClick = onDefinirMeta,
+            )
+        }
+        Text(
+            text = stringResource(R.string.inicio_meta_cumplida_detalle),
+            style = MaterialTheme.typography.bodySmall,
+            color = GestorVenturesTheme.colors.success,
+        )
     }
 }
 
@@ -148,6 +182,7 @@ private fun InicioScreenPreview() {
                 onVerFinanzas = {},
                 onRegistrarVenta = {},
                 onAbrirCaja = {},
+                onDefinirMeta = {},
             )
         }
     }
