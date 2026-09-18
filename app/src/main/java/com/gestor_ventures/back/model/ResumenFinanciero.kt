@@ -36,19 +36,22 @@ data class ResumenFinanciero(
 
     val ganancia: Double get() = ingresos - egresos
 
-    /**
-     * HU-09. Lo que la app calcula que se puede reinvertir: el porcentaje configurado sobre la
-     * ganancia. Un mes en pérdida no deja nada para reinvertir, así que no se calcula sobre un
-     * número negativo.
-     */
-    val reinversion: Double
-        get() = if (ganancia <= 0.0) 0.0 else ganancia * porcentajeReinversion / 100.0
+    /** HU-09. Lo que la app calcula que se puede reinvertir. */
+    val reinversion: Double get() = reinversionDe(ganancia, porcentajeReinversion)
 
     /** Lo que ya tiene dueño antes de que el emprendedor toque la ganancia. */
     val comprometido: Double get() = obligacionesPendientes + apartadoParaMeta + reinversion
 
+    /**
+     * HU-08. Lo que queda libre después de pagar lo que se debe y de devolverle al negocio lo
+     * suyo, pero antes de apartar para la meta. Es con esto que se mide el progreso de la meta:
+     * usar el dinero disponible sería descontar dos veces el mismo ahorro.
+     */
+    val libreParaAhorrar: Double
+        get() = libreParaAhorrarDe(ganancia, obligacionesPendientes, porcentajeReinversion)
+
     /** HU-16. Lo que se puede sacar del negocio hoy sin quedar corto. Puede ser negativo. */
-    val disponible: Double get() = ganancia - comprometido
+    val disponible: Double get() = libreParaAhorrar - apartadoParaMeta
 
     /** Qué proporción de lo vendido quedó como ganancia; null si no hubo ventas. */
     val margen: Float? get() = if (ingresos <= 0.0) null else (ganancia / ingresos).toFloat()
@@ -60,9 +63,10 @@ data class ResumenFinanciero(
 /**
  * HU-08. Qué tan cerca está el negocio de su meta de ahorro.
  *
- * [acumulado] es la ganancia que el negocio lleva desde que se definió la meta. No es plata
- * apartada en una cuenta —la app todavía no registra movimientos de ahorro— sino lo que el
- * negocio ha generado y podría haber guardado, que es lo que se puede medir con lo que hay.
+ * [acumulado] es el dinero que el negocio ha dejado libre desde que se definió la meta: la
+ * ganancia menos las obligaciones pendientes y menos la reinversión, con las mismas reglas de
+ * HU-16. No es plata apartada en una cuenta —la app todavía no registra movimientos de ahorro—
+ * sino lo que el negocio pudo haber guardado, que es lo que se puede medir con lo que hay.
  */
 data class ProgresoMeta(
     val montoObjetivo: Double,
@@ -76,3 +80,23 @@ data class ProgresoMeta(
 
     val falta: Double get() = (montoObjetivo - acumulado).coerceAtLeast(0.0)
 }
+
+/**
+ * HU-09. Lo que se puede reinvertir de una ganancia.
+ *
+ * Un mes en pérdida no deja nada para reinvertir, así que el porcentaje no se aplica sobre un
+ * número en rojo: sería "reinvertir plata que no existe".
+ */
+fun reinversionDe(ganancia: Double, porcentaje: Double): Double =
+    if (ganancia <= 0.0) 0.0 else ganancia * porcentaje / 100.0
+
+/**
+ * HU-08. El dinero que queda libre para ahorrar: la ganancia menos lo que se debe y menos lo
+ * que vuelve al negocio.
+ *
+ * Vive fuera de [ResumenFinanciero] porque la meta lo necesita sobre un periodo entero —desde
+ * que se definió hasta hoy— y no solo sobre el mes en curso, y la regla tiene que ser la misma
+ * en los dos casos.
+ */
+fun libreParaAhorrarDe(ganancia: Double, obligaciones: Double, porcentaje: Double): Double =
+    ganancia - obligaciones - reinversionDe(ganancia, porcentaje)

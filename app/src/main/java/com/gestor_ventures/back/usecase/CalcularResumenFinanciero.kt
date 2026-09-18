@@ -1,6 +1,7 @@
 package com.gestor_ventures.back.usecase
 
 import com.gestor_ventures.back.model.DiasPorMes
+import com.gestor_ventures.back.model.libreParaAhorrarDe
 import com.gestor_ventures.back.model.MetaAhorro
 import com.gestor_ventures.back.model.ProgresoMeta
 import com.gestor_ventures.back.model.Reloj
@@ -91,8 +92,7 @@ class CalcularResumenFinanciero @Inject constructor(
      * gastos fijos no están registrados como movimientos —son configuración— así que se cobran
      * a razón de su equivalente mensual por el tiempo que lleva corriendo la meta.
      *
-     * Es público porque el inicio también muestra el progreso, y ahí no hace falta cruzar
-     * obligaciones ni reinversión para responder "¿cómo voy?".
+     * Es público porque el inicio también muestra el progreso sin mostrar el resumen entero.
      */
     fun progresoDeLaMeta(negocioId: Long): Flow<ProgresoMeta?> =
         baseFinancieraRepository.metaActiva(negocioId).flatMapLatest { meta ->
@@ -106,18 +106,40 @@ class CalcularResumenFinanciero @Inject constructor(
                 }
         }
 
+    /**
+     * Lo que el negocio ha dejado libre desde [desde] hasta hoy, con las mismas reglas de
+     * HU-16: la ganancia del periodo menos lo que se debe y menos lo que vuelve al negocio.
+     *
+     * Se detiene justo antes de apartar para la meta. El dinero disponible de HU-16 ya le restó
+     * ese apartado, y medir la meta con un número al que se le quitó el ahorro de la meta sería
+     * descontar dos veces lo mismo: el emprendedor guardaría lo que le pedimos todos los meses
+     * y el progreso nunca llegaría.
+     */
     private fun acumuladoDesde(negocioId: Long, desde: LocalDate): Flow<Double> {
         val hoy = reloj.ahora().toLocalDate()
         val meses = ChronoUnit.DAYS.between(desde, hoy).coerceAtLeast(0) / DiasPorMes
 
-        return combine(
+        val gananciaDelPeriodo = combine(
             ventaRepository.totalEntre(negocioId, desde, hoy),
             gastoRepository.totalEntre(negocioId, desde, hoy),
             costoRepository.totalEntre(negocioId, desde, hoy),
             baseFinancieraRepository.gastosFijosMensuales(negocioId),
         ) { ingresos, gastos, costos, gastosFijos ->
+            ingresos - gastos - costos - gastosFijos * meses
+        }
+
+        return combine(
+            gananciaDelPeriodo,
+            obligacionRepository.totalPendiente(negocioId),
+            negocioRepository.observarNegocio(negocioId),
+        ) { ganancia, obligaciones, negocio ->
+            val libre = libreParaAhorrarDe(
+                ganancia = ganancia,
+                obligaciones = obligaciones,
+                porcentaje = negocio?.porcentajeReinversion ?: 0.0,
+            )
             // Perder plata no es tener un progreso negativo: la meta se queda en cero.
-            (ingresos - gastos - costos - gastosFijos * meses).coerceAtLeast(0.0)
+            libre.coerceAtLeast(0.0)
         }
     }
 
