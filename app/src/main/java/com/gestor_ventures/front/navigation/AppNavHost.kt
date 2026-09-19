@@ -18,6 +18,7 @@ import com.gestor_ventures.R
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
 import com.gestor_ventures.front.ui.finanzas.CategoriasRoute
 import com.gestor_ventures.front.ui.finanzas.FinanzasRoute
+import com.gestor_ventures.front.ui.finanzas.HistorialRoute
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
@@ -41,6 +42,9 @@ object Rutas {
 
     /** HU-08 y HU-09. Meta de ahorro y reinversión del negocio activo, fuera del onboarding. */
     const val MetaYReinversion = "meta_y_reinversion"
+
+    /** HU-17. Todo lo que movió plata en un periodo, para poder corregirlo. */
+    const val Historial = "historial"
 
     /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
     const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
@@ -96,9 +100,14 @@ fun AppNavHost(
             GastosYObligacionesRoute(onBack = { navController.popBackStack() })
         }
 
-        // HU-13 y HU-14. HU-16 le pondrá el resumen encima del selector.
+        // HU-13, HU-14 y HU-16: el resumen del mes y el detalle que lo compone.
         composable(TopLevelDestination.Finanzas.route) {
-            FinanzasRoute()
+            FinanzasRoute(onVerHistorial = { navController.navigate(Rutas.Historial) })
+        }
+
+        // HU-17: se entra desde el resumen, a arreglar algo que quedó mal registrado.
+        composable(Rutas.Historial) {
+            HistorialRoute(onBack = { navController.popBackStack() })
         }
 
         composable(Rutas.Categorias) {

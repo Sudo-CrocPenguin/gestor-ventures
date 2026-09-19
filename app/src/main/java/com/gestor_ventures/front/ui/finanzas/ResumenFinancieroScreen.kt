@@ -33,6 +33,7 @@ import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvCardHeader
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvProgressBar
+import com.gestor_ventures.front.components.GvTextLink
 import com.gestor_ventures.front.components.MoneyText
 import com.gestor_ventures.front.components.StatusPill
 import com.gestor_ventures.front.theme.GestorVenturesTheme
@@ -45,10 +46,13 @@ import java.time.YearMonth
 import kotlin.math.roundToInt
 
 @Composable
-fun ResumenFinancieroRoute(viewModel: ResumenFinancieroViewModel = hiltViewModel()) {
+fun ResumenFinancieroRoute(
+    onVerHistorial: () -> Unit,
+    viewModel: ResumenFinancieroViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    ResumenFinancieroScreen(uiState = uiState)
+    ResumenFinancieroScreen(uiState = uiState, onVerHistorial = onVerHistorial)
 }
 
 /**
@@ -60,6 +64,7 @@ fun ResumenFinancieroRoute(viewModel: ResumenFinancieroViewModel = hiltViewModel
 @Composable
 fun ResumenFinancieroScreen(
     uiState: ResumenFinancieroUiState,
+    onVerHistorial: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val resumen = uiState.resumen ?: return
@@ -76,7 +81,7 @@ fun ResumenFinancieroScreen(
         if (resumen.sinMovimientos) {
             GvInfoNote(stringResource(R.string.resumen_vacio))
         } else {
-            MovimientosCard(resumen)
+            MovimientosCard(resumen, onVerHistorial = onVerHistorial)
             DisponibleCard(resumen)
             Nota(enRojo = resumen.disponible < 0)
         }
@@ -87,11 +92,20 @@ fun ResumenFinancieroScreen(
 
 /** Lo que entró y lo que salió, con la ganancia como cierre de la cuenta. */
 @Composable
-private fun MovimientosCard(resumen: ResumenFinanciero, modifier: Modifier = Modifier) {
+private fun MovimientosCard(
+    resumen: ResumenFinanciero,
+    onVerHistorial: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     GvCard(modifier) {
+        // El total del mes invita a la pregunta siguiente: "¿de qué está hecho?".
         GvCardHeader(title = stringResource(R.string.resumen_movimientos)) {
-            StatusPill(text = formatMesLargo(resumen.mes.atDay(1)))
+            GvTextLink(text = stringResource(R.string.historial_ver), onClick = onVerHistorial)
         }
+        StatusPill(
+            text = formatMesLargo(resumen.mes.atDay(1)),
+            modifier = Modifier.padding(bottom = 12.dp),
+        )
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Kpi(
@@ -410,7 +424,8 @@ private fun VistaPreviaResumen(resumen: ResumenFinanciero) {
     GestorVenturesTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             ResumenFinancieroScreen(
-                ResumenFinancieroUiState(resumen = resumen, cargando = false),
+                uiState = ResumenFinancieroUiState(resumen = resumen, cargando = false),
+                onVerHistorial = {},
             )
         }
     }
