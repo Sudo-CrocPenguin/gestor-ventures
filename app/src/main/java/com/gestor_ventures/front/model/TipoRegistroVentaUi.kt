@@ -16,6 +16,12 @@ enum class TipoRegistroVentaUi(@param:StringRes val labelRes: Int) {
     Rapido(R.string.venta_tipo_rapida),
 }
 
+/** La modalidad de una venta ya guardada, para poder mostrarla y corregirla (HU-17). */
+fun TipoRegistroVenta.aUi(): TipoRegistroVentaUi = when (this) {
+    TipoRegistroVenta.DETALLADO -> TipoRegistroVentaUi.Detallado
+    TipoRegistroVenta.RAPIDO -> TipoRegistroVentaUi.Rapido
+}
+
 /** La modalidad como la entiende el dominio, para poder guardarla. */
 fun TipoRegistroVentaUi.aDominio(): TipoRegistroVenta = when (this) {
     TipoRegistroVentaUi.Detallado -> TipoRegistroVenta.DETALLADO

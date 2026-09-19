@@ -14,6 +14,16 @@ enum class MetodoPagoUi(@param:StringRes val labelRes: Int) {
     Tarjeta(R.string.metodo_pago_tarjeta),
 }
 
+/**
+ * El método de pago de una venta ya guardada, para poder mostrarlo. OTRO cae en efectivo, que
+ * es lo que decidió [MetodoPagoUi] cuando se resolvió no ofrecerlo.
+ */
+fun MetodoPago.aUi(): MetodoPagoUi = when (this) {
+    MetodoPago.TRANSFERENCIA -> MetodoPagoUi.Transferencia
+    MetodoPago.TARJETA -> MetodoPagoUi.Tarjeta
+    MetodoPago.EFECTIVO, MetodoPago.OTRO -> MetodoPagoUi.Efectivo
+}
+
 /** El método de pago como lo entiende el dominio, para poder guardarlo. */
 fun MetodoPagoUi.aDominio(): MetodoPago = when (this) {
     MetodoPagoUi.Efectivo -> MetodoPago.EFECTIVO
