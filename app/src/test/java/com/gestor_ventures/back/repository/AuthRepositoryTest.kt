@@ -236,4 +236,28 @@ class AuthRepositoryTest {
     fun sesionActiva_conUsuarioInexistente_devuelveFalso() = runTest {
         assertEquals(false, repository.sesionActiva(99L))
     }
+    // ---------- HU-02: cerrar sesión a pedido ----------
+
+    @Test
+    fun cerrarSesionDejaLaAppSinUsuario() = runTest {
+        repository.registrar("Mariana", "mariana@correo.com", "Clave.123")
+
+        repository.cerrarSesion()
+
+        assertNull(autenticador.sesion.value)
+    }
+
+    @Test
+    fun cerrarSesionNoBorraLaCuenta() = runTest {
+        repository.registrar("Mariana", "mariana@correo.com", "Clave.123")
+        repository.cerrarSesion()
+
+        // Salir no es darse de baja: los negocios y las ventas siguen ahí para cuando vuelva.
+        assertNotNull(usuarioDao.obtenerPorCorreo("mariana@correo.com"))
+        assertEquals(
+            ResultadoAuth.Exito(1L),
+            repository.iniciarSesion("mariana@correo.com", "Clave.123"),
+        )
+    }
+
 }
