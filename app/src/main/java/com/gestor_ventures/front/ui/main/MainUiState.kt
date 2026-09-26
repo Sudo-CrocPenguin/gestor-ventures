@@ -13,7 +13,8 @@ import com.gestor_ventures.front.ui.menu.MenuLateralUiState
  * al onboarding antes de saber si ya tiene negocios.
  */
 data class MainUiState(
-    val usuario: UsuarioUi,
+    /** Null mientras la sesión no se ha resuelto: es un estado real, no un usuario en blanco. */
+    val usuario: UsuarioUi? = null,
     val negocios: List<NegocioUi> = emptyList(),
     val negocioActivoId: String? = null,
     val notificacionesSinLeer: Int = 0,

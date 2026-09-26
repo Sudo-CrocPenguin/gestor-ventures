@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Negocio
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
+import com.gestor_ventures.back.model.Usuario
 import com.gestor_ventures.back.repository.SesionRepository
 import com.gestor_ventures.front.model.NegocioUi
 import com.gestor_ventures.front.model.RolNegocio
+import com.gestor_ventures.front.model.UsuarioUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,9 +35,10 @@ class MainViewModel @Inject constructor(
         // El negocio elegido a mano lo guarda el repositorio, no esta pantalla: el inicio y el
         // registro de ventas necesitan saber el mismo.
         negocioActivoRepository.seleccionado,
-    ) { negocios, elegido ->
+        sesionRepository.usuarioActual,
+    ) { negocios, elegido, usuario ->
         MainUiState(
-            usuario = MainPreviewData.usuario,
+            usuario = usuario?.aUsuarioUi(),
             negocios = negocios.map(::aNegocioUi),
             negocioActivoId = elegido?.toString(),
             // Las notificaciones (HU-40/HU-41) todavía no tienen datos reales.
@@ -45,7 +48,7 @@ class MainViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = MainUiState(usuario = MainPreviewData.usuario),
+        initialValue = MainUiState(),
     )
 
     /** Cambia el negocio activo desde el menú lateral. */
@@ -65,3 +68,5 @@ private fun aNegocioUi(negocio: Negocio) = NegocioUi(
     rol = RolNegocio.Lider,
     colorMarca = negocio.colorMarca,
 )
+
+private fun Usuario.aUsuarioUi() = UsuarioUi(nombre = nombre, correo = correo)

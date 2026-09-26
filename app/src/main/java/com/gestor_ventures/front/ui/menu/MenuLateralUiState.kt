@@ -8,7 +8,7 @@ import com.gestor_ventures.front.model.UsuarioUi
  * del marco de la app, para que el negocio activo tenga una sola fuente de verdad.
  */
 data class MenuLateralUiState(
-    val usuario: UsuarioUi,
+    val usuario: UsuarioUi? = null,
     val negocios: List<NegocioUi>,
     val negocioActivoId: String,
 ) {

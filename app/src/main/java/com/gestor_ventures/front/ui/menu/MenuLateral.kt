@@ -64,7 +64,7 @@ fun MenuLateral(
         drawerShape = RectangleShape,
         drawerContainerColor = MaterialTheme.colorScheme.surface,
     ) {
-        CabeceraUsuario(uiState.usuario)
+        uiState.usuario?.let { CabeceraUsuario(it) }
         HorizontalDivider(color = MaterialTheme.colorScheme.outline)
 
         Column(
