@@ -1,10 +1,13 @@
 package com.gestor_ventures.back.repository
 
 import com.gestor_ventures.back.di.ApplicationScope
+import com.gestor_ventures.back.model.Usuario
 import com.gestor_ventures.db.dao.UsuarioDao
+import com.gestor_ventures.db.entity.UsuarioEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -26,7 +29,7 @@ import javax.inject.Singleton
 @Singleton
 class SesionRepository @Inject constructor(
     autenticador: Autenticador,
-    usuarioDao: UsuarioDao,
+    private val usuarioDao: UsuarioDao,
     authRepository: AuthRepository,
     @ApplicationScope scope: CoroutineScope,
 ) {
@@ -42,9 +45,28 @@ class SesionRepository @Inject constructor(
         .map { usuario -> usuario?.usuarioId?.takeIf { authRepository.sesionActiva(it) } }
         .stateIn(scope, SharingStarted.Eagerly, null)
 
+    /**
+     * El perfil de quien tiene la sesión abierta: su nombre y su correo de verdad.
+     *
+     * Lo necesitan el saludo del inicio y la cabecera del menú, que hasta ahora mostraban un
+     * nombre de ejemplo. Se sigue por `Flow` para que al cambiar el perfil (HU-04) o cerrar
+     * sesión las dos pantallas se enteren solas.
+     */
+    val usuarioActual: Flow<Usuario?> = usuarioIdActual.flatMapLatest { usuarioId ->
+        if (usuarioId == null) flowOf(null) else usuarioDao.observar(usuarioId).map { it?.aUsuario() }
+    }
+
     /** El id de quien tiene la sesión abierta ahora mismo, o `null` si nadie. */
     fun usuarioId(): Long? = usuarioIdActual.value
 
     /** Para quien necesita reaccionar a que alguien inicie o cierre sesión. */
     fun observarUsuarioId(): StateFlow<Long?> = usuarioIdActual
 }
+
+private fun UsuarioEntity.aUsuario() = Usuario(
+    id = usuarioId,
+    nombre = nombre,
+    correo = correo,
+    fotoPerfilUrl = fotoPerfilUrl,
+    telefono = telefono,
+)
