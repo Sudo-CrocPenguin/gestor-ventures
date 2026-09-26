@@ -101,6 +101,17 @@ class AuthRepository @Inject constructor(
     }
 
     /**
+     * HU-02. Cierra la sesión porque el usuario lo pidió.
+     *
+     * No hay que navegar a ninguna parte después: `AppRoot` sigue al usuario de la sesión y en
+     * cuanto queda en nulo muestra el login solo. Tampoco se borra nada de la base: los
+     * negocios, las ventas y todo lo demás siguen ahí para cuando vuelva a entrar.
+     */
+    fun cerrarSesion() {
+        autenticador.cerrarSesion()
+    }
+
+    /**
      * HU-02. Si pasó más de una semana desde el último acceso de [usuarioId], cierra la sesión
      * y devuelve `false`. Quien controla el ciclo de vida de la app (a qué pantalla mandar al
      * usuario al abrirla) es quien debe llamar esto y actuar según el resultado.
