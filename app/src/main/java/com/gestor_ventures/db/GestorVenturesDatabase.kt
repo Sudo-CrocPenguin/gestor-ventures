@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.gestor_ventures.db.dao.CategoriaDao
+import com.gestor_ventures.db.dao.ClienteDao
 import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.dao.GastoFijoDao
@@ -88,4 +89,6 @@ abstract class GestorVenturesDatabase : RoomDatabase() {
     abstract fun costoDao(): CostoDao
 
     abstract fun obligacionDao(): ObligacionDao
+
+    abstract fun clienteDao(): ClienteDao
 }

@@ -2,6 +2,7 @@ package com.gestor_ventures.back.repository
 
 import com.gestor_ventures.back.model.ErrorAuth
 import com.gestor_ventures.back.model.Reloj
+import com.gestor_ventures.back.model.FormatoCorreo
 import com.gestor_ventures.back.model.ResultadoAuth
 import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.entity.UsuarioEntity
@@ -11,7 +12,6 @@ import javax.inject.Singleton
 
 /** Tope de caracteres del nombre y formato de correo/contraseña, tal como quedó en HU-01. */
 private const val MaxCaracteresNombre = 50
-private val FormatoCorreo = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
 
 /** 8-25 caracteres, con al menos una mayúscula, una minúscula y un símbolo. */
 private val FormatoContrasena = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*[^A-Za-z0-9]).{8,25}$")

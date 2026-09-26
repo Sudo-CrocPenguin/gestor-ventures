@@ -6,6 +6,7 @@ import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.db.GestorVenturesDatabase
 import com.gestor_ventures.db.MIGRACIONES
 import com.gestor_ventures.db.dao.CategoriaDao
+import com.gestor_ventures.db.dao.ClienteDao
 import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.dao.GastoFijoDao
@@ -62,6 +63,9 @@ object DatabaseModule {
 
     @Provides
     fun proveerObligacionDao(db: GestorVenturesDatabase): ObligacionDao = db.obligacionDao()
+
+    @Provides
+    fun proveerClienteDao(db: GestorVenturesDatabase): ClienteDao = db.clienteDao()
 
     @Provides
     @Singleton
