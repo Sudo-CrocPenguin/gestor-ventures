@@ -126,7 +126,11 @@ private fun Saludo(
 
     Column(modifier.padding(top = 2.dp)) {
         Text(
-            text = stringResource(R.string.inicio_saludo, nombreUsuario),
+            text = if (nombreUsuario.isBlank()) {
+                stringResource(R.string.inicio_saludo_sin_nombre)
+            } else {
+                stringResource(R.string.inicio_saludo, nombreUsuario)
+            },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )

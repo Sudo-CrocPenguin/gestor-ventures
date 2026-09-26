@@ -325,6 +325,7 @@
 
     <!-- Inicio -->
     <string name="inicio_saludo">Hola, %1$s</string>
+    <string name="inicio_saludo_sin_nombre">Hola</string>
     <string name="inicio_fecha_y_alertas">%1$s · %2$s</string>
     <plurals name="inicio_alertas_nuevas">
         <item quantity="one">%d alerta nueva</item>

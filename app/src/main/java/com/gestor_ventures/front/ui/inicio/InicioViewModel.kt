@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.repository.NegocioActivoRepository
+import com.gestor_ventures.back.repository.SesionRepository
 import com.gestor_ventures.back.repository.VentaRepository
 import com.gestor_ventures.back.usecase.CalcularResumenFinanciero
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +14,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 import javax.inject.Inject
@@ -22,14 +23,15 @@ import kotlin.math.roundToInt
 /**
  * HU-16. Resumen del día del negocio activo.
  *
- * Las ventas (HU-11/HU-12) y la meta de ahorro (HU-08) son reales. Los gastos del día y las
- * cajas del equipo se muestran vacíos a propósito: preferimos que la pantalla diga "todavía no
- * hay" y no un número inventado que el usuario tome por bueno.
+ * Las ventas (HU-11/HU-12), la meta de ahorro (HU-08) y el nombre de quien entró (HU-01) son
+ * reales. Los gastos del día y las cajas del equipo se muestran vacíos a propósito: preferimos
+ * que la pantalla diga "todavía no hay" y no un número inventado que el usuario tome por bueno.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class InicioViewModel @Inject constructor(
     negocioActivoRepository: NegocioActivoRepository,
+    private val sesionRepository: SesionRepository,
     private val ventaRepository: VentaRepository,
     private val calcularResumenFinanciero: CalcularResumenFinanciero,
     private val reloj: Reloj,
@@ -37,7 +39,12 @@ class InicioViewModel @Inject constructor(
 
     val uiState: StateFlow<InicioUiState> = negocioActivoRepository.negocioActivoId
         .flatMapLatest { negocioId ->
-            if (negocioId == null) flowOf(estadoBase()) else resumenDe(negocioId)
+            // Sin negocio todavía hay a quién saludar: la cuenta existe antes que el negocio.
+            if (negocioId == null) {
+                sesionRepository.usuarioActual.map { estadoBase(nombre = it?.primerNombre.orEmpty()) }
+            } else {
+                resumenDe(negocioId)
+            }
         }
         .stateIn(
             scope = viewModelScope,
@@ -53,8 +60,9 @@ class InicioViewModel @Inject constructor(
             ventaRepository.resumenDelDia(negocioId, hoy),
             ventaRepository.resumenDelDia(negocioId, hoy.minusDays(1)),
             calcularResumenFinanciero.progresoDeLaMeta(negocioId),
-        ) { ventasDeHoy, resumenHoy, resumenAyer, progresoMeta ->
-            estadoBase(hoy).copy(
+            sesionRepository.usuarioActual,
+        ) { ventasDeHoy, resumenHoy, resumenAyer, progresoMeta, usuario ->
+            estadoBase(hoy, usuario?.primerNombre.orEmpty()).copy(
                 resumenHoy = ResumenHoyUi(
                     ventas = resumenHoy.total,
                     variacionVentasVsAyer = variacion(resumenHoy.total, resumenAyer.total),
@@ -76,11 +84,16 @@ class InicioViewModel @Inject constructor(
     /**
      * Lo que se muestra mientras no hay negocio o no hay ventas.
      *
-     * TEMPORAL — el nombre y las alertas salen de datos de ejemplo hasta que existan HU-01
-     * (la cuenta del usuario) y HU-40 (notificaciones).
+     * El nombre llega vacío hasta que la sesión se resuelve, y entonces la pantalla saluda sin
+     * nombre: mejor eso que un "Hola, " colgando o un nombre inventado.
+     *
+     * TEMPORAL — las alertas siguen saliendo de datos de ejemplo hasta HU-40 (notificaciones).
      */
-    private fun estadoBase(hoy: LocalDate = reloj.ahora().toLocalDate()) = InicioUiState(
-        nombreUsuario = InicioPreviewData.NombreTemporal,
+    private fun estadoBase(
+        hoy: LocalDate = reloj.ahora().toLocalDate(),
+        nombre: String = "",
+    ) = InicioUiState(
+        nombreUsuario = nombre,
         fecha = hoy,
         alertasNuevas = InicioPreviewData.AlertasTemporales,
     )

@@ -64,7 +64,8 @@ class InicioViewModelTest {
     private val negocioRepository = NegocioRepository(negocioDao, reloj)
     private val baseFinancieraRepository =
         BaseFinancieraRepository(GastoFijoDaoFalso(), metaAhorroDao, negocioDao, reloj)
-    private val negocioActivo = NegocioActivoRepository(negocioRepository, sesionRepositoryDePrueba())
+    private val sesionRepository = sesionRepositoryDePrueba()
+    private val negocioActivo = NegocioActivoRepository(negocioRepository, sesionRepository)
 
     private val calcularResumen = CalcularResumenFinanciero(
         ventaRepository = ventaRepository,
@@ -116,8 +117,33 @@ class InicioViewModelTest {
      * tiene que mirarlo igual que la pantalla.
      */
     private fun TestScope.abrirPantalla() {
-        viewModel = InicioViewModel(negocioActivo, ventaRepository, calcularResumen, reloj)
+        viewModel = InicioViewModel(
+            negocioActivoRepository = negocioActivo,
+            sesionRepository = sesionRepository,
+            ventaRepository = ventaRepository,
+            calcularResumenFinanciero = calcularResumen,
+            reloj = reloj,
+        )
         backgroundScope.launch { viewModel.uiState.collect { } }
+    }
+
+    @Test
+    fun elSaludoUsaElNombreDeLaCuentaYNoUnoDeEjemplo() = runTest(dispatcher) {
+        crearNegocio()
+        abrirPantalla()
+        advanceUntilIdle()
+
+        // "Usuario de prueba" es quien tiene la sesión abierta en sesionRepositoryDePrueba().
+        assertEquals("Usuario", estado.nombreUsuario)
+    }
+
+    @Test
+    fun sinNegocioTodaviaHayAQuienSaludar() = runTest(dispatcher) {
+        abrirPantalla()
+        advanceUntilIdle()
+
+        // La cuenta existe antes que el negocio: el saludo no tiene por qué esperar.
+        assertEquals("Usuario", estado.nombreUsuario)
     }
 
     @Test
