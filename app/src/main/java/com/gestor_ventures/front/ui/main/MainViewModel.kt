@@ -3,6 +3,7 @@ package com.gestor_ventures.front.ui.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Negocio
+import com.gestor_ventures.back.repository.AuthRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
 import com.gestor_ventures.back.model.Usuario
@@ -26,6 +27,7 @@ class MainViewModel @Inject constructor(
     negocioRepository: NegocioRepository,
     sesionRepository: SesionRepository,
     private val negocioActivoRepository: NegocioActivoRepository,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     val uiState: StateFlow<MainUiState> = combine(
@@ -50,6 +52,16 @@ class MainViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = MainUiState(),
     )
+
+    /**
+     * HU-02. Cierra la sesión desde el menú lateral.
+     *
+     * No hay que navegar a ninguna parte: `AppRoot` sigue al usuario de la sesión y en cuanto
+     * queda en nulo muestra el login solo.
+     */
+    fun cerrarSesion() {
+        authRepository.cerrarSesion()
+    }
 
     /** Cambia el negocio activo desde el menú lateral. */
     fun seleccionarNegocio(negocioId: String) {

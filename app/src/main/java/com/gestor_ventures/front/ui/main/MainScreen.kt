@@ -40,6 +40,7 @@ fun MainRoute(viewModel: MainViewModel = hiltViewModel()) {
     MainScreen(
         uiState = uiState,
         onNegocioSeleccionado = viewModel::seleccionarNegocio,
+        onCerrarSesion = viewModel::cerrarSesion,
     )
 }
 
@@ -51,6 +52,7 @@ fun MainRoute(viewModel: MainViewModel = hiltViewModel()) {
 fun MainScreen(
     uiState: MainUiState,
     onNegocioSeleccionado: (String) -> Unit,
+    onCerrarSesion: () -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -75,6 +77,13 @@ fun MainScreen(
 
     /** Las opciones que ya tienen pantalla navegan; las demás siguen avisando que faltan. */
     fun abrirOpcion(opcion: OpcionMenu) {
+        // Cerrar sesión no es una pantalla: se cierra el menú y AppRoot cambia al login solo.
+        if (opcion == OpcionMenu.CerrarSesion) {
+            scope.launch { drawerState.close() }
+            onCerrarSesion()
+            return
+        }
+
         val ruta = when (opcion) {
             OpcionMenu.GastosFijos -> Rutas.GastosFijos
             OpcionMenu.MetaYReinversion -> Rutas.MetaYReinversion
