@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.gestor_ventures.R
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
+import com.gestor_ventures.front.ui.clientes.ClientesRoute
 import com.gestor_ventures.front.ui.finanzas.CategoriasRoute
 import com.gestor_ventures.front.ui.finanzas.FinanzasRoute
 import com.gestor_ventures.front.ui.finanzas.HistorialRoute
@@ -163,10 +164,14 @@ fun AppNavHost(
             )
         }
 
+        // HU-29. A quién le vende el negocio.
+        composable(TopLevelDestination.Clientes.route) {
+            ClientesRoute()
+        }
+
         // Pestañas cuya pantalla aún no existe: se reemplazan a medida que se construyen.
         listOf(
             TopLevelDestination.Agenda,
-            TopLevelDestination.Clientes,
             TopLevelDestination.Asistente,
         ).forEach { destination ->
             composable(destination.route) { PendingDestination(destination) }
