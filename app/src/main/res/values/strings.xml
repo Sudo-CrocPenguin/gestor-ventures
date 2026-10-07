@@ -435,4 +435,19 @@
     <string name="auth_error_correo_no_registrado">No encontramos una cuenta con ese correo.</string>
     <string name="auth_error_red">No pudimos conectarnos. Intenta de nuevo.</string>
     <string name="registro_error_contrasenas_no_coinciden">Las contraseñas no coinciden.</string>
+    <!-- HU-19. Abrir la jornada de caja. -->
+    <string name="caja_titulo">Caja</string>
+    <string name="caja_abrir">Abrir caja</string>
+    <string name="caja_abrir_titulo">Empieza tu turno</string>
+    <string name="caja_monto_inicial">Monto inicial en caja</string>
+    <string name="caja_monto_ayuda">Cuenta el efectivo con el que arrancas. Si no tienes nada, escribe 0.</string>
+    <string name="caja_jornada_en_curso">Jornada en curso</string>
+    <string name="caja_estado_abierta">Abierta</string>
+    <string name="caja_monto_inicial_etiqueta">Monto inicial</string>
+    <string name="caja_abierta_desde">Abierta desde las %1$s · %2$s</string>
+    <string name="caja_vacia_titulo">No tienes una caja abierta</string>
+    <string name="caja_vacia_detalle">Ábrela para llevar el control del efectivo desde que arranca tu jornada.</string>
+    <string name="caja_movimientos_pendiente">Las ventas y gastos del turno, y el cierre de la caja, llegan en las siguientes historias.</string>
+    <string name="caja_error_monto">El monto inicial no puede ser negativo.</string>
+    <string name="caja_error_ya_abierta">Ya tienes una caja abierta. Ciérrala antes de abrir otra.</string>
 </resources>
