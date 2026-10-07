@@ -29,9 +29,30 @@ class GastoRepositoryTest {
     private suspend fun registrar(
         descripcion: String = "Domicilio",
         monto: Double = 12_000.0,
-        fecha: LocalDate = hoy,
+        fecha: LocalDateTime = hoy.atStartOfDay(),
         categoriaId: Long? = null,
     ) = repository.registrarGasto(negocioId, descripcion, monto, fecha, categoriaId)
+
+    @Test
+    fun elGastoGuardaLaHoraYNoSoloElDia() = runTest {
+        // HU-20: sin hora, un gasto no se puede ubicar dentro de una jornada de caja.
+        assertNull(registrar(fecha = ahora.withHour(9).withMinute(40)))
+
+        assertEquals(ahora.withHour(9).withMinute(40), repository.gastosDelMes(negocioId).first().single().fecha)
+    }
+
+    @Test
+    fun sinDecirCuandoFueElGastoQuedaConLaHoraDeRegistro() = runTest {
+        assertNull(repository.registrarGasto(negocioId, "Domicilio", 12_000.0))
+
+        assertEquals(ahora, repository.gastosDelMes(negocioId).first().single().fecha)
+    }
+
+    @Test
+    fun unGastoDeMasTardeHoyTampocoSeAdmite() = runTest {
+        // El reloj marca las 10:00; un gasto de las 18:00 todavía no ocurrió.
+        assertEquals(ErrorGasto.FechaEnElFuturo, registrar(fecha = ahora.withHour(18)))
+    }
 
     @Test
     fun registrarGasto_loGuarda() = runTest {
@@ -40,7 +61,7 @@ class GastoRepositoryTest {
         val gasto = repository.gastosDelMes(negocioId).first().single()
         assertEquals("Domicilio", gasto.descripcion)
         assertEquals(12_000.0, gasto.monto, 0.001)
-        assertEquals(hoy, gasto.fecha)
+        assertEquals(hoy, gasto.fecha.toLocalDate())
     }
 
     @Test
@@ -60,13 +81,13 @@ class GastoRepositoryTest {
 
     @Test
     fun noSePuedeRegistrarUnGastoDeManana() = runTest {
-        assertEquals(ErrorGasto.FechaEnElFuturo, registrar(fecha = hoy.plusDays(1)))
+        assertEquals(ErrorGasto.FechaEnElFuturo, registrar(fecha = hoy.plusDays(1).atStartOfDay()))
     }
 
     @Test
     fun unGastoDeLaSemanaPasadaSiSePuede() = runTest {
         // La gente registra el gasto días después de haberlo pagado.
-        assertNull(registrar(fecha = hoy.minusDays(7)))
+        assertNull(registrar(fecha = hoy.minusDays(7).atStartOfDay()))
     }
 
     @Test
@@ -78,16 +99,16 @@ class GastoRepositoryTest {
 
     @Test
     fun elTotalDelMesSumaSoloLoDeEsteMes() = runTest {
-        registrar(monto = 12_000.0, fecha = hoy)
-        registrar(monto = 8_000.0, fecha = hoy.withDayOfMonth(1))
-        registrar(monto = 99_000.0, fecha = hoy.minusMonths(1))
+        registrar(monto = 12_000.0, fecha = hoy.atStartOfDay())
+        registrar(monto = 8_000.0, fecha = hoy.withDayOfMonth(1).atStartOfDay())
+        registrar(monto = 99_000.0, fecha = hoy.minusMonths(1).atStartOfDay())
 
         assertEquals(20_000.0, repository.totalDelMes(negocioId).first(), 0.001)
     }
 
     @Test
     fun elMesPasadoSePuedeConsultarAparte() = runTest {
-        registrar(monto = 99_000.0, fecha = hoy.minusMonths(1))
+        registrar(monto = 99_000.0, fecha = hoy.minusMonths(1).atStartOfDay())
 
         val mesPasado = YearMonth.from(hoy.minusMonths(1))
         assertEquals(99_000.0, repository.totalDelMes(negocioId, mesPasado).first(), 0.001)
@@ -120,7 +141,7 @@ class GastoRepositoryTest {
             gastoId = gasto.id,
             descripcion = "Domicilio del sábado",
             monto = 15_000.0,
-            fecha = hoy,
+            fecha = hoy.atStartOfDay(),
             categoriaId = 3L,
         )
 
@@ -138,11 +159,11 @@ class GastoRepositoryTest {
 
         assertEquals(
             ErrorGasto.MontoNoPositivo,
-            repository.editarGasto(gasto.id, "Domicilio", 0.0, hoy),
+            repository.editarGasto(gasto.id, "Domicilio", 0.0, hoy.atStartOfDay()),
         )
         assertEquals(
             ErrorGasto.FechaEnElFuturo,
-            repository.editarGasto(gasto.id, "Domicilio", 15_000.0, hoy.plusDays(1)),
+            repository.editarGasto(gasto.id, "Domicilio", 15_000.0, hoy.plusDays(1).atStartOfDay()),
         )
         // El gasto original queda intacto: un intento inválido no daña lo que ya estaba bien.
         assertEquals(12_000.0, repository.gastosDelMes(negocioId).first().single().monto, 0.001)
@@ -150,7 +171,7 @@ class GastoRepositoryTest {
 
     @Test
     fun editarUnGastoQueYaNoExisteNoRompeNada() = runTest {
-        assertNull(repository.editarGasto(99L, "Domicilio", 12_000.0, hoy))
+        assertNull(repository.editarGasto(99L, "Domicilio", 12_000.0, hoy.atStartOfDay()))
     }
 
     @Test

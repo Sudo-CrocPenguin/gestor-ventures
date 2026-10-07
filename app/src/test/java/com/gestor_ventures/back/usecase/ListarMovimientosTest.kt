@@ -63,7 +63,7 @@ class ListarMovimientosTest {
         )
 
     private suspend fun gastar(monto: Double, fecha: LocalDate = hoy) =
-        gastoRepository.registrarGasto(negocioId, "Transporte", monto, fecha)
+        gastoRepository.registrarGasto(negocioId, "Transporte", monto, fecha.atStartOfDay())
 
     private suspend fun costear(monto: Double, fecha: LocalDateTime = ahora) =
         costoRepository.registrarCosto(negocioId, "Harina", monto, fecha)

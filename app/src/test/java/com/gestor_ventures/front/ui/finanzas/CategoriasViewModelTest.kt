@@ -111,8 +111,8 @@ class CategoriasViewModelTest {
         crear("Papelería", TipoCategoria.GASTO)
         advanceUntilIdle()
         val transporte = estado.categorias.first { it.categoria.nombre == "Transporte" }.categoria
-        gastoRepository.registrarGasto(1L, "Taxi", 8_000.0, hoy, transporte.id)
-        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy, transporte.id)
+        gastoRepository.registrarGasto(1L, "Taxi", 8_000.0, hoy.atStartOfDay(), transporte.id)
+        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy.atStartOfDay(), transporte.id)
         advanceUntilIdle()
 
         val porNombre = estado.categorias.associate { it.categoria.nombre to it.total }
@@ -125,7 +125,7 @@ class CategoriasViewModelTest {
     fun loQueNadieClasificoSeMuestraAparte() = runTest(dispatcher) {
         crear("Transporte", TipoCategoria.GASTO)
         advanceUntilIdle()
-        gastoRepository.registrarGasto(1L, "Varios", 5_000.0, hoy, categoriaId = null)
+        gastoRepository.registrarGasto(1L, "Varios", 5_000.0, hoy.atStartOfDay(), categoriaId = null)
         advanceUntilIdle()
 
         assertEquals(5_000.0, estado.sinClasificar, 0.001)
@@ -138,7 +138,7 @@ class CategoriasViewModelTest {
         crear("Insumos", TipoCategoria.COSTO)
         advanceUntilIdle()
         val transporte = estado.categorias.single().categoria
-        gastoRepository.registrarGasto(1L, "Taxi", 8_000.0, hoy, transporte.id)
+        gastoRepository.registrarGasto(1L, "Taxi", 8_000.0, hoy.atStartOfDay(), transporte.id)
         advanceUntilIdle()
 
         assertEquals(8_000.0, estado.categorias.single().total, 0.001)

@@ -7,6 +7,7 @@ import com.gestor_ventures.back.model.ErrorGasto
 import com.gestor_ventures.back.model.Gasto
 import com.gestor_ventures.front.util.formatMiles
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 /**
@@ -45,7 +46,8 @@ data class FormularioGasto(
     val gastoId: Long? = null,
     val descripcion: String = "",
     val monto: String = "",
-    val fecha: LocalDate = LocalDate.now(),
+    /** Fecha y hora, igual que en costos: el selector cambia el día y conserva la hora. */
+    val fecha: LocalDateTime = LocalDateTime.now(),
     val categoriaId: Long? = null,
 ) {
     val esEdicion: Boolean get() = gastoId != null

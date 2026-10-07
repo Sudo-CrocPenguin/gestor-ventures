@@ -95,7 +95,7 @@ fun GastoSheet(
 
             GvDateField(
                 label = stringResource(R.string.gasto_fecha),
-                fecha = formulario.fecha,
+                fecha = formulario.fecha.toLocalDate(),
                 onFechaChange = onFechaChange,
             )
 

@@ -507,7 +507,7 @@ private fun HistorialPreview() {
                     ),
                 ),
                 Movimiento.DeGasto(
-                    Gasto(id = 3, descripcion = "Domicilio pedido", monto = 12_000.0, fecha = hoy),
+                    Gasto(id = 3, descripcion = "Domicilio pedido", monto = 12_000.0, fecha = hoy.atTime(9, 50)),
                 ),
             ),
         ),

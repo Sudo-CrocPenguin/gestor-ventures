@@ -38,6 +38,7 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.util.formatLongDate
 import com.gestor_ventures.front.util.formatMesLargo
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Composable
@@ -75,7 +76,7 @@ fun GastosScreen(
     onCerrarAcciones: () -> Unit,
     onDescripcionChange: (String) -> Unit,
     onMontoChange: (String) -> Unit,
-    onFechaChange: (LocalDate) -> Unit,
+    onFechaChange: (LocalDateTime) -> Unit,
     onCategoriaChange: (Long?) -> Unit,
     onGuardarFormulario: () -> Unit,
     onCerrarFormulario: () -> Unit,
@@ -138,7 +139,8 @@ fun GastosScreen(
             error = uiState.error,
             onDescripcionChange = onDescripcionChange,
             onMontoChange = onMontoChange,
-            onFechaChange = onFechaChange,
+            // El calendario solo cambia el día; la hora del registro se conserva.
+            onFechaChange = { fecha -> onFechaChange(fecha.atTime(formulario.fecha.toLocalTime())) },
             onCategoriaChange = onCategoriaChange,
             onGuardar = onGuardarFormulario,
             onCerrar = onCerrarFormulario,
@@ -201,7 +203,7 @@ private fun FilaGasto(
 /** "Jueves 10 de septiembre · Transporte", o solo la fecha si no tiene categoría. */
 @Composable
 private fun detalle(gastoUi: GastoUi): String {
-    val fecha = formatLongDate(gastoUi.gasto.fecha)
+    val fecha = formatLongDate(gastoUi.gasto.fecha.toLocalDate())
     val categoria = gastoUi.categoria ?: stringResource(R.string.gasto_sin_categoria)
     return "$fecha · $categoria"
 }
@@ -222,9 +224,9 @@ private fun GastosScreenPreview() {
             cargando = false,
             total = 47_000.0,
             gastos = listOf(
-                GastoUi(Gasto(1, "Domicilio de insumos", 12_000.0, mes.atDay(10), 1), "Transporte"),
-                GastoUi(Gasto(2, "Facturas y stickers", 30_000.0, mes.atDay(7), 2), "Papelería"),
-                GastoUi(Gasto(3, "Varios", 5_000.0, mes.atDay(3)), null),
+                GastoUi(Gasto(1, "Domicilio de insumos", 12_000.0, mes.atDay(10).atTime(9, 40), 1), "Transporte"),
+                GastoUi(Gasto(2, "Facturas y stickers", 30_000.0, mes.atDay(7).atTime(16, 5), 2), "Papelería"),
+                GastoUi(Gasto(3, "Varios", 5_000.0, mes.atDay(3).atTime(11, 20)), null),
             ),
         ),
     )

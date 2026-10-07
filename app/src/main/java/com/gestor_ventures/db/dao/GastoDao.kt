@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.gestor_ventures.db.entity.GastoEntity
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 /**
  * HU-14. Gastos generales del negocio: lo que se paga una vez y no se repite solo, a
@@ -33,29 +33,29 @@ interface GastoDao {
 
     /**
      * Gastos del rango, del más reciente al más antiguo. Desempata por id porque dos gastos
-     * del mismo día saldrían en cualquier orden si solo se mirara la fecha.
+     * del mismo minuto saldrían en cualquier orden si solo se mirara la fecha.
      */
     @Query(
         """
         SELECT * FROM gastos
-        WHERE negocio_id = :negocioId AND fecha BETWEEN :desde AND :hasta
-        ORDER BY fecha DESC, gasto_id DESC
+        WHERE negocio_id = :negocioId AND fecha_hora BETWEEN :desde AND :hasta
+        ORDER BY fecha_hora DESC, gasto_id DESC
         """,
     )
     fun observarEntre(
         negocioId: Long,
-        desde: LocalDate,
-        hasta: LocalDate,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
     ): Flow<List<GastoEntity>>
 
     /** HU-16: cuánto se gastó en el periodo. El COALESCE evita que un mes sin gastos dé nulo. */
     @Query(
         """
         SELECT COALESCE(SUM(monto), 0) FROM gastos
-        WHERE negocio_id = :negocioId AND fecha BETWEEN :desde AND :hasta
+        WHERE negocio_id = :negocioId AND fecha_hora BETWEEN :desde AND :hasta
         """,
     )
-    fun observarTotalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double>
+    fun observarTotalEntre(negocioId: Long, desde: LocalDateTime, hasta: LocalDateTime): Flow<Double>
 
     /**
      * HU-15: cuánto se ha gastado en cada categoría dentro del rango.
@@ -66,15 +66,15 @@ interface GastoDao {
     @Query(
         """
         SELECT categoria_id AS categoriaId, SUM(monto) AS total FROM gastos
-        WHERE negocio_id = :negocioId AND fecha BETWEEN :desde AND :hasta
+        WHERE negocio_id = :negocioId AND fecha_hora BETWEEN :desde AND :hasta
         GROUP BY categoria_id
         ORDER BY total DESC
         """,
     )
     fun observarTotalPorCategoriaEntre(
         negocioId: Long,
-        desde: LocalDate,
-        hasta: LocalDate,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
     ): Flow<List<TotalPorCategoria>>
 }
 

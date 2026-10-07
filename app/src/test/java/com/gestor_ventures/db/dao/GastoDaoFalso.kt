@@ -4,7 +4,7 @@ import com.gestor_ventures.db.entity.GastoEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 /**
  * DAO de mentiras para las pruebas de JVM: guarda en memoria y filtra por rango igual que la
@@ -34,25 +34,25 @@ class GastoDaoFalso : GastoDao {
 
     override fun observarEntre(
         negocioId: Long,
-        desde: LocalDate,
-        hasta: LocalDate,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
     ): Flow<List<GastoEntity>> = gastos.map { lista ->
         lista.enRango(negocioId, desde, hasta)
-            .sortedWith(compareByDescending<GastoEntity> { it.fecha }.thenByDescending { it.gastoId })
+            .sortedWith(compareByDescending<GastoEntity> { it.fechaHora }.thenByDescending { it.gastoId })
     }
 
     override fun observarTotalEntre(
         negocioId: Long,
-        desde: LocalDate,
-        hasta: LocalDate,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
     ): Flow<Double> = gastos.map { lista ->
         lista.enRango(negocioId, desde, hasta).sumOf { it.monto }
     }
 
     override fun observarTotalPorCategoriaEntre(
         negocioId: Long,
-        desde: LocalDate,
-        hasta: LocalDate,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
     ): Flow<List<TotalPorCategoria>> = gastos.map { lista ->
         lista.enRango(negocioId, desde, hasta)
             .groupBy { it.categoriaId }
@@ -62,9 +62,9 @@ class GastoDaoFalso : GastoDao {
 
     private fun List<GastoEntity>.enRango(
         negocioId: Long,
-        desde: LocalDate,
-        hasta: LocalDate,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
     ) = filter {
-        it.negocioId == negocioId && !it.fecha.isBefore(desde) && !it.fecha.isAfter(hasta)
+        it.negocioId == negocioId && !it.fechaHora.isBefore(desde) && !it.fechaHora.isAfter(hasta)
     }
 }
