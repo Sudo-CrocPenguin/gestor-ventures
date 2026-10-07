@@ -18,3 +18,7 @@ local.properties
 /app/google-services.json
 .env
 .env.*
+
+# Scratch del compilador de Kotlin y configuración por máquina del IDE.
+/.kotlin
+/.idea/deviceManager.xml
