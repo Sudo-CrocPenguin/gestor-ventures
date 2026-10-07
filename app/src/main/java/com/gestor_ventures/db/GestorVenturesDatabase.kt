@@ -43,6 +43,7 @@ import com.gestor_ventures.db.entity.VentaEntity
  *
  * Versión 2: `negocios.color_marca` (HU-05). Ver [MIGRACION_1_2].
  * Versión 3: `ventas.nota` (HU-11). Ver [MIGRACION_2_3].
+ * Versión 4: `gastos.fecha` pasa a `gastos.fecha_hora` (HU-20). Ver [MIGRACION_3_4].
  */
 @Database(
     entities = [
@@ -67,7 +68,7 @@ import com.gestor_ventures.db.entity.VentaEntity
         AlertaEntity::class,
         NotificacionEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

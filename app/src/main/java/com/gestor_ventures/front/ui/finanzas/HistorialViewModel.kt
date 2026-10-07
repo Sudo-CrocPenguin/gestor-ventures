@@ -145,7 +145,10 @@ class HistorialViewModel @Inject constructor(
                 val hora = it.campos.fechaHora.toLocalTime()
                 it.copy(campos = it.campos.copy(fechaHora = fecha.atTime(hora), error = null))
             },
-            gasto = { it.copy(campos = it.campos.copy(fecha = fecha), error = null) },
+            gasto = {
+                val hora = it.campos.fecha.toLocalTime()
+                it.copy(campos = it.campos.copy(fecha = fecha.atTime(hora)), error = null)
+            },
             costo = {
                 val hora = it.campos.fecha.toLocalTime()
                 it.copy(campos = it.campos.copy(fecha = fecha.atTime(hora)), error = null)

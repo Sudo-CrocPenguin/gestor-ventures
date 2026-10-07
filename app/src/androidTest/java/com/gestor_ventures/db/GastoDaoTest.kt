@@ -19,6 +19,7 @@ import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 /**
  * HU-14. Gastos generales contra una base de datos real en memoria.
@@ -35,6 +36,10 @@ class GastoDaoTest {
 
     private val mes: LocalDate = LocalDate.of(2026, 9, 1)
     private val finDeMes: LocalDate = LocalDate.of(2026, 9, 30)
+
+    // El rango va del primer instante del mes al último: el gasto ahora lleva hora (HU-20).
+    private val desde: LocalDateTime = mes.atStartOfDay()
+    private val hasta: LocalDateTime = finDeMes.atTime(LocalTime.MAX)
 
     private var negocioId: Long = 0
     private var categoriaId: Long = 0
@@ -81,7 +86,7 @@ class GastoDaoTest {
 
         assertEquals("Domicilio", guardado?.descripcion)
         assertEquals(12_000.0, guardado?.monto)
-        assertEquals(LocalDate.of(2026, 9, 10), guardado?.fecha)
+        assertEquals(LocalDate.of(2026, 9, 10).atTime(9, 40), guardado?.fechaHora)
         assertEquals(categoriaId, guardado?.categoriaId)
     }
 
@@ -96,9 +101,9 @@ class GastoDaoTest {
     fun elPrimeroYElUltimoDiaDelMesCuentan() = runTest {
         gastoDao.insertar(gasto(descripcion = "Uno", monto = 10_000.0, dia = 1))
         gastoDao.insertar(gasto(descripcion = "Treinta", monto = 20_000.0, dia = 30))
-        gastoDao.insertar(gasto(descripcion = "Mes pasado", monto = 99_000.0, fecha = mes.minusDays(1)))
+        gastoDao.insertar(gasto(descripcion = "Mes pasado", monto = 99_000.0, fecha = mes.minusDays(1).atTime(9, 40)))
 
-        val total = gastoDao.observarTotalEntre(negocioId, mes, finDeMes).first()
+        val total = gastoDao.observarTotalEntre(negocioId, desde, hasta).first()
 
         assertEquals(30_000.0, total, 0.001)
     }
@@ -109,7 +114,7 @@ class GastoDaoTest {
         gastoDao.insertar(gasto(descripcion = "Ultimo", monto = 20_000.0, dia = 20))
         gastoDao.insertar(gasto(descripcion = "Medio", monto = 15_000.0, dia = 12))
 
-        val gastos = gastoDao.observarEntre(negocioId, mes, finDeMes).first()
+        val gastos = gastoDao.observarEntre(negocioId, desde, hasta).first()
 
         assertEquals(listOf("Ultimo", "Medio", "Primero"), gastos.map { it.descripcion })
     }
@@ -119,14 +124,14 @@ class GastoDaoTest {
         val primero = gastoDao.insertar(gasto(descripcion = "Uno", monto = 10_000.0, dia = 10))
         val segundo = gastoDao.insertar(gasto(descripcion = "Otro", monto = 20_000.0, dia = 10))
 
-        val gastos = gastoDao.observarEntre(negocioId, mes, finDeMes).first()
+        val gastos = gastoDao.observarEntre(negocioId, desde, hasta).first()
 
         assertEquals(listOf(segundo, primero), gastos.map { it.gastoId })
     }
 
     @Test
     fun unMesSinGastosTotalizaCeroYNoNulo() = runTest {
-        assertEquals(0.0, gastoDao.observarTotalEntre(negocioId, mes, finDeMes).first(), 0.001)
+        assertEquals(0.0, gastoDao.observarTotalEntre(negocioId, desde, hasta).first(), 0.001)
     }
 
     @Test
@@ -146,7 +151,7 @@ class GastoDaoTest {
             gasto(descripcion = "Ajeno", monto = 99_000.0, dia = 10, negocio = otroNegocioId, categoria = null),
         )
 
-        assertEquals(10_000.0, gastoDao.observarTotalEntre(negocioId, mes, finDeMes).first(), 0.001)
+        assertEquals(10_000.0, gastoDao.observarTotalEntre(negocioId, desde, hasta).first(), 0.001)
     }
 
     @Test
@@ -163,7 +168,7 @@ class GastoDaoTest {
         gastoDao.insertar(gasto(descripcion = "Facturas", monto = 30_000.0, dia = 7, categoria = papeleria))
         gastoDao.insertar(gasto(descripcion = "Varios", monto = 5_000.0, dia = 8, categoria = null))
 
-        val totales = gastoDao.observarTotalPorCategoriaEntre(negocioId, mes, finDeMes).first()
+        val totales = gastoDao.observarTotalPorCategoriaEntre(negocioId, desde, hasta).first()
 
         // De mayor a menor: papelería 30.000, transporte 20.000, sin clasificar 5.000.
         assertEquals(listOf(papeleria, categoriaId, null), totales.map { it.categoriaId })
@@ -178,14 +183,14 @@ class GastoDaoTest {
 
         // El gasto sigue ahí, sin etiqueta, y sigue contando en el total del mes.
         assertNull(gastoDao.obtener(id)?.categoriaId)
-        assertEquals(12_000.0, gastoDao.observarTotalEntre(negocioId, mes, finDeMes).first(), 0.001)
+        assertEquals(12_000.0, gastoDao.observarTotalEntre(negocioId, desde, hasta).first(), 0.001)
     }
 
     private fun gasto(
         descripcion: String,
         monto: Double,
         dia: Int = 15,
-        fecha: LocalDate = mes.withDayOfMonth(dia),
+        fecha: LocalDateTime = mes.withDayOfMonth(dia).atTime(9, 40),
         negocio: Long = negocioId,
         categoria: Long? = categoriaId,
     ) = GastoEntity(
@@ -193,6 +198,6 @@ class GastoDaoTest {
         categoriaId = categoria,
         descripcion = descripcion,
         monto = monto,
-        fecha = fecha,
+        fechaHora = fecha,
     )
 }

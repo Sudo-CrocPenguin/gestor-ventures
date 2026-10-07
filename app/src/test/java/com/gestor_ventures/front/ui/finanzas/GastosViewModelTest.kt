@@ -108,7 +108,7 @@ class GastosViewModelTest {
 
         viewModel.abrirFormularioNuevo()
 
-        assertEquals(hoy, estado.formulario?.fecha)
+        assertEquals(hoy, estado.formulario?.fecha?.toLocalDate())
     }
 
     @Test
@@ -194,7 +194,7 @@ class GastosViewModelTest {
         viewModel.abrirFormularioNuevo()
         viewModel.onDescripcionChange("Domicilio")
         viewModel.onMontoChange("12000")
-        viewModel.onFechaChange(hoy.plusDays(1))
+        viewModel.onFechaChange(hoy.plusDays(1).atStartOfDay())
         viewModel.guardarFormulario()
         advanceUntilIdle()
 
@@ -208,7 +208,7 @@ class GastosViewModelTest {
         crearCategoria("Transporte")
         advanceUntilIdle()
         val categoria = estado.categorias.single()
-        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy, categoria.id)
+        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy.atStartOfDay(), categoria.id)
         advanceUntilIdle()
 
         viewModel.abrirAcciones(estado.gastos.single())
@@ -217,14 +217,14 @@ class GastosViewModelTest {
         val formulario = estado.formulario
         assertEquals("Domicilio", formulario?.descripcion)
         assertEquals("12000", formulario?.monto)
-        assertEquals(hoy, formulario?.fecha)
+        assertEquals(hoy, formulario?.fecha?.toLocalDate())
         assertEquals(categoria.id, formulario?.categoriaId)
         assertTrue(formulario?.esEdicion == true)
     }
 
     @Test
     fun editarCorrigeElGastoEnVezDeCrearOtro() = runTest(dispatcher) {
-        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy)
+        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy.atStartOfDay())
         advanceUntilIdle()
 
         viewModel.abrirAcciones(estado.gastos.single())
@@ -240,8 +240,8 @@ class GastosViewModelTest {
 
     @Test
     fun eliminarSacaElGastoYBajaElTotal() = runTest(dispatcher) {
-        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy)
-        gastoRepository.registrarGasto(1L, "Taxi", 8_000.0, hoy)
+        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy.atStartOfDay())
+        gastoRepository.registrarGasto(1L, "Taxi", 8_000.0, hoy.atStartOfDay())
         advanceUntilIdle()
 
         // El último registrado va de primero, así que el taxi encabeza la lista.
@@ -258,7 +258,7 @@ class GastosViewModelTest {
 
     @Test
     fun tocarUnGastoAbreSusOpcionesYNoLoEditaDeUna() = runTest(dispatcher) {
-        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy)
+        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy.atStartOfDay())
         advanceUntilIdle()
 
         viewModel.abrirAcciones(estado.gastos.single())
@@ -269,7 +269,7 @@ class GastosViewModelTest {
 
     @Test
     fun elMenuSeCierraAlElegirUnaOpcion() = runTest(dispatcher) {
-        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy)
+        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy.atStartOfDay())
         advanceUntilIdle()
 
         viewModel.abrirAcciones(estado.gastos.single())
@@ -282,7 +282,7 @@ class GastosViewModelTest {
 
     @Test
     fun cerrarElMenuNoTocaElGasto() = runTest(dispatcher) {
-        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy)
+        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, hoy.atStartOfDay())
         advanceUntilIdle()
 
         viewModel.abrirAcciones(estado.gastos.single())

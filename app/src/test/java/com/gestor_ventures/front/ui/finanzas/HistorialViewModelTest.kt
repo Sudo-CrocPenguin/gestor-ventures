@@ -125,7 +125,7 @@ class HistorialViewModelTest {
         )
 
     private suspend fun gastar(monto: Double, fecha: LocalDate = hoy) =
-        gastoRepository.registrarGasto(negocioId, "Transporte", monto, fecha)
+        gastoRepository.registrarGasto(negocioId, "Transporte", monto, fecha.atStartOfDay())
 
     @Test
     fun elHistorialAbreEnHoy() = runTest(dispatcher) {

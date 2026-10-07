@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 /** Máximo de dígitos de un monto, igual que en el resto de formularios. */
@@ -96,7 +97,7 @@ class GastosViewModel @Inject constructor(
 
     fun abrirFormularioNuevo() {
         _uiState.update {
-            it.copy(formulario = FormularioGasto(fecha = gastoRepository.hoy()), error = null)
+            it.copy(formulario = FormularioGasto(fecha = gastoRepository.ahora()), error = null)
         }
     }
 
@@ -132,7 +133,7 @@ class GastosViewModel @Inject constructor(
         }
     }
 
-    fun onFechaChange(fecha: LocalDate) {
+    fun onFechaChange(fecha: LocalDateTime) {
         _uiState.update { it.copy(formulario = it.formulario?.copy(fecha = fecha), error = null) }
     }
 

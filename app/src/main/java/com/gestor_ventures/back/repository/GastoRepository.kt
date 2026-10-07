@@ -9,6 +9,8 @@ import com.gestor_ventures.db.entity.GastoEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,7 +32,7 @@ class GastoRepository @Inject constructor(
         negocioId: Long,
         descripcion: String,
         monto: Double,
-        fecha: LocalDate,
+        fecha: LocalDateTime = reloj.ahora(),
         categoriaId: Long? = null,
     ): ErrorGasto? {
         val descripcionLimpia = descripcion.trim()
@@ -42,7 +44,7 @@ class GastoRepository @Inject constructor(
                 categoriaId = categoriaId,
                 descripcion = descripcionLimpia,
                 monto = monto,
-                fecha = fecha,
+                fechaHora = fecha,
             ),
         )
         return null
@@ -57,7 +59,7 @@ class GastoRepository @Inject constructor(
         gastoId: Long,
         descripcion: String,
         monto: Double,
-        fecha: LocalDate,
+        fecha: LocalDateTime,
         categoriaId: Long? = null,
     ): ErrorGasto? {
         val descripcionLimpia = descripcion.trim()
@@ -68,7 +70,7 @@ class GastoRepository @Inject constructor(
             actual.copy(
                 descripcion = descripcionLimpia,
                 monto = monto,
-                fecha = fecha,
+                fechaHora = fecha,
                 categoriaId = categoriaId,
             ),
         )
@@ -81,27 +83,28 @@ class GastoRepository @Inject constructor(
 
     /** Gastos de un mes, del más reciente al más antiguo. */
     fun gastosDelMes(negocioId: Long, mes: YearMonth = mesActual()): Flow<List<Gasto>> =
-        gastoDao.observarEntre(negocioId, mes.atDay(1), mes.atEndOfMonth())
+        gastoDao.observarEntre(negocioId, mes.inicio(), mes.fin())
             .map { entidades -> entidades.map(::aGasto) }
 
     /** HU-16: cuánto se gastó en el mes. */
     fun totalDelMes(negocioId: Long, mes: YearMonth = mesActual()): Flow<Double> =
-        gastoDao.observarTotalEntre(negocioId, mes.atDay(1), mes.atEndOfMonth())
+        gastoDao.observarTotalEntre(negocioId, mes.inicio(), mes.fin())
 
     /** HU-17: los gastos de un rango de días, del más reciente al más antiguo. */
     fun gastosEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Gasto>> =
-        gastoDao.observarEntre(negocioId, desde, hasta).map { it.map(::aGasto) }
+        gastoDao.observarEntre(negocioId, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX))
+            .map { it.map(::aGasto) }
 
     /** HU-08: lo gastado entre dos días, para medir el progreso de la meta. */
     fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
-        gastoDao.observarTotalEntre(negocioId, desde, hasta)
+        gastoDao.observarTotalEntre(negocioId, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX))
 
     /** HU-15: cuánto se gastó en cada categoría durante el mes. */
     fun totalPorCategoriaDelMes(
         negocioId: Long,
         mes: YearMonth = mesActual(),
     ): Flow<List<GastoPorCategoria>> =
-        gastoDao.observarTotalPorCategoriaEntre(negocioId, mes.atDay(1), mes.atEndOfMonth())
+        gastoDao.observarTotalPorCategoriaEntre(negocioId, mes.inicio(), mes.fin())
             .map { totales ->
                 totales.map { GastoPorCategoria(it.categoriaId, it.total) }
             }
@@ -109,19 +112,22 @@ class GastoRepository @Inject constructor(
     /** El mes en curso según el reloj de la app, que en las pruebas se puede fijar. */
     fun mesActual(): YearMonth = YearMonth.from(reloj.ahora())
 
-    /** El día de hoy, para que la pantalla proponga la fecha del gasto. */
+    /** El día de hoy, para limitar hasta dónde puede elegir el selector de fecha. */
     fun hoy(): LocalDate = reloj.ahora().toLocalDate()
+
+    /** El instante actual, para que la pantalla proponga cuándo fue el gasto. */
+    fun ahora(): LocalDateTime = reloj.ahora()
 
     private fun validar(
         descripcion: String,
         monto: Double,
-        fecha: LocalDate,
+        fecha: LocalDateTime,
     ): ErrorGasto? = when {
         descripcion.isEmpty() -> ErrorGasto.DescripcionVacia
         monto <= 0.0 -> ErrorGasto.MontoNoPositivo
         // Un gasto de mañana desordenaría los resúmenes; uno de la semana pasada es normal,
         // porque la gente registra días después de haber pagado.
-        fecha.isAfter(hoy()) -> ErrorGasto.FechaEnElFuturo
+        fecha.isAfter(reloj.ahora()) -> ErrorGasto.FechaEnElFuturo
         else -> null
     }
 
@@ -129,7 +135,12 @@ class GastoRepository @Inject constructor(
         id = entidad.gastoId,
         descripcion = entidad.descripcion,
         monto = entidad.monto,
-        fecha = entidad.fecha,
+        fecha = entidad.fechaHora,
         categoriaId = entidad.categoriaId,
     )
 }
+
+/** El mes va de su primer instante a su último, como en costos. */
+private fun YearMonth.inicio(): LocalDateTime = atDay(1).atStartOfDay()
+
+private fun YearMonth.fin(): LocalDateTime = atEndOfMonth().atTime(LocalTime.MAX)

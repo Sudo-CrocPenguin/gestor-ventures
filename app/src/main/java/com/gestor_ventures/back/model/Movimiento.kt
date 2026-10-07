@@ -31,11 +31,7 @@ sealed interface Movimiento {
         override val id: Long get() = gasto.id
         override val monto: Double get() = gasto.monto
 
-        /**
-         * Un gasto se registra por día, sin hora. Al mezclarlo con ventas queda al comienzo de
-         * su día, así que dentro de una misma fecha las ventas aparecen por encima.
-         */
-        override val fechaHora: LocalDateTime get() = gasto.fecha.atStartOfDay()
+        override val fechaHora: LocalDateTime get() = gasto.fecha
         override val entra: Boolean get() = false
     }
 

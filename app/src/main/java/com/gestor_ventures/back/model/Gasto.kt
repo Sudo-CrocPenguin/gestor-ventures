@@ -1,6 +1,6 @@
 package com.gestor_ventures.back.model
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 /**
  * HU-14. Gasto general del negocio: lo que se paga una vez y no se repite solo, a diferencia
@@ -13,7 +13,8 @@ data class Gasto(
     val id: Long,
     val descripcion: String,
     val monto: Double,
-    val fecha: LocalDate,
+    /** Con hora desde HU-20: la caja necesita saber en qué jornada cayó el gasto. */
+    val fecha: LocalDateTime,
     val categoriaId: Long? = null,
 )
 
