@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.gestor_ventures.R
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
+import com.gestor_ventures.front.ui.caja.CajaRoute
 import com.gestor_ventures.front.ui.clientes.ClientesRoute
 import com.gestor_ventures.front.ui.finanzas.CategoriasRoute
 import com.gestor_ventures.front.ui.finanzas.FinanzasRoute
@@ -47,6 +48,9 @@ object Rutas {
     /** HU-17. Todo lo que movió plata en un periodo, para poder corregirlo. */
     const val Historial = "historial"
 
+    /** HU-19. La jornada de caja del negocio activo. */
+    const val Caja = "caja"
+
     /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
     const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
     fun baseFinanciera(negocioId: String) = "base_financiera/$negocioId"
@@ -76,8 +80,7 @@ fun AppNavHost(
             InicioRoute(
                 onVerFinanzas = { navController.navigateToTopLevel(TopLevelDestination.Finanzas) },
                 onRegistrarVenta = { navController.navigate(Rutas.RegistrarVenta) },
-                // Abrir caja (Épica 4) aún no tiene pantalla.
-                onAbrirCaja = {},
+                onAbrirCaja = { navController.navigate(Rutas.Caja) },
                 onDefinirMeta = { navController.navigate(Rutas.MetaYReinversion) },
             )
         }
@@ -162,6 +165,11 @@ fun AppNavHost(
                     }
                 },
             )
+        }
+
+        // HU-19. La jornada de caja: con cuánto se arrancó el turno.
+        composable(Rutas.Caja) {
+            CajaRoute(onBack = { navController.popBackStack() })
         }
 
         // HU-29. A quién le vende el negocio.
