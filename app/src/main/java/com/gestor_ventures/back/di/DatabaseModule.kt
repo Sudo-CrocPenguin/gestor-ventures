@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.db.GestorVenturesDatabase
 import com.gestor_ventures.db.MIGRACIONES
+import com.gestor_ventures.db.dao.CajaDao
 import com.gestor_ventures.db.dao.CategoriaDao
 import com.gestor_ventures.db.dao.ClienteDao
 import com.gestor_ventures.db.dao.CostoDao
@@ -66,6 +67,9 @@ object DatabaseModule {
 
     @Provides
     fun proveerClienteDao(db: GestorVenturesDatabase): ClienteDao = db.clienteDao()
+
+    @Provides
+    fun proveerCajaDao(db: GestorVenturesDatabase): CajaDao = db.cajaDao()
 
     @Provides
     @Singleton
