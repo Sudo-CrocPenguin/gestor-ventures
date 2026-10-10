@@ -184,8 +184,10 @@ que trabaje sobre un negocio lo inyecta en vez de recibir el id por la navegaci�
   este proyecto:
   - `CalcularResumenFinanciero` (HU-16): ingresos − gastos − costos, incluye gastos
     fijos (HU-06) y obligaciones (HU-07) en el cálculo de dinero disponible.
-  - `CalcularDiferenciaCaja` (HU-22): monto esperado (derivado de ventas/gastos/costos
-    de la jornada) vs. monto real de cierre.
+  - `CalcularSaldoEsperado` (HU-20): monto inicial + ventas − gastos − costos de la
+    jornada, sumados por el periodo que lleva abierta la caja. No hay tabla de
+    movimientos de caja: duplicaría montos que ya viven en sus propias tablas.
+  - `CalcularDiferenciaCaja` (HU-22): monto esperado (HU-20) vs. monto real de cierre.
   - `CalcularMontoReinversion` (HU-09 / HU-36): porcentaje configurado × ganancia
     estimada.
   - `GenerarAlertas` (HU-38): evalúa las tres condiciones — caída de ventas, gasto

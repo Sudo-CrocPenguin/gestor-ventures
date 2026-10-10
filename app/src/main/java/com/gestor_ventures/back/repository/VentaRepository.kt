@@ -2,6 +2,7 @@ package com.gestor_ventures.back.repository
 
 import com.gestor_ventures.back.model.ErrorVenta
 import com.gestor_ventures.back.model.MetodoPago
+import com.gestor_ventures.back.model.JornadaSinCerrar
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.ResultadoVenta
 import com.gestor_ventures.back.model.ResumenVentas
@@ -142,6 +143,10 @@ class VentaRepository @Inject constructor(
     /** HU-08: lo vendido entre dos días, para medir el progreso de la meta desde que se creó. */
     fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
         ventaDao.observarTotalEntre(negocioId, desde.inicio(), hasta.fin())
+
+    /** HU-20: lo vendido desde que se abrió la caja, para el saldo esperado de la jornada. */
+    fun totalDesde(negocioId: Long, desde: LocalDateTime): Flow<Double> =
+        ventaDao.observarTotalEntre(negocioId, desde, JornadaSinCerrar)
 
     /** HU-17: las ventas de un rango de días, de la más reciente a la más antigua. */
     fun ventasEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Venta>> =
