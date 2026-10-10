@@ -81,7 +81,13 @@ fun CajaScreen(
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            // Sin jornada hay poco que mostrar: centrado queda a media altura en vez de
+            // pegado arriba, que en una tablet deja media pantalla vacía.
+            verticalArrangement = if (uiState.sinCaja) {
+                Arrangement.Center
+            } else {
+                Arrangement.spacedBy(12.dp)
+            },
         ) {
             when {
                 uiState.caja != null -> JornadaAbierta(uiState.caja)
@@ -166,9 +172,7 @@ private fun JornadaAbierta(caja: CajaAbiertaUi, modifier: Modifier = Modifier) {
 @Composable
 private fun SinJornada(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 48.dp),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

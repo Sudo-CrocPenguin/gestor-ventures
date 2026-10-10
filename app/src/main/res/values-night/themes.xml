@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+        En oscuro solo cambia de qué color van los iconos de la barra de estado durante el
+        arranque. El fondo ya cambia solo, por `fondo_app` (ver values-night/colors.xml).
+    -->
+    <style name="Theme.Gestorventures" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/fondo_app</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
