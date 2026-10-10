@@ -123,7 +123,7 @@ fun ObligacionesScreen(
             }
         }
 
-        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxWidth()) {
             GvPrimaryButton(
                 text = stringResource(R.string.obligaciones_agregar),
                 onClick = onAgregar,

@@ -2,10 +2,12 @@ package com.gestor_ventures.front.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -37,34 +39,39 @@ fun GvTopBar(
     onNotificacionesClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        IconButton(onClick = onMenuClick) {
-            Icon(
-                painter = painterResource(R.drawable.ic_menu),
-                contentDescription = stringResource(R.string.cd_abrir_menu),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Text(
-            text = titulo,
-            style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
+    // Mismo ancho que el contenido: si no, en una tablet acostada el menú se va al borde
+    // izquierdo y la campana al derecho, cada uno a medio metro de lo que hay debajo.
+    Box(modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Row(
             modifier = Modifier
-                .weight(1f)
+                .widthIn(max = AnchoMaximoApp)
+                .fillMaxWidth()
+                .height(56.dp)
                 .padding(horizontal = 4.dp),
-        )
-        IconButton(onClick = onNotificacionesClick) {
-            NotificationBell(notificacionesSinLeer)
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            IconButton(onClick = onMenuClick) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_menu),
+                    contentDescription = stringResource(R.string.cd_abrir_menu),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Text(
+                text = titulo,
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp),
+            )
+            IconButton(onClick = onNotificacionesClick) {
+                NotificationBell(notificacionesSinLeer)
+            }
         }
     }
 }
