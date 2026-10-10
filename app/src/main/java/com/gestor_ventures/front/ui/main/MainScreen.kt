@@ -26,6 +26,7 @@ import com.gestor_ventures.R
 import com.gestor_ventures.front.components.GvTopBar
 import com.gestor_ventures.front.model.NegocioUi
 import com.gestor_ventures.front.navigation.AppNavHost
+import com.gestor_ventures.front.components.AnchoMaximoApp
 import com.gestor_ventures.front.components.GvAnchoDeLectura
 import com.gestor_ventures.front.navigation.GvBottomBar
 import com.gestor_ventures.front.navigation.Rutas
@@ -163,8 +164,10 @@ fun MainScreen(
                 }
             },
         ) { innerPadding ->
-            // Las barras van de borde a borde; el contenido se queda en su columna.
-            GvAnchoDeLectura(Modifier.padding(innerPadding)) {
+            // Las barras van de borde a borde; el contenido se queda en su columna, con el
+            // tope holgado: en una tablet acostada, 600 dp dejaba dos franjas muertas a los
+            // lados y sin tope las tarjetas se estiran de punta a punta.
+            GvAnchoDeLectura(Modifier.padding(innerPadding), maximo = AnchoMaximoApp) {
                 AppNavHost(
                     navController = navController,
                     mostrarMensaje = { mensaje -> scope.launch { snackbarHostState.showSnackbar(mensaje) } },

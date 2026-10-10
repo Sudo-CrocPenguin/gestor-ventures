@@ -10,29 +10,43 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Ancho máximo de una columna de contenido.
+ * Tope para un formulario: un campo por fila.
  *
- * Los diseños están pensados para un teléfono. En una tablet, dejar que un campo o una tarjeta
- * se estiren de borde a borde no aprovecha el espacio: obliga al ojo a cruzar media pantalla
- * para ir de la etiqueta al valor, y un campo de texto de 1.200 dp se ve vacío siempre.
+ * Estirado a todo el ancho de una tablet, un campo de texto se ve vacío siempre y obliga al
+ * ojo a cruzar media pantalla para ir de la etiqueta al valor.
  */
-val AnchoMaximoContenido = 600.dp
+val AnchoMaximoFormulario = 600.dp
 
 /**
- * Deja el contenido de la pantalla en una columna centrada, sin pasar de [AnchoMaximoContenido].
+ * Tope para el contenido de la app: tarjetas, listas, resúmenes.
+ *
+ * Más holgado que el de un formulario porque acá hay varias cosas por fila y el contenido
+ * aguanta más ancho. Con 600 dp una tablet acostada quedaba con dos franjas muertas a los
+ * lados; sin tope, las tarjetas se estiran de borde a borde. Esto es el punto medio.
+ */
+val AnchoMaximoApp = 1000.dp
+
+/**
+ * Deja el contenido de la pantalla en una columna centrada, sin pasar de [maximo].
  *
  * En un teléfono no cambia nada: la pantalla es más angosta que el tope, así que el contenido
  * sigue ocupándola entera. En una tablet el sobrante se reparte a los lados en vez de estirar
  * lo de adentro.
  *
  * Envuelve a los `NavHost`, no a cada pantalla, para que una pantalla nueva nazca bien puesta
- * sin que nadie se acuerde de esto.
+ * sin que nadie se acuerde de esto. Cada uno con su tope: [AnchoMaximoFormulario] para el
+ * acceso, [AnchoMaximoApp] para el resto.
  */
 @Composable
-fun GvAnchoDeLectura(modifier: Modifier = Modifier, contenido: @Composable () -> Unit) {
+fun GvAnchoDeLectura(
+    modifier: Modifier = Modifier,
+    maximo: Dp = AnchoMaximoFormulario,
+    contenido: @Composable () -> Unit,
+) {
     // El fondo se pinta acá y no adentro: si no, lo que queda a los lados de la columna
     // se ve del color de la ventana, que en una tablet son dos franjas blancas.
     Box(
@@ -43,7 +57,7 @@ fun GvAnchoDeLectura(modifier: Modifier = Modifier, contenido: @Composable () ->
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = AnchoMaximoContenido)
+                .widthIn(max = maximo)
                 .fillMaxWidth()
                 .fillMaxHeight(),
         ) {

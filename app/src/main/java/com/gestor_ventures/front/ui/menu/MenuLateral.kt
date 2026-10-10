@@ -3,7 +3,7 @@ package com.gestor_ventures.front.ui.menu
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
@@ -21,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.gestor_ventures.R
 import com.gestor_ventures.front.model.NegocioUi
@@ -31,6 +34,27 @@ internal val MenuItemShape = RoundedCornerShape(13.dp)
 
 /** El mockup abre el menú sobre el 83 % del ancho de la pantalla. */
 private const val AnchoMenu = 0.83f
+
+/**
+ * Tope del ancho del menú. El 83 % está pensado para un teléfono; en una tablet acostada son
+ * más de 1.100 dp de menú para una lista de opciones cortas, y lo que se tapa es la app.
+ */
+private val AnchoMaximoMenu = 360.dp
+
+/**
+ * El 83 % de la pantalla, sin pasarse de [AnchoMaximoMenu].
+ *
+ * Se calcula y se aplica con `width` en vez de encadenar `fillMaxWidth(…).widthIn(max = …)`:
+ * eso no recorta nada, porque `fillMaxWidth` deja el ancho fijo y `widthIn` ya no puede
+ * bajarlo.
+ */
+@Composable
+private fun anchoDelMenu(): Dp {
+    val anchoPantalla = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
+    return minOf(anchoPantalla * AnchoMenu, AnchoMaximoMenu)
+}
 
 /** Secciones plegables del menú. */
 private enum class SeccionMenu { General, Negocios, Configuracion }
@@ -60,7 +84,7 @@ fun MenuLateral(
     }
 
     ModalDrawerSheet(
-        modifier = modifier.fillMaxWidth(AnchoMenu),
+        modifier = modifier.width(anchoDelMenu()),
         drawerShape = RectangleShape,
         drawerContainerColor = MaterialTheme.colorScheme.surface,
     ) {

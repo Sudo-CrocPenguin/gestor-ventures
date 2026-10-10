@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gestor_ventures.front.components.AnchoMaximoApp
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 /** Barra de pestañas inferior; la pestaña activa lleva un indicador en el borde superior. */
@@ -42,8 +44,13 @@ fun GvBottomBar(
             .background(MaterialTheme.colorScheme.surface),
     ) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+        // El fondo y la línea van de borde a borde; las pestañas se quedan en el mismo ancho
+        // que el contenido. Repartidas por toda una tablet acostada quedan a 280 dp una de
+        // otra, lejos del dedo y sin relación con lo que hay encima.
         Row(
             modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .widthIn(max = AnchoMaximoApp)
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .selectableGroup(),

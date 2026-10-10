@@ -94,7 +94,7 @@ fun GastosFijosScreen(
             )
         }
 
-        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxWidth()) {
             GvPrimaryButton(
                 text = stringResource(R.string.base_agregar_gasto),
                 onClick = onAgregar,
