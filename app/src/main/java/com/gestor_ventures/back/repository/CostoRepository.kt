@@ -3,6 +3,7 @@ package com.gestor_ventures.back.repository
 import com.gestor_ventures.back.model.Costo
 import com.gestor_ventures.back.model.ErrorCosto
 import com.gestor_ventures.back.model.GastoPorCategoria
+import com.gestor_ventures.back.model.JornadaSinCerrar
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.entity.CostoEntity
@@ -96,6 +97,10 @@ class CostoRepository @Inject constructor(
     /** HU-08: lo costeado entre dos días, para medir el progreso de la meta. */
     fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
         costoDao.observarTotalEntre(negocioId, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX))
+
+    /** HU-20: lo costeado desde que se abrió la caja, para el saldo esperado de la jornada. */
+    fun totalDesde(negocioId: Long, desde: LocalDateTime): Flow<Double> =
+        costoDao.observarTotalEntre(negocioId, desde, JornadaSinCerrar)
 
     /** HU-15: cuánto se costeó en cada categoría durante el mes. */
     fun totalPorCategoriaDelMes(

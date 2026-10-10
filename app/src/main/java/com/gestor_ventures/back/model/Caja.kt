@@ -15,6 +15,16 @@ data class Caja(
     val fechaHoraApertura: LocalDateTime,
 )
 
+/**
+ * HU-20. Final del periodo de una caja que sigue abierta.
+ *
+ * No se usa "ahora" porque un `Flow` no se entera de que el reloj avanzó: la consulta se arma
+ * una sola vez y una venta registrada un minuto después quedaría fuera del rango, con el saldo
+ * congelado. Un tope lejano no deja entrar nada que no haya pasado ya, porque ninguna venta,
+ * gasto ni costo puede quedar con fecha futura: las tres validaciones lo impiden.
+ */
+val JornadaSinCerrar: LocalDateTime = LocalDateTime.of(9999, 12, 31, 23, 59, 59)
+
 /** Reglas que debe cumplir una apertura de caja (HU-19). */
 enum class ErrorCaja {
     /** Cero sí se admite —se puede arrancar sin efectivo—, pero no se arranca debiendo. */

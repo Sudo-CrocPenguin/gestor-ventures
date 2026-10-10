@@ -3,6 +3,7 @@ package com.gestor_ventures.back.repository
 import com.gestor_ventures.back.model.ErrorGasto
 import com.gestor_ventures.back.model.Gasto
 import com.gestor_ventures.back.model.GastoPorCategoria
+import com.gestor_ventures.back.model.JornadaSinCerrar
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.entity.GastoEntity
@@ -98,6 +99,10 @@ class GastoRepository @Inject constructor(
     /** HU-08: lo gastado entre dos días, para medir el progreso de la meta. */
     fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
         gastoDao.observarTotalEntre(negocioId, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX))
+
+    /** HU-20: lo gastado desde que se abrió la caja, para el saldo esperado de la jornada. */
+    fun totalDesde(negocioId: Long, desde: LocalDateTime): Flow<Double> =
+        gastoDao.observarTotalEntre(negocioId, desde, JornadaSinCerrar)
 
     /** HU-15: cuánto se gastó en cada categoría durante el mes. */
     fun totalPorCategoriaDelMes(
