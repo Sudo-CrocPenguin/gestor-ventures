@@ -80,6 +80,9 @@ fun RecuperarContrasenaScreen(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 24.dp),
+                // Centrado vertical: en una tablet el contenido queda a media altura en vez
+                // de pegado arriba, debajo de la flecha de volver.
+                verticalArrangement = Arrangement.Center,
             ) {
                 Spacer(Modifier.height(20.dp))
 

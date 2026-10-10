@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gestor_ventures.front.components.GvAnchoDeLectura
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.ui.auth.AuthNavHost
 import com.gestor_ventures.front.ui.main.MainRoute
@@ -22,7 +23,7 @@ fun AppRoot(appRootViewModel: AppRootViewModel = hiltViewModel()) {
 
     if (usuarioId == null) {
         GestorVenturesTheme {
-            AuthNavHost()
+            GvAnchoDeLectura { AuthNavHost() }
         }
     } else {
         val mainViewModel: MainViewModel = hiltViewModel()

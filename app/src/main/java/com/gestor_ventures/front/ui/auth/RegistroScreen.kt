@@ -87,6 +87,10 @@ fun RegistroScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
+            // Centrado vertical: con contenido más corto que la pantalla —una tablet, un
+            // teléfono grande— queda a media altura en vez de pegado arriba. Si no cabe, el
+            // centrado no hace nada y el scroll arranca donde debe.
+            verticalArrangement = Arrangement.Center,
         ) {
             Spacer(Modifier.height(32.dp))
             InsigniaApp()
