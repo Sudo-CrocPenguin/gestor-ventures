@@ -94,8 +94,9 @@ fun AperturaSheet(
     }
 }
 
+/** El "$" y el "COP" que acompañan a un campo de dinero; lo usan las dos hojas de caja. */
 @Composable
-private fun TextoAuxiliar(texto: String) {
+internal fun TextoAuxiliar(texto: String) {
     Text(
         text = texto,
         style = MaterialTheme.typography.bodySmall,

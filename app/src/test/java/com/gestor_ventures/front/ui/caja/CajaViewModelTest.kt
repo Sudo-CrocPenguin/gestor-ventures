@@ -37,7 +37,7 @@ import org.junit.Before
 import org.junit.Test
 import java.time.LocalDateTime
 
-/** HU-19 y HU-20: abrir la jornada de caja y seguir su saldo. */
+/** HU-19 a HU-22: abrir la jornada, seguir su saldo y cerrarla. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class CajaViewModelTest {
 
@@ -282,5 +282,136 @@ class CajaViewModelTest {
         // La venta existe, pero sin jornada abierta no hay saldo de caja que calcular.
         assertNull(estado.caja)
         assertTrue(estado.sinCaja)
+    }
+
+    // ---------- HU-21 y HU-22: cerrar ----------
+
+    private fun contar(monto: String, nota: String = "") {
+        viewModel.abrirCierre()
+        viewModel.onMontoRealChange(monto)
+        if (nota.isNotEmpty()) viewModel.onNotaChange(nota)
+    }
+
+    @Test
+    fun conLaHojaRecienAbiertaTodaviaNoHayDiferencia() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+
+        viewModel.abrirCierre()
+
+        // Un "faltan $50.000" apenas se abre la hoja sería una alarma falsa.
+        assertNull(estado.diferencia)
+    }
+
+    @Test
+    fun siSeCuentaDeMenosLaPantallaDiceQueFalta() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+        vender(25_000.0)
+        advanceUntilIdle()
+
+        contar("70000")
+
+        val diferencia = estado.diferencia
+        assertEquals(-5_000.0, diferencia?.diferencia ?: 0.0, 0.001)
+        assertTrue(diferencia?.falta ?: false)
+    }
+
+    @Test
+    fun siSeCuentaDeMasLaPantallaDiceQueSobra() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+
+        contar("52000")
+
+        assertTrue(estado.diferencia?.sobra ?: false)
+    }
+
+    @Test
+    fun siCoincideLaPantallaDiceQueCuadra() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+        vender(25_000.0)
+        advanceUntilIdle()
+
+        contar("75000")
+
+        assertTrue(estado.diferencia?.cuadra ?: false)
+    }
+
+    @Test
+    fun confirmarElCierreDejaLaPantallaSinJornada() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+
+        contar("50000")
+        viewModel.cerrarCaja()
+        advanceUntilIdle()
+
+        assertNull(estado.caja)
+        assertNull(estado.cierre)
+        assertTrue(estado.sinCaja)
+    }
+
+    @Test
+    fun conElCampoVacioNoSePuedeCerrar() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+
+        viewModel.abrirCierre()
+        assertFalse(estado.cierre?.puedeCerrar ?: true)
+
+        viewModel.cerrarCaja()
+        advanceUntilIdle()
+        assertNotNull(estado.caja)
+    }
+
+    @Test
+    fun laNotaViajaHastaLaJornadaCerrada() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+
+        contar("48000", nota = "Se dio vuelto de más")
+        viewModel.cerrarCaja()
+        advanceUntilIdle()
+
+        assertEquals("Se dio vuelto de más", cajaDao.cajas.value.single().notaDiferencia)
+    }
+
+    @Test
+    fun cerrarLaHojaDeCierreNoDejaRastro() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+
+        contar("48000", nota = "Algo pasó")
+        viewModel.cerrarCierre()
+
+        assertNull(estado.cierre)
+        viewModel.abrirCierre()
+        assertEquals("", estado.cierre?.montoReal)
+        assertEquals("", estado.cierre?.nota)
+    }
+
+    @Test
+    fun despuesDeCerrarSePuedeAbrirOtraJornada() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+        contar("50000")
+        viewModel.cerrarCaja()
+        advanceUntilIdle()
+
+        abrirCon("20000")
+        advanceUntilIdle()
+
+        assertEquals(20_000.0, estado.caja?.montoInicial ?: -1.0, 0.001)
     }
 }
