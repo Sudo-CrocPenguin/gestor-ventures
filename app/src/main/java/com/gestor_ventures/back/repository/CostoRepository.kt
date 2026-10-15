@@ -102,6 +102,11 @@ class CostoRepository @Inject constructor(
     fun totalDesde(negocioId: Long, desde: LocalDateTime): Flow<Double> =
         costoDao.observarTotalEntre(negocioId, desde, JornadaSinCerrar)
 
+    /** HU-23: lo que se costeó dentro de una jornada ya cerrada, de una sola consulta. */
+    suspend fun sumarEntre(negocioId: Long, desde: LocalDateTime, hasta: LocalDateTime): Double =
+        costoDao.sumarEntre(negocioId, desde, hasta)
+
+
     /** HU-15: cuánto se costeó en cada categoría durante el mes. */
     fun totalPorCategoriaDelMes(
         negocioId: Long,

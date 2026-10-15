@@ -1,12 +1,15 @@
 package com.gestor_ventures.back.repository
 
 import com.gestor_ventures.back.model.Caja
+import com.gestor_ventures.back.model.CajaCerrada
 import com.gestor_ventures.back.model.ErrorCaja
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.db.dao.CajaDao
 import com.gestor_ventures.db.entity.CajaEntity
 import com.gestor_ventures.db.enums.EstadoCaja
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
+import java.time.LocalTime
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -78,6 +81,38 @@ class CajaRepository @Inject constructor(
             ),
         )
         return null
+    }
+
+    /**
+     * HU-23. Las jornadas ya cerradas de un rango de días, de la más reciente a la más antigua.
+     *
+     * Recibe días y no instantes, como el resto de la app: el corte a primera y última hora se
+     * decide acá y no en cada pantalla que quiera un historial.
+     */
+    fun cajasCerradasEntre(
+        negocioId: Long,
+        desde: LocalDate,
+        hasta: LocalDate,
+    ): Flow<List<CajaCerrada>> =
+        cajaDao.observarCerradasEntre(negocioId, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX))
+            .map { entidades -> entidades.mapNotNull(::aCajaCerrada) }
+
+    /**
+     * Una fila cerrada se traduce solo si de verdad tiene cierre y monto contado. Si alguna vez
+     * llegara una a medias, se deja fuera en vez de inventarle un cero que al usuario le
+     * aparecería como un faltante que nunca ocurrió.
+     */
+    private fun aCajaCerrada(entidad: CajaEntity): CajaCerrada? {
+        val cierre = entidad.fechaHoraCierre ?: return null
+        val montoReal = entidad.montoRealCierre ?: return null
+        return CajaCerrada(
+            id = entidad.cajaId,
+            montoInicial = entidad.montoInicial,
+            apertura = entidad.fechaHoraApertura,
+            cierre = cierre,
+            montoReal = montoReal,
+            nota = entidad.notaDiferencia,
+        )
     }
 
     private fun aCaja(entidad: CajaEntity) = Caja(
