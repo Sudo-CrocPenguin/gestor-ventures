@@ -3,6 +3,14 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
+    alias(libs.plugins.hilt)
+}
+
+// El plugin de Google Services lee app/google-services.json (credenciales del proyecto de
+// Firebase, no se versiona). Se aplica solo si el archivo ya está, para no romper el build de
+// quien todavía no lo tiene.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
 
 android {
@@ -51,11 +59,27 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.kotlinx.coroutines.play.services)
+    // Room lee los esquemas con kotlinx-serialization en las pruebas de migración, y AGP
+    // obliga a que las pruebas usen la misma versión que la app. Sin esta línea la app se
+    // queda en la versión vieja que arrastra lifecycle, y el helper de migraciones falla.
+    implementation(libs.kotlinx.serialization.core)
+    ksp(libs.hilt.compiler)
     ksp(libs.androidx.room.compiler)
     coreLibraryDesugaring(libs.android.desugar.jdk.libs)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

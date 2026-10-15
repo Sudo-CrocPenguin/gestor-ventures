@@ -1,0 +1,208 @@
+package com.gestor_ventures.front.navigation
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.NavType
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.gestor_ventures.R
+import com.gestor_ventures.front.model.TipoRegistroVentaUi
+import com.gestor_ventures.front.ui.caja.CajaRoute
+import com.gestor_ventures.front.ui.clientes.ClientesRoute
+import com.gestor_ventures.front.ui.finanzas.CategoriasRoute
+import com.gestor_ventures.front.ui.finanzas.FinanzasRoute
+import com.gestor_ventures.front.ui.finanzas.HistorialRoute
+import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
+import com.gestor_ventures.front.ui.inicio.InicioRoute
+import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
+import com.gestor_ventures.front.ui.negocio.GastosYObligacionesRoute
+import com.gestor_ventures.front.ui.negocio.MetaYReinversionRoute
+import com.gestor_ventures.front.ui.negocio.NegocioListoRoute
+import com.gestor_ventures.front.ui.negocio.RegistrarNegocioRoute
+
+/**
+ * Rutas que no son pestañas: pantallas de flujo que se abren encima y se cierran al volver.
+ */
+object Rutas {
+    const val RegistrarVenta = "registrar_venta"
+    const val RegistrarNegocio = "registrar_negocio"
+
+    /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
+    const val GastosFijos = "gastos_fijos"
+
+    /** HU-15. Categorías con las que el negocio clasifica gastos y costos. */
+    const val Categorias = "categorias"
+
+    /** HU-08 y HU-09. Meta de ahorro y reinversión del negocio activo, fuera del onboarding. */
+    const val MetaYReinversion = "meta_y_reinversion"
+
+    /** HU-17. Todo lo que movió plata en un periodo, para poder corregirlo. */
+    const val Historial = "historial"
+
+    /** HU-19. La jornada de caja del negocio activo. */
+    const val Caja = "caja"
+
+    /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
+    const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
+    fun baseFinanciera(negocioId: String) = "base_financiera/$negocioId"
+
+    /** Cierre del onboarding con el resumen del negocio. */
+    const val NegocioListo = "negocio_listo/{$ArgumentoNegocioId}"
+    fun negocioListo(negocioId: String) = "negocio_listo/$negocioId"
+}
+
+/** Nombre del id de negocio dentro de la ruta. */
+const val ArgumentoNegocioId = "negocioId"
+
+@Composable
+fun AppNavHost(
+    navController: NavHostController,
+    mostrarMensaje: (String) -> Unit,
+    onNegocioCreado: (String) -> Unit,
+    tieneNegocios: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    NavHost(
+        navController = navController,
+        startDestination = TopLevelDestination.Inicio.route,
+        modifier = modifier,
+    ) {
+        composable(TopLevelDestination.Inicio.route) {
+            InicioRoute(
+                onVerFinanzas = { navController.navigateToTopLevel(TopLevelDestination.Finanzas) },
+                onRegistrarVenta = { navController.navigate(Rutas.RegistrarVenta) },
+                onAbrirCaja = { navController.navigate(Rutas.Caja) },
+                onDefinirMeta = { navController.navigate(Rutas.MetaYReinversion) },
+            )
+        }
+
+        composable(Rutas.RegistrarVenta) {
+            val mensajeDetallada = stringResource(R.string.registrar_venta_guardada)
+            val mensajeRapida = stringResource(R.string.registrar_venta_rapida_guardada)
+            RegistrarVentaRoute(
+                onBack = { navController.popBackStack() },
+                onVentaGuardada = { tipo ->
+                    navController.popBackStack()
+                    mostrarMensaje(
+                        if (tipo == TipoRegistroVentaUi.Rapido) mensajeRapida else mensajeDetallada,
+                    )
+                },
+            )
+        }
+
+        // HU-06 y HU-07: los gastos fijos y las obligaciones viven en la misma pantalla.
+        composable(Rutas.GastosFijos) {
+            GastosYObligacionesRoute(onBack = { navController.popBackStack() })
+        }
+
+        // HU-13, HU-14 y HU-16: el resumen del mes y el detalle que lo compone.
+        composable(TopLevelDestination.Finanzas.route) {
+            FinanzasRoute(onVerHistorial = { navController.navigate(Rutas.Historial) })
+        }
+
+        // HU-17: se entra desde el resumen, a arreglar algo que quedó mal registrado.
+        composable(Rutas.Historial) {
+            HistorialRoute(onBack = { navController.popBackStack() })
+        }
+
+        composable(Rutas.Categorias) {
+            CategoriasRoute(onBack = { navController.popBackStack() })
+        }
+
+        // HU-08 y HU-09: el paso 2 del onboarding, convertido en configuración del negocio.
+        composable(Rutas.MetaYReinversion) {
+            val mensaje = stringResource(R.string.meta_guardada)
+            MetaYReinversionRoute(
+                onBack = { navController.popBackStack() },
+                onGuardado = {
+                    navController.popBackStack()
+                    mostrarMensaje(mensaje)
+                },
+            )
+        }
+
+        composable(Rutas.RegistrarNegocio) {
+            RegistrarNegocioRoute(
+                puedeVolver = tieneNegocios,
+                onBack = { navController.popBackStack() },
+                onNegocioCreado = { negocioId ->
+                    onNegocioCreado(negocioId.toString())
+                    // El negocio ya existe: sigue el paso 2, su base financiera.
+                    navController.navigate(Rutas.baseFinanciera(negocioId.toString()))
+                },
+            )
+        }
+
+        composable(
+            route = Rutas.BaseFinanciera,
+            arguments = listOf(navArgument(ArgumentoNegocioId) { type = NavType.StringType }),
+        ) { entrada ->
+            val negocioId = entrada.arguments?.getString(ArgumentoNegocioId).orEmpty()
+            BaseFinancieraRoute(
+                onBack = { navController.popBackStack() },
+                onConfiguracionLista = { navController.navigate(Rutas.negocioListo(negocioId)) },
+            )
+        }
+
+        composable(
+            route = Rutas.NegocioListo,
+            arguments = listOf(navArgument(ArgumentoNegocioId) { type = NavType.StringType }),
+        ) {
+            NegocioListoRoute(
+                onIrAlNegocio = {
+                    // Cierra todo el onboarding: no se vuelve atrás desde el inicio.
+                    navController.navigate(TopLevelDestination.Inicio.route) {
+                        popUpTo(TopLevelDestination.Inicio.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        // HU-19. La jornada de caja: con cuánto se arrancó el turno.
+        composable(Rutas.Caja) {
+            CajaRoute(onBack = { navController.popBackStack() })
+        }
+
+        // HU-29. A quién le vende el negocio.
+        composable(TopLevelDestination.Clientes.route) {
+            ClientesRoute()
+        }
+
+        // Pestañas cuya pantalla aún no existe: se reemplazan a medida que se construyen.
+        listOf(
+            TopLevelDestination.Agenda,
+            TopLevelDestination.Asistente,
+        ).forEach { destination ->
+            composable(destination.route) { PendingDestination(destination) }
+        }
+    }
+}
+
+/** Cambia de pestaña conservando el estado de cada una, sin apilar pestañas repetidas. */
+fun NavHostController.navigateToTopLevel(destination: TopLevelDestination) {
+    navigate(destination.route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
+@Composable
+private fun PendingDestination(destination: TopLevelDestination) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            text = stringResource(R.string.pantalla_pendiente, stringResource(destination.labelRes)),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}

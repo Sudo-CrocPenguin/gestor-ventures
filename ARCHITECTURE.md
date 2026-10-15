@@ -91,22 +91,29 @@ camino trazado para modularizar después si hace falta.
 ## 4. Estructura de carpetas
 
 ```
-com.gestorventures/
+com.gestor_ventures/
 │
 ├── front/                          ← Presentación (Compose + ViewModels)
 │   ├── ui/
+│   │   ├── main/                     Marco común: barra superior, negocio activo, pestañas
+│   │   ├── menu/                     Menú lateral: negocios, configuración, cerrar sesión
+│   │   ├── inicio/                   Inicio del Líder: resumen del día, cajas del equipo
 │   │   ├── auth/                     HU-01 a HU-04
 │   │   ├── negocio/                  HU-05 a HU-10
-│   │   ├── finanzas/                 HU-11 a HU-18
+│   │   ├── finanzas/                 HU-11 a HU-18 (registrar venta ya hecho)
 │   │   ├── caja/                     HU-19 a HU-23
 │   │   ├── agenda/                   HU-24 a HU-28
 │   │   ├── clientes/                 HU-29 a HU-33
 │   │   ├── asistente/                HU-34 a HU-39
 │   │   └── notificaciones/           HU-40, HU-41
-│   ├── navigation/                 NavGraph, rutas
-│   └── theme/                      Color.kt, Type.kt, Theme.kt
+│   ├── components/                 Componentes visuales reutilizables (GvCard, MoneyText…)
+│   ├── model/                      Modelos de UI compartidos (UsuarioUi, NegocioUi, RolNegocio)
+│   ├── navigation/                 Pestañas (TopLevelDestination), AppNavHost, barra inferior
+│   ├── theme/                      Color.kt, Type.kt, Theme.kt
+│   └── util/                       Formato de moneda, fecha y hora
 │
 ├── back/                           ← Lógica de negocio y orquestación
+│   ├── model/                      Modelos de dominio (Negocio, Reloj…), sin Room
 │   ├── repository/                 Un repository por dominio
 │   ├── usecase/                    Solo donde hay cálculo/lógica real (§5.2)
 │   ├── network/                    Retrofit: ApiService + DTOs (asistente de IA)
@@ -122,10 +129,38 @@ com.gestorventures/
 └── MainActivity.kt
 ```
 
-Cada subcarpeta de `front/ui/` trae su(s) pantalla(s) Compose y su `XxxViewModel.kt`.
+Cada subcarpeta de `front/ui/` sigue la misma forma (`front/ui/inicio/` es la referencia):
+
+| Archivo | Contenido |
+|---|---|
+| `XxxScreen.kt` | `XxxRoute` (obtiene el ViewModel y observa el estado) + `XxxScreen` (sin estado: recibe el `UiState` y callbacks) + `@Preview` |
+| `XxxViewModel.kt` | Expone `StateFlow<XxxUiState>` y los eventos de la pantalla |
+| `XxxUiState.kt` | `data class` con todo lo que la pantalla muestra |
+| `XxxPreviewData.kt` | Datos de ejemplo para los `@Preview` |
+| `YyyCard.kt`, … | Piezas visuales propias de esa pantalla |
+
+Una pieza visual que usan dos o más pantallas se mueve a `front/components/`, y un modelo que
+usan dos o más features (`UsuarioUi`, `NegocioUi`, `RolNegocio`) se mueve a `front/model/`, para
+que ninguna feature tenga que importar de otra.
+
+`back/model/` es la frontera entre capas: el repositorio traduce entre esos modelos y las
+entidades de Room, y `front/` nunca ve un `@Entity`. Por eso hay enums parecidos en `db/` y en
+`back/model/`: son la misma idea escrita para dos mundos distintos, y el repositorio los mapea.
+
+Una feature no lleva `ViewModel` propio cuando su estado ya pertenece a otra pantalla. Es el caso
+de `front/ui/menu/`: el menú lateral vive dentro del marco de la app, así que su estado lo arma
+`MainViewModel` y el menú solo recibe el `UiState` y avisa de las acciones hacia arriba. Así el
+negocio activo tiene una sola fuente de verdad.
+
 Cada dominio en `back/repository/` corresponde a un grupo de tablas relacionadas
 (`NegocioRepository`, `VentaRepository`, `CajaRepository`, `ClienteRepository`,
 `AsistenteRepository`, etc.).
+
+La excepción es `NegocioActivoRepository`, que no envuelve tablas sino el estado compartido de
+con qué negocio está trabajando el usuario. Vive en `back/` porque no es de ninguna pantalla:
+el menú lateral lo cambia, la barra superior lo muestra, el inicio resume sus ventas y el
+registro de ventas lo necesita para saber a quién apuntarle la venta. Cualquier pantalla nueva
+que trabaje sobre un negocio lo inyecta en vez de recibir el id por la navegación.
 
 ---
 
@@ -149,8 +184,10 @@ Cada dominio en `back/repository/` corresponde a un grupo de tablas relacionadas
   este proyecto:
   - `CalcularResumenFinanciero` (HU-16): ingresos − gastos − costos, incluye gastos
     fijos (HU-06) y obligaciones (HU-07) en el cálculo de dinero disponible.
-  - `CalcularDiferenciaCaja` (HU-22): monto esperado (derivado de ventas/gastos/costos
-    de la jornada) vs. monto real de cierre.
+  - `CalcularSaldoEsperado` (HU-20): monto inicial + ventas − gastos − costos de la
+    jornada, sumados por el periodo que lleva abierta la caja. No hay tabla de
+    movimientos de caja: duplicaría montos que ya viven en sus propias tablas.
+  - `CalcularDiferenciaCaja` (HU-22): monto esperado (HU-20) vs. monto real de cierre.
   - `CalcularMontoReinversion` (HU-09 / HU-36): porcentaje configurado × ganancia
     estimada.
   - `GenerarAlertas` (HU-38): evalúa las tres condiciones — caída de ventas, gasto
@@ -225,6 +262,12 @@ decide entre caché local y red, sin que `front/` se entere del cambio.
   `LiveData`.
 - **Queries reactivas**: los DAO devuelven `Flow<T>` para listas/consultas que la UI
   debe observar en tiempo real (ej. lista de ventas del día, saldo de caja).
+- **Colores y textos**: las pantallas toman los colores solo de `MaterialTheme.colorScheme`
+  o `GestorVenturesTheme.colors` (nunca `Color(0x…)` directo) y los textos de
+  `res/values/strings.xml`.
+- **Montos y fechas**: siempre con `front/util/Formatters.kt` (`formatPesos`,
+  `formatLongDate`, `formatHour`).
+- **Íconos**: vectores en `res/drawable/ic_*.xml`.
 
 ---
 

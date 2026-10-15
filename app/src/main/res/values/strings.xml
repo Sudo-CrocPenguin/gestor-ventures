@@ -1,3 +1,454 @@
 <resources>
-    <string name="app_name">gestor-ventures</string>
+    <string name="app_name">Gestor Ventures</string>
+
+    <!-- Navegación -->
+    <string name="destino_inicio">Inicio</string>
+    <string name="destino_finanzas">Finanzas</string>
+    <string name="destino_agenda">Agenda</string>
+    <string name="destino_clientes">Clientes</string>
+    <string name="destino_asistente">Asistente</string>
+    <string name="pantalla_pendiente">%1$s: pantalla en construcción</string>
+
+    <!-- Marco de la app -->
+    <string name="cd_abrir_menu">Abrir menú</string>
+    <string name="cd_notificaciones">Notificaciones</string>
+    <plurals name="cd_notificaciones_sin_leer">
+        <item quantity="one">Notificaciones, %d sin leer</item>
+        <item quantity="other">Notificaciones, %d sin leer</item>
+    </plurals>
+
+    <!-- Roles -->
+    <string name="rol_lider">Líder</string>
+    <string name="rol_vendedor">Vendedor</string>
+
+    <!-- Menú lateral -->
+    <string name="menu_mis_negocios">Mis negocios</string>
+    <string name="menu_agregar_negocio">Agregar negocio</string>
+    <string name="menu_configuracion">Configuración · %1$s</string>
+    <string name="menu_general">General</string>
+    <string name="menu_info_negocio">Información del negocio</string>
+    <string name="menu_gastos_fijos">Gastos fijos y obligaciones</string>
+    <string name="clientes_vacio">Todavía no tienes clientes. Agrega el primero para tener sus datos a la mano.</string>
+    <string name="clientes_agregar">Agregar cliente</string>
+    <string name="cliente_titulo_nuevo">Nuevo cliente</string>
+    <string name="cliente_titulo_editar">Corregir cliente</string>
+    <string name="cliente_nombre">Nombre</string>
+    <string name="cliente_nombre_placeholder">Ej. Laura Gómez</string>
+    <string name="cliente_telefono">Teléfono (opcional)</string>
+    <string name="cliente_telefono_placeholder">300 111 2233</string>
+    <string name="cliente_correo">Correo (opcional)</string>
+    <string name="cliente_correo_placeholder">correo@ejemplo.com</string>
+    <string name="cliente_notas">Notas (opcional)</string>
+    <string name="cliente_notas_placeholder">Ej. Alérgica a las nueces</string>
+    <string name="cliente_guardar">Guardar cliente</string>
+    <string name="cliente_guardar_cambios">Guardar cambios</string>
+    <string name="cliente_sin_contacto">Sin teléfono ni correo</string>
+    <string name="cliente_acciones_de">Opciones de %1$s</string>
+    <string name="cliente_accion_editar">Corregir cliente</string>
+    <string name="cliente_accion_eliminar">Eliminar cliente</string>
+    <string name="cliente_error_nombre">Escribe el nombre del cliente.</string>
+    <string name="cliente_error_nombre_largo">El nombre es demasiado largo.</string>
+    <string name="cliente_error_telefono">Ese teléfono no parece válido.</string>
+    <string name="cliente_error_correo">Ese correo no parece válido.</string>
+    <string name="cliente_error_telefono_repetido">Ya tienes un cliente con ese teléfono.</string>
+    <string name="cliente_error_correo_repetido">Ya tienes un cliente con ese correo.</string>
+    <string name="menu_meta_ahorro">Meta de ahorro y reinversión</string>
+    <string name="menu_categorias">Categorías</string>
+    <string name="categoria_tipo_gasto">Gastos</string>
+    <string name="categoria_tipo_costo">Costos</string>
+    <string name="categoria_tipo_gasto_ayuda">Plata que se va por funcionar: arriendo, transporte, papelería.</string>
+    <string name="categoria_tipo_costo_ayuda">Plata que se va por producir lo que vendes: insumos, empaques.</string>
+    <string name="categorias_vacio">Todavía no tienes categorías de este tipo. Agrégalas para saber en qué se te va la plata.</string>
+    <string name="categorias_sin_clasificar">Sin clasificar</string>
+    <string name="categorias_agregar">Agregar categoría</string>
+    <string name="categoria_titulo_nueva">Nueva categoría</string>
+    <string name="categoria_titulo_editar">Editar categoría</string>
+    <string name="categoria_nombre">Nombre</string>
+    <string name="categoria_nombre_placeholder">Ej. Insumos</string>
+    <string name="categoria_guardar">Guardar categoría</string>
+    <string name="categoria_guardar_cambios">Guardar cambios</string>
+    <string name="categoria_acciones">Opciones de %1$s</string>
+    <string name="categoria_accion_editar">Editar categoría</string>
+    <string name="categoria_accion_eliminar">Eliminar categoría</string>
+    <string name="categoria_eliminar_titulo">¿Eliminar %1$s?</string>
+    <string name="categoria_eliminar_ayuda">Los gastos y costos que estaban en esta categoría no se borran: quedan sin categoría y siguen contando en tus finanzas.</string>
+    <string name="categoria_eliminar_confirmar">Eliminar</string>
+    <string name="venta_corregir_titulo">Corregir venta</string>
+    <string name="venta_fecha">Fecha de la venta</string>
+    <string name="venta_guardar_cambios">Guardar cambios</string>
+    <string name="historial_accion_editar">Corregir movimiento</string>
+    <string name="historial_titulo">Historial</string>
+    <string name="historial_ingresos">Ingresos</string>
+    <string name="historial_salidas">Salidas</string>
+    <string name="historial_diferencia">Diferencia del periodo</string>
+    <string name="historial_filtro_todos">Todos</string>
+    <string name="historial_filtro_ventas">Ventas</string>
+    <string name="historial_filtro_salidas">Gastos y costos</string>
+    <string name="historial_vacio">No hay movimientos en este periodo. Registra una venta o un gasto y aparecerán acá.</string>
+    <string name="historial_sin_filtro">No hay movimientos de este tipo en el periodo. Prueba con otro filtro.</string>
+    <string name="historial_venta_rapida">Venta rápida</string>
+    <string name="historial_venta_con_pago">Venta · %1$s</string>
+    <string name="historial_venta_sin_desglose">Venta · sin desglose</string>
+    <string name="historial_gasto">Gasto</string>
+    <string name="historial_costo">Costo</string>
+    <string name="historial_con_categoria">%1$s · %2$s</string>
+    <string name="historial_sin_categoria">%1$s · sin categoría</string>
+    <string name="historial_con_fecha">%1$s · %2$s</string>
+    <string name="historial_acciones_de">Opciones de %1$s</string>
+    <string name="historial_accion_eliminar">Eliminar movimiento</string>
+    <string name="historial_eliminar_titulo">¿Eliminar %1$s?</string>
+    <string name="historial_eliminar_ayuda">El movimiento se borra y su plata sale de todos los totales: del día, del mes y del progreso de tu meta. No se puede deshacer.</string>
+    <string name="historial_eliminar_confirmar">Eliminar</string>
+    <string name="historial_ver">Ver historial</string>
+    <string name="periodo_hoy">Hoy</string>
+    <string name="periodo_ayer">Ayer</string>
+    <string name="periodo_semana">Esta semana</string>
+    <string name="periodo_mes">Este mes</string>
+    <string name="finanzas_seccion_resumen">Resumen</string>
+    <string name="finanzas_seccion_gastos">Gastos</string>
+    <string name="finanzas_seccion_costos">Costos</string>
+    <string name="resumen_vacio">Todavía no hay movimientos este mes. Registra una venta, un gasto o un costo y acá verás cómo va el negocio.</string>
+    <string name="resumen_movimientos">Cómo va el mes</string>
+    <string name="resumen_ingresos">Ingresos del mes</string>
+    <string name="resumen_gastos">Gastos del mes</string>
+    <string name="resumen_costos">Costos de producción</string>
+    <string name="resumen_gastos_fijos">Gastos fijos</string>
+    <string name="resumen_margen">Margen del mes</string>
+    <string name="resumen_ganancia">Ganancia estimada</string>
+    <string name="resumen_disponible">Dinero disponible</string>
+    <string name="resumen_menos_obligaciones">− Obligaciones pendientes</string>
+    <string name="resumen_menos_meta">− Apartado para la meta</string>
+    <string name="resumen_menos_reinversion">− Reinversión (%1$d %%)</string>
+    <string name="resumen_nota">Esto es lo que puedes sacar del negocio hoy sin quedar corto con tus compromisos ni con tu meta de ahorro.</string>
+    <string name="resumen_nota_en_rojo">Este mes lo que entró no alcanza para cubrir tus compromisos. Revisa tus gastos o tus precios antes de sacar plata del negocio.</string>
+    <string name="resumen_meta_titulo">Meta de ahorro</string>
+    <string name="resumen_meta_de">%1$s de %2$s</string>
+    <string name="resumen_meta_falta">Te faltan %1$s para llegar antes de %2$s.</string>
+    <string name="resumen_meta_cumplida">¡Llegaste a tu meta de %1$s! Ya puedes definir la siguiente.</string>
+    <string name="resumen_meta_explicacion">El progreso se mide con el dinero que el negocio te ha dejado libre desde que definiste la meta: la ganancia, menos lo que debes y menos lo que reinviertes.</string>
+    <string name="resumen_sin_reinversion">Define un porcentaje de reinversión y la app calcula sola cuánto puedes devolverle al negocio.</string>
+    <string name="costos_vacio">Todavía no has registrado costos este mes. Regístralos para saber cuánto te deja cada producto.</string>
+    <string name="costos_agregar">Registrar costo</string>
+    <string name="costos_registrados">Costos del mes</string>
+    <string name="costos_margen">Margen por producto</string>
+    <string name="costos_margen_detalle">Vendió %1$s · Costó %2$s</string>
+    <string name="costos_margen_porcentaje">%1$d%% de margen</string>
+    <string name="costo_titulo_nuevo">Nuevo costo</string>
+    <string name="costo_titulo_editar">Editar costo</string>
+    <string name="costo_explicacion">Escribe el producto igual que en la venta para que el margen cuadre.</string>
+    <string name="costo_producto">¿De qué producto o servicio?</string>
+    <string name="costo_producto_placeholder">Ej. Torta de chocolate</string>
+    <string name="costo_monto">¿Cuánto costó producirlo?</string>
+    <string name="costo_fecha">Fecha del costo</string>
+    <string name="costo_categoria">Categoría (opcional)</string>
+    <string name="costo_sin_categorias">Todavía no tienes categorías de costo. Puedes crearlas desde el menú, en Categorías.</string>
+    <string name="costo_sin_categoria">Sin categoría</string>
+    <string name="costo_guardar">Guardar costo</string>
+    <string name="costo_guardar_cambios">Guardar cambios</string>
+    <string name="costo_acciones_de">Opciones de %1$s</string>
+    <string name="costo_accion_editar">Editar costo</string>
+    <string name="costo_accion_eliminar">Eliminar costo</string>
+    <string name="costo_error_producto">Escribe de qué producto es el costo.</string>
+    <string name="costo_error_monto">Escribe cuánto costó.</string>
+    <string name="costo_error_fecha_futura">No puedes registrar un costo con fecha futura.</string>
+    <string name="gastos_vacio">Todavía no has registrado gastos este mes.</string>
+    <string name="gastos_agregar">Registrar gasto</string>
+    <string name="gasto_titulo_nuevo">Nuevo gasto</string>
+    <string name="gasto_titulo_editar">Editar gasto</string>
+    <string name="gasto_descripcion">¿En qué fue el gasto?</string>
+    <string name="gasto_descripcion_placeholder">Ej. Domicilio de insumos</string>
+    <string name="gasto_fecha">Fecha del gasto</string>
+    <string name="gasto_categoria">Categoría (opcional)</string>
+    <string name="gasto_sin_categorias">Todavía no tienes categorías de gasto. Puedes crearlas desde el menú, en Categorías.</string>
+    <string name="gasto_sin_categoria">Sin categoría</string>
+    <string name="gasto_guardar">Guardar gasto</string>
+    <string name="gasto_guardar_cambios">Guardar cambios</string>
+    <string name="gasto_acciones_de">Opciones de %1$s</string>
+    <string name="gasto_accion_editar">Editar gasto</string>
+    <string name="gasto_accion_eliminar">Eliminar gasto</string>
+    <string name="gasto_error_descripcion">Escribe en qué fue el gasto.</string>
+    <string name="gasto_error_monto">Escribe cuánto gastaste.</string>
+    <string name="gasto_error_fecha_futura">No puedes registrar un gasto con fecha futura.</string>
+    <string name="categoria_error_nombre_vacio">Escribe el nombre de la categoría.</string>
+    <string name="categoria_error_nombre_largo">El nombre no puede pasar de 50 caracteres.</string>
+    <string name="categoria_error_repetida">Ya tienes una categoría con ese nombre.</string>
+    <string name="menu_metodos_pago">Métodos de pago</string>
+    <string name="menu_equipo">Equipo (vendedores)</string>
+    <string name="menu_mi_perfil">Mi perfil</string>
+    <string name="menu_notificaciones">Notificaciones</string>
+    <string name="menu_cerrar_sesion">Cerrar sesión</string>
+    <string name="menu_negocio_cambiado">Ahora estás en %1$s · %2$s</string>
+    <string name="cd_desplegar_seccion">Desplegar sección</string>
+    <string name="cd_plegar_seccion">Plegar sección</string>
+
+    <!-- Comunes -->
+    <string name="porcentaje">%1$d%%</string>
+    <string name="cd_volver">Volver</string>
+    <string name="paso_de">Paso %1$d de %2$d</string>
+
+    <!-- Registrar negocio (HU-05) -->
+    <string name="negocio_titulo">Cuéntanos de tu negocio</string>
+    <string name="negocio_subtitulo">Puedes cambiar todo esto después.</string>
+    <string name="negocio_nombre">Nombre del negocio</string>
+    <string name="negocio_nombre_placeholder">Ej. Dulce Antojo</string>
+    <string name="negocio_categoria">¿A qué se dedica?</string>
+    <string name="negocio_categoria_placeholder">Escríbelo libremente</string>
+    <string name="negocio_sugerencias">Sugerencias</string>
+    <string name="negocio_sugerencia_reposteria">Repostería</string>
+    <string name="negocio_sugerencia_belleza">Belleza</string>
+    <string name="negocio_sugerencia_ropa">Ropa</string>
+    <string name="negocio_sugerencia_comida">Comida</string>
+    <string name="negocio_sugerencia_servicios">Servicios</string>
+    <string name="negocio_sugerencia_otro">Otro</string>
+    <string name="negocio_tipo_actividad">Tipo de actividad</string>
+    <string name="negocio_tipo_actividad_ayuda">Define qué módulos verás en la agenda.</string>
+    <string name="negocio_actividad_servicios">Servicios</string>
+    <string name="negocio_actividad_servicios_desc">Agendo citas con hora. Verás la agenda de citas.</string>
+    <string name="negocio_actividad_productos">Productos</string>
+    <string name="negocio_actividad_productos_desc">Vendo cosas con fecha de entrega. Verás los pedidos.</string>
+    <string name="negocio_actividad_mixto">Mixto</string>
+    <string name="negocio_actividad_mixto_desc">Las dos cosas. Citas y pedidos en un solo calendario.</string>
+    <string name="negocio_color">Color de marca</string>
+    <string name="negocio_color_ayuda">Los botones y resaltados de tu app tomarán este color.</string>
+    <string name="negocio_color_predeterminado">Predeterminado de la app</string>
+    <string name="cd_color_elegido">Color elegido</string>
+    <string name="color_azul_marino">Azul marino</string>
+    <string name="color_rosa_cuarzo">Rosa cuarzo</string>
+    <string name="color_salvia">Verde salvia</string>
+    <string name="color_personalizado">Personalizado</string>
+    <string name="color_personalizado_titulo">El color de tu marca</string>
+    <string name="color_personalizado_ayuda">Mueve el punto para buscar tu color, o escribe su código si ya lo tienes.</string>
+    <string name="color_personalizado_hex">Código del color</string>
+    <string name="color_personalizado_usar">Usar este color</string>
+    <!-- Letras de muestra sobre el color, para ver si el texto se lee encima. -->
+    <string name="color_personalizado_muestra">Aa</string>
+    <string name="negocio_continuar">Continuar</string>
+    <string name="negocio_creado">Negocio creado ✓</string>
+    <string name="negocio_error_nombre_vacio">Escribe el nombre del negocio.</string>
+    <string name="negocio_error_nombre_largo">El nombre no puede pasar de 100 caracteres.</string>
+    <string name="negocio_error_categoria_vacia">Cuéntanos a qué se dedica tu negocio.</string>
+    <string name="negocio_error_porcentaje">El porcentaje de reinversión va de 0 a 100.</string>
+    <string name="negocio_error_no_existe">Ese negocio ya no existe.</string>
+
+    <!-- Base financiera, paso 2 del onboarding (HU-06, HU-08, HU-09) -->
+    <string name="inicio_meta_cumplida_titulo">¡Llegaste a tu meta!</string>
+    <string name="inicio_meta_cumplida_accion">Definir otra</string>
+    <string name="inicio_meta_cumplida_detalle">Tu negocio ya alcanzó lo que te propusiste ahorrar. Ponte la siguiente para seguir midiendo el progreso.</string>
+    <string name="meta_progreso_titulo">Tu meta hoy</string>
+    <string name="meta_reinversion_ayuda">Las dos son opcionales. La meta te sirve para ver cuánto llevas ahorrado; la reinversión, para saber cuánto devolverle al negocio antes de sacar plata.</string>
+    <string name="meta_incompleta">Una meta necesita monto y fecha límite. Llena las dos o déjalas vacías.</string>
+    <string name="meta_cumplida_corto">¡Ya llegaste a tu meta! Define una nueva para seguir.</string>
+    <string name="meta_guardar">Guardar cambios</string>
+    <string name="meta_guardada">Meta y reinversión guardadas</string>
+    <string name="base_titulo">Tu base financiera</string>
+    <string name="base_subtitulo">Esto ayuda al asistente a darte mejores recomendaciones. Todo es opcional.</string>
+    <string name="base_gastos_fijos">Gastos fijos mensuales</string>
+    <string name="base_agregar_gasto">Agregar gasto fijo</string>
+    <string name="base_acciones_gasto">Opciones de %1$s</string>
+    <string name="base_accion_editar_gasto">Editar gasto fijo</string>
+    <string name="base_accion_eliminar_gasto">Eliminar gasto fijo</string>
+    <string name="base_meta">Meta de ahorro</string>
+    <string name="base_meta_ayuda">¿Cuánto quieres ahorrar? Verás tu progreso en el inicio.</string>
+    <string name="base_fecha_limite">Fecha límite de la meta</string>
+    <string name="base_fecha_limite_placeholder">Elige una fecha</string>
+    <string name="base_fecha_limite_ayuda">Debe ser posterior a hoy. Con ella calculamos cuánto necesitas ahorrar por mes.</string>
+    <string name="base_ahorro_mensual">Para llegar a tu meta necesitas apartar %1$s al mes.</string>
+    <string name="base_reinversion">Porcentaje de reinversión</string>
+    <string name="base_reinversion_ayuda">De cada ganancia, reinvierto</string>
+    <string name="base_finalizar">Finalizar configuración</string>
+    <string name="base_error_nombre_gasto">Escribe el nombre del gasto fijo.</string>
+    <string name="base_error_monto">El monto debe ser mayor que cero.</string>
+    <string name="base_error_meta_monto">Escribe cuánto quieres ahorrar.</string>
+    <string name="base_error_fecha_limite">La fecha límite debe ser posterior a hoy.</string>
+    <string name="base_error_porcentaje">El porcentaje de reinversión va de 0 a 100.</string>
+
+    <!-- Gasto fijo (HU-06) -->
+    <string name="gasto_fijo_titulo">Nuevo gasto fijo</string>
+    <string name="gasto_fijo_explicacion">Un pago que se repite cada periodo: arriendo, servicios, internet.</string>
+    <string name="gasto_fijo_nombre">Nombre</string>
+    <string name="gasto_fijo_nombre_placeholder">Ej. Arriendo del local</string>
+    <string name="gasto_fijo_frecuencia">Frecuencia</string>
+    <string name="gasto_fijo_guardar">Guardar gasto fijo</string>
+    <string name="gasto_fijo_titulo_editar">Editar gasto fijo</string>
+    <string name="gasto_fijo_actualizar">Guardar cambios</string>
+    <string name="compromisos_seccion_fijos">Gastos fijos</string>
+    <string name="compromisos_seccion_obligaciones">Obligaciones</string>
+    <string name="obligaciones_vacio">Todavía no tienes obligaciones registradas. Agrégalas para no pasarte de una fecha de pago.</string>
+    <string name="obligaciones_agregar">Agregar obligación</string>
+    <string name="obligaciones_total_pendiente">Pendiente por pagar</string>
+    <string name="obligaciones_proximas">Próximas a vencer</string>
+    <string name="obligaciones_todas">Todas</string>
+    <string name="obligacion_titulo_nueva">Nueva obligación</string>
+    <string name="obligacion_titulo_editar">Editar obligación</string>
+    <string name="obligacion_explicacion">Un compromiso que ya adquiriste: un préstamo, una cuota, un pago recurrente.</string>
+    <string name="obligacion_nombre">¿Qué debes?</string>
+    <string name="obligacion_nombre_placeholder">Ej. Cuota del horno</string>
+    <string name="obligacion_vencimiento">Fecha de vencimiento</string>
+    <string name="obligacion_vencimiento_placeholder">Elige una fecha</string>
+    <string name="obligacion_guardar">Guardar obligación</string>
+    <string name="obligacion_guardar_cambios">Guardar cambios</string>
+    <string name="obligacion_acciones_de">Opciones de %1$s</string>
+    <string name="obligacion_accion_pagada">Marcar como pagada</string>
+    <string name="obligacion_accion_pendiente">Marcar como pendiente</string>
+    <string name="obligacion_accion_editar">Editar obligación</string>
+    <string name="obligacion_accion_eliminar">Eliminar obligación</string>
+    <string name="obligacion_pagada">Pagada</string>
+    <string name="obligacion_pagada_el">Pagada · vencía el %1$s</string>
+    <string name="obligacion_vence_hoy">Vence hoy</string>
+    <string name="obligacion_error_nombre">Escribe qué es lo que debes.</string>
+    <string name="obligacion_error_monto">Escribe cuánto debes.</string>
+    <string name="gastos_fijos_explicacion">Los pagos que se repiten cada periodo. Tócalos para corregirlos.</string>
+    <string name="gastos_fijos_vacio">Todavía no tienes gastos fijos. Agrégalos para saber cuánto necesitas vender.</string>
+    <string name="frecuencia_semanal">Semanal</string>
+    <string name="frecuencia_quincenal">Quincenal</string>
+    <string name="frecuencia_mensual">Mensual</string>
+    <string name="frecuencia_anual">Anual</string>
+
+    <!-- Cierre del onboarding (HU-05) -->
+    <string name="listo_titulo">¡Todo listo! 🎉</string>
+    <string name="listo_subtitulo">%1$s quedó configurado. Ya puedes empezar a registrar ventas y gestionar tu negocio.</string>
+    <string name="listo_actividad">Actividad</string>
+    <string name="listo_tipo">Tipo</string>
+    <string name="listo_meta">Meta de ahorro</string>
+    <string name="listo_meta_valor">%1$s · %2$s</string>
+    <string name="listo_reinversion">Reinversión</string>
+    <string name="listo_ir_al_negocio">Ir a mi negocio</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="cancelar">Cancelar</string>
+
+    <!-- Formularios -->
+    <string name="form_monto">Monto</string>
+    <string name="form_monto_placeholder">0</string>
+    <string name="form_moneda_simbolo" translatable="false">$</string>
+    <string name="form_moneda" translatable="false">COP</string>
+    <string name="form_metodo_pago">Método de pago</string>
+    <string name="metodo_pago_efectivo">Efectivo</string>
+    <string name="metodo_pago_transferencia">Transferencia</string>
+    <string name="metodo_pago_tarjeta">Tarjeta</string>
+
+    <!-- Registrar venta (HU-11/HU-12) -->
+    <string name="registrar_venta_titulo">Registrar venta</string>
+    <string name="venta_tipo_detallada">Detallada</string>
+    <string name="venta_tipo_rapida">Rápida</string>
+    <string name="venta_rapida_explicacion">Registra el total vendido sin desglosar. Útil para cerrar el día rápido; luego puedes detallarlo si quieres.</string>
+    <string name="venta_monto">Monto de la venta</string>
+    <string name="venta_total_vendido">Total vendido</string>
+    <string name="venta_producto">¿Qué vendiste?</string>
+    <string name="venta_producto_placeholder">Ej. Torta personalizada</string>
+    <string name="venta_error_sin_negocio">Primero crea un negocio para registrarle ventas.</string>
+    <string name="venta_error_monto">Escribe cuánto vendiste.</string>
+    <string name="venta_error_producto">Escribe qué vendiste.</string>
+    <string name="venta_error_metodo_pago">Elige cómo te pagaron.</string>
+    <string name="venta_error_fecha_futura">No puedes registrar una venta con fecha futura.</string>
+    <string name="venta_nota">Nota (opcional)</string>
+    <string name="venta_nota_placeholder">Ej. Ventas del día en el punto</string>
+    <string name="venta_fecha_hora">Fecha y hora</string>
+    <string name="registrar_venta_guardar">Guardar venta</string>
+    <string name="registrar_venta_guardada">Venta registrada ✓</string>
+    <string name="registrar_venta_rapida_guardada">Venta rápida registrada ✓</string>
+
+    <!-- Inicio -->
+    <string name="inicio_saludo">Hola, %1$s</string>
+    <string name="inicio_saludo_sin_nombre">Hola</string>
+    <string name="inicio_fecha_y_alertas">%1$s · %2$s</string>
+    <plurals name="inicio_alertas_nuevas">
+        <item quantity="one">%d alerta nueva</item>
+        <item quantity="other">%d alertas nuevas</item>
+    </plurals>
+    <string name="inicio_resumen_hoy">Resumen de hoy</string>
+    <string name="inicio_ver_finanzas">Ver finanzas</string>
+    <string name="inicio_ventas">Ventas</string>
+    <string name="inicio_gastos">Gastos</string>
+    <string name="inicio_variacion_sube">▲ %1$d%% vs. ayer</string>
+    <string name="inicio_variacion_baja">▼ %1$d%% vs. ayer</string>
+    <plurals name="inicio_registros">
+        <item quantity="one">%d registro</item>
+        <item quantity="other">%d registros</item>
+    </plurals>
+    <string name="inicio_meta_ahorro">Meta de ahorro</string>
+    <string name="inicio_registrar_venta">Registrar venta</string>
+    <string name="inicio_abrir_caja">Abrir caja</string>
+    <string name="inicio_caja_del_turno">Caja del turno</string>
+    <string name="inicio_caja_apertura">Abierta desde las %1$s · inició con %2$s</string>
+    <string name="inicio_sin_cajas_abiertas">No tienes una caja abierta en este momento.</string>
+    <plurals name="obligacion_vence_en">
+        <item quantity="one">Vence mañana</item>
+        <item quantity="other">Vence en %1$d días</item>
+    </plurals>
+    <plurals name="obligacion_vencida_hace">
+        <item quantity="one">Vencida ayer</item>
+        <item quantity="other">Vencida hace %1$d días</item>
+    </plurals>
+
+    <!-- Autenticación: HU-01, HU-02, HU-03 -->
+    <string name="auth_eslogan">Tu negocio, bajo control</string>
+    <string name="auth_correo">Correo electrónico</string>
+    <string name="auth_correo_placeholder">tucorreo@ejemplo.com</string>
+    <string name="auth_contrasena">Contraseña</string>
+    <string name="cd_mostrar_contrasena">Mostrar contraseña</string>
+    <string name="cd_ocultar_contrasena">Ocultar contraseña</string>
+
+    <string name="login_titulo">Bienvenido de vuelta</string>
+    <string name="login_subtitulo">Ingresa para gestionar tus negocios</string>
+    <string name="login_correo_placeholder">sebastian@correo.com</string>
+    <string name="login_recordarme">Recordarme</string>
+    <string name="login_olvidaste_contrasena">¿Olvidaste tu contraseña?</string>
+    <string name="login_iniciar_sesion">Iniciar sesión</string>
+    <string name="login_continua_con">o continúa con</string>
+    <string name="login_google">Google</string>
+    <string name="login_no_tienes_cuenta">¿No tienes cuenta?</string>
+    <string name="login_crear_cuenta">Crear cuenta</string>
+
+    <string name="registro_titulo">Crea tu cuenta</string>
+    <string name="registro_subtitulo">Empieza a gestionar tu negocio en minutos</string>
+    <string name="registro_nombre">Nombre completo</string>
+    <string name="registro_nombre_placeholder">Ej. Sebastián Orrego</string>
+    <string name="registro_contrasena_placeholder">Mínimo 8 caracteres</string>
+    <string name="registro_fortaleza_ayuda">Usa 8+ caracteres con números</string>
+    <string name="registro_confirmar_contrasena">Confirmar contraseña</string>
+    <string name="registro_confirmar_contrasena_placeholder">Repite tu contraseña</string>
+    <string name="registro_acepto_terminos">Acepto términos y privacidad</string>
+    <string name="registro_crear_cuenta">Crear cuenta</string>
+    <string name="registro_ya_tienes_cuenta">¿Ya tienes cuenta?</string>
+    <string name="registro_iniciar_sesion">Iniciar sesión</string>
+
+    <string name="recuperar_titulo">¿Olvidaste tu contraseña?</string>
+    <!-- HU-03 se conecta a Firebase Authentication: manda un enlace, no un código de 6 dígitos
+         como decía el mockup original. -->
+    <string name="recuperar_subtitulo">Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.</string>
+    <string name="recuperar_enviar_codigo">Enviar enlace</string>
+    <string name="recuperar_volver_a_iniciar_sesion">Volver a iniciar sesión</string>
+    <!-- No confirma si el correo existe: Firebase evita revelarlo por seguridad. -->
+    <string name="recuperar_enviado">Si el correo está registrado, te llegará un enlace para restablecer tu contraseña.</string>
+
+    <string name="auth_error_nombre_vacio">Escribe tu nombre completo.</string>
+    <string name="auth_error_nombre_largo">El nombre no puede tener más de 50 caracteres.</string>
+    <string name="auth_error_correo_invalido">Escribe un correo válido, como usuario@dominio.com.</string>
+    <string name="auth_error_correo_ya_registrado">Ya existe una cuenta con ese correo.</string>
+    <string name="auth_error_contrasena_invalida">La contraseña debe tener entre 8 y 25 caracteres, con mayúscula, minúscula y símbolo.</string>
+    <string name="auth_error_credenciales_invalidas">Correo o contraseña incorrectos.</string>
+    <string name="auth_error_correo_no_registrado">No encontramos una cuenta con ese correo.</string>
+    <string name="auth_error_red">No pudimos conectarnos. Intenta de nuevo.</string>
+    <string name="registro_error_contrasenas_no_coinciden">Las contraseñas no coinciden.</string>
+    <!-- HU-19. Abrir la jornada de caja. -->
+    <string name="caja_titulo">Caja</string>
+    <string name="caja_abrir">Abrir caja</string>
+    <string name="caja_abrir_titulo">Empieza tu turno</string>
+    <string name="caja_monto_inicial">Monto inicial en caja</string>
+    <string name="caja_monto_ayuda">Cuenta el efectivo con el que arrancas. Si no tienes nada, escribe 0.</string>
+    <string name="caja_jornada_en_curso">Jornada en curso</string>
+    <string name="caja_estado_abierta">Abierta</string>
+    <string name="caja_monto_inicial_etiqueta">Monto inicial</string>
+    <string name="caja_abierta_desde">Abierta desde las %1$s · %2$s</string>
+    <string name="caja_vacia_titulo">No tienes una caja abierta</string>
+    <string name="caja_vacia_detalle">Ábrela para llevar el control del efectivo desde que arranca tu jornada.</string>
+    <string name="caja_saldo_esperado">Saldo esperado en caja</string>
+    <string name="caja_desglose">De dónde sale</string>
+    <string name="caja_ventas_del_turno">Ventas del turno</string>
+    <string name="caja_gastos_del_turno">Gastos del turno</string>
+    <string name="caja_costos_del_turno">Costos del turno</string>
+    <string name="caja_sin_movimientos">Todavía no has registrado ventas ni gastos en este turno.</string>
+    <string name="caja_cierre_pendiente">Cerrar la caja y comparar contra lo que tienes de verdad llega en la siguiente historia.</string>
+    <string name="caja_error_monto">El monto inicial no puede ser negativo.</string>
+    <string name="caja_error_ya_abierta">Ya tienes una caja abierta. Ciérrala antes de abrir otra.</string>
 </resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Ver la nota en values/colors.xml. Es BackgroundDark de `front/theme/Color.kt`. -->
+    <color name="fondo_app">#FF0E1116</color>
+</resources>
