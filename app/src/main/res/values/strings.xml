@@ -451,4 +451,5 @@
     <string name="caja_cierre_pendiente">Cerrar la caja y comparar contra lo que tienes de verdad llega en la siguiente historia.</string>
     <string name="caja_error_monto">El monto inicial no puede ser negativo.</string>
     <string name="caja_error_ya_abierta">Ya tienes una caja abierta. Ciérrala antes de abrir otra.</string>
+    <string name="caja_error_no_abierta">Esta caja ya no está abierta.</string>
 </resources>

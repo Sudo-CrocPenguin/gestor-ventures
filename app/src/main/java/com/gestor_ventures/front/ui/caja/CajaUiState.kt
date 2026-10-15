@@ -63,4 +63,5 @@ data class FormularioApertura(
 fun ErrorCaja.mensajeRes(): Int = when (this) {
     ErrorCaja.MontoNegativo -> R.string.caja_error_monto
     ErrorCaja.YaHayCajaAbierta -> R.string.caja_error_ya_abierta
+    ErrorCaja.NoHayCajaAbierta -> R.string.caja_error_no_abierta
 }

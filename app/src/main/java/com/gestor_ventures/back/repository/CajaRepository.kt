@@ -5,6 +5,7 @@ import com.gestor_ventures.back.model.ErrorCaja
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.db.dao.CajaDao
 import com.gestor_ventures.db.entity.CajaEntity
+import com.gestor_ventures.db.enums.EstadoCaja
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -47,6 +48,33 @@ class CajaRepository @Inject constructor(
                 negocioId = negocioId,
                 montoInicial = montoInicial,
                 fechaHoraApertura = reloj.ahora(),
+            ),
+        )
+        return null
+    }
+
+    /**
+     * HU-21 y HU-22. Cierra la jornada con el efectivo que el usuario contó de verdad.
+     *
+     * La hora de cierre la pone el [Reloj], igual que la de apertura. La nota es opcional:
+     * cuando la caja cuadra no hay nada que explicar, y exigirla llenaría el historial de
+     * "ok" escritos por salir del paso.
+     *
+     * No recibe el saldo esperado ni guarda la diferencia: las dos cosas salen de los
+     * movimientos de la jornada y se pueden volver a calcular cuando haga falta (HU-23). Un
+     * número copiado es un número que algún día deja de cuadrar con su origen.
+     */
+    suspend fun cerrarCaja(negocioId: Long, montoReal: Double, nota: String? = null): ErrorCaja? {
+        if (montoReal < 0.0) return ErrorCaja.MontoNegativo
+
+        val abierta = cajaDao.obtenerAbierta(negocioId) ?: return ErrorCaja.NoHayCajaAbierta
+
+        cajaDao.actualizar(
+            abierta.copy(
+                montoRealCierre = montoReal,
+                fechaHoraCierre = reloj.ahora(),
+                estadoCaja = EstadoCaja.CERRADA,
+                notaDiferencia = nota?.trim()?.takeIf { it.isNotEmpty() },
             ),
         )
         return null
