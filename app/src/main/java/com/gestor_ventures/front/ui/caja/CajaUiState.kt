@@ -7,7 +7,7 @@ import com.gestor_ventures.front.util.formatMiles
 import java.time.LocalDateTime
 
 /**
- * HU-19. La jornada de caja del negocio activo.
+ * HU-19 y HU-20. La jornada de caja del negocio activo.
  *
  * La pantalla tiene dos caras y [caja] decide cuál se ve: con una jornada en curso muestra con
  * qué arrancó y desde cuándo; sin ninguna, invita a abrirla. Mientras [cargando] no se resuelva
@@ -22,11 +22,23 @@ data class CajaUiState(
     val sinCaja: Boolean get() = !cargando && caja == null
 }
 
-/** Lo que la pantalla muestra de una jornada abierta. */
+/**
+ * Lo que la pantalla muestra de una jornada abierta.
+ *
+ * El desglose va al lado del saldo y no escondido: un saldo que no cuadra no le dice nada a
+ * nadie si no se puede ver de dónde salió.
+ */
 data class CajaAbiertaUi(
     val montoInicial: Double,
     val apertura: LocalDateTime,
-)
+    val ventas: Double,
+    val gastos: Double,
+    val costos: Double,
+    val saldoEsperado: Double,
+) {
+    /** Si la jornada todavía no movió plata, el desglose no tiene nada que contar. */
+    val sinMovimientos: Boolean get() = ventas == 0.0 && gastos == 0.0 && costos == 0.0
+}
 
 /**
  * Formulario de apertura. El monto se guarda en dígitos crudos y se formatea aparte: así el

@@ -7,6 +7,7 @@ import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.SesionRepository
 import com.gestor_ventures.back.repository.VentaRepository
 import com.gestor_ventures.back.usecase.CalcularResumenFinanciero
+import com.gestor_ventures.back.usecase.CalcularSaldoEsperado
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -23,9 +24,9 @@ import kotlin.math.roundToInt
 /**
  * HU-16. Resumen del día del negocio activo.
  *
- * Las ventas (HU-11/HU-12), la meta de ahorro (HU-08) y el nombre de quien entró (HU-01) son
- * reales. Los gastos del día y las cajas del equipo se muestran vacíos a propósito: preferimos
- * que la pantalla diga "todavía no hay" y no un número inventado que el usuario tome por bueno.
+ * Las ventas (HU-11/HU-12), la meta de ahorro (HU-08), la caja del turno (HU-19/HU-20) y el
+ * nombre de quien entró (HU-01) son reales. Los gastos del día se muestran vacíos a propósito:
+ * preferimos que la pantalla diga "todavía no hay" y no un número que el usuario tome por bueno.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -34,6 +35,7 @@ class InicioViewModel @Inject constructor(
     private val sesionRepository: SesionRepository,
     private val ventaRepository: VentaRepository,
     private val calcularResumenFinanciero: CalcularResumenFinanciero,
+    private val calcularSaldoEsperado: CalcularSaldoEsperado,
     private val reloj: Reloj,
 ) : ViewModel() {
 
@@ -52,7 +54,22 @@ class InicioViewModel @Inject constructor(
             initialValue = estadoBase(),
         )
 
-    private fun resumenDe(negocioId: Long): Flow<InicioUiState> {
+    private fun resumenDe(negocioId: Long): Flow<InicioUiState> =
+        // La caja va aparte y no dentro del `combine` de abajo porque ya llegó a cinco flujos,
+        // que es el tope de esa forma de combinar.
+        combine(resumenDelDia(negocioId), calcularSaldoEsperado(negocioId)) { estado, saldo ->
+            estado.copy(
+                cajaAbierta = saldo?.let {
+                    CajaAbiertaUi(
+                        horaApertura = it.caja.fechaHoraApertura.toLocalTime(),
+                        montoInicial = it.caja.montoInicial,
+                        saldoEsperado = it.saldoEsperado,
+                    )
+                },
+            )
+        }
+
+    private fun resumenDelDia(negocioId: Long): Flow<InicioUiState> {
         val hoy = reloj.ahora().toLocalDate()
 
         return combine(

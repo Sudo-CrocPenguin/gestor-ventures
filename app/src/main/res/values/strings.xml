@@ -368,14 +368,9 @@
     <string name="inicio_meta_ahorro">Meta de ahorro</string>
     <string name="inicio_registrar_venta">Registrar venta</string>
     <string name="inicio_abrir_caja">Abrir caja</string>
-    <string name="inicio_cajas_activas">Cajas activas · equipo</string>
-    <plurals name="inicio_cajas_abiertas">
-        <item quantity="one">%d abierta</item>
-        <item quantity="other">%d abiertas</item>
-    </plurals>
-    <string name="inicio_caja_responsable">%1$s · turno %2$s</string>
-    <string name="inicio_caja_apertura">Abrió %1$s · inició %2$s</string>
-    <string name="inicio_sin_cajas_abiertas">No hay cajas abiertas en este momento.</string>
+    <string name="inicio_caja_del_turno">Caja del turno</string>
+    <string name="inicio_caja_apertura">Abierta desde las %1$s · inició con %2$s</string>
+    <string name="inicio_sin_cajas_abiertas">No tienes una caja abierta en este momento.</string>
     <plurals name="obligacion_vence_en">
         <item quantity="one">Vence mañana</item>
         <item quantity="other">Vence en %1$d días</item>
@@ -447,7 +442,13 @@
     <string name="caja_abierta_desde">Abierta desde las %1$s · %2$s</string>
     <string name="caja_vacia_titulo">No tienes una caja abierta</string>
     <string name="caja_vacia_detalle">Ábrela para llevar el control del efectivo desde que arranca tu jornada.</string>
-    <string name="caja_movimientos_pendiente">Las ventas y gastos del turno, y el cierre de la caja, llegan en las siguientes historias.</string>
+    <string name="caja_saldo_esperado">Saldo esperado en caja</string>
+    <string name="caja_desglose">De dónde sale</string>
+    <string name="caja_ventas_del_turno">Ventas del turno</string>
+    <string name="caja_gastos_del_turno">Gastos del turno</string>
+    <string name="caja_costos_del_turno">Costos del turno</string>
+    <string name="caja_sin_movimientos">Todavía no has registrado ventas ni gastos en este turno.</string>
+    <string name="caja_cierre_pendiente">Cerrar la caja y comparar contra lo que tienes de verdad llega en la siguiente historia.</string>
     <string name="caja_error_monto">El monto inicial no puede ser negativo.</string>
     <string name="caja_error_ya_abierta">Ya tienes una caja abierta. Ciérrala antes de abrir otra.</string>
 </resources>

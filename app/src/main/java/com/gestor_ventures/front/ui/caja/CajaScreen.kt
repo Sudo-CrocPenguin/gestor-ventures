@@ -118,7 +118,12 @@ fun CajaScreen(
     }
 }
 
-/** La jornada en curso: con cuánto se arrancó y desde cuándo. */
+/**
+ * HU-20. La jornada en curso: cuánto debería haber en la caja ahora mismo.
+ *
+ * El saldo va arriba y grande porque es lo que se compara contra los billetes al cerrar; el
+ * desglose va debajo porque un saldo que no cuadra no dice nada sin saber de dónde salió.
+ */
 @Composable
 private fun JornadaAbierta(caja: CajaAbiertaUi, modifier: Modifier = Modifier) {
     GvCard(modifier) {
@@ -131,14 +136,19 @@ private fun JornadaAbierta(caja: CajaAbiertaUi, modifier: Modifier = Modifier) {
         }
 
         Text(
-            text = stringResource(R.string.caja_monto_inicial_etiqueta),
+            text = stringResource(R.string.caja_saldo_esperado),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = formatPesos(caja.montoInicial),
-            style = NumericTextStyle.copy(fontSize = 26.sp),
-            color = MaterialTheme.colorScheme.onSurface,
+            text = formatPesos(caja.saldoEsperado),
+            style = NumericTextStyle.copy(fontSize = 30.sp),
+            // En rojo si quedó en negativo: es justo el caso que hay que mirar.
+            color = if (caja.saldoEsperado < 0) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
         )
 
         Row(
@@ -164,8 +174,78 @@ private fun JornadaAbierta(caja: CajaAbiertaUi, modifier: Modifier = Modifier) {
         }
     }
 
+    GvCard {
+        GvCardHeader(title = stringResource(R.string.caja_desglose))
+
+        LineaDelDesglose(
+            etiqueta = stringResource(R.string.caja_monto_inicial_etiqueta),
+            monto = caja.montoInicial,
+        )
+        LineaDelDesglose(
+            etiqueta = stringResource(R.string.caja_ventas_del_turno),
+            monto = caja.ventas,
+            entra = true,
+        )
+        LineaDelDesglose(
+            etiqueta = stringResource(R.string.caja_gastos_del_turno),
+            monto = caja.gastos,
+            entra = false,
+        )
+        LineaDelDesglose(
+            etiqueta = stringResource(R.string.caja_costos_del_turno),
+            monto = caja.costos,
+            entra = false,
+        )
+
+        if (caja.sinMovimientos) {
+            Text(
+                text = stringResource(R.string.caja_sin_movimientos),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+    }
+
     // Lo que falta de la épica, dicho de frente en vez de dejar la pantalla a medias.
-    GvInfoNote(stringResource(R.string.caja_movimientos_pendiente))
+    GvInfoNote(stringResource(R.string.caja_cierre_pendiente))
+}
+
+/**
+ * Una línea del desglose. [entra] decide el signo y el color; en el monto inicial va nulo
+ * porque no entró ni salió: ya estaba ahí.
+ */
+@Composable
+private fun LineaDelDesglose(etiqueta: String, monto: Double, entra: Boolean? = null) {
+    val color = when (entra) {
+        true -> GestorVenturesTheme.colors.success
+        false -> MaterialTheme.colorScheme.error
+        null -> MaterialTheme.colorScheme.onSurface
+    }
+    val signo = when (entra) {
+        true -> "+ "
+        false -> "− "
+        null -> ""
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = etiqueta,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = signo + formatPesos(monto),
+            style = NumericTextStyle.copy(fontSize = 15.sp),
+            color = color,
+        )
+    }
 }
 
 /** Sin jornada abierta: el estado en el que arranca el día. */
@@ -222,6 +302,10 @@ private fun CajaAbiertaPreview() {
             caja = CajaAbiertaUi(
                 montoInicial = 50_000.0,
                 apertura = LocalDateTime.of(2026, 10, 7, 8, 0),
+                ventas = 92_500.0,
+                gastos = 12_000.0,
+                costos = 8_000.0,
+                saldoEsperado = 122_500.0,
             ),
         ),
     )

@@ -4,6 +4,7 @@ import com.gestor_ventures.back.model.MetodoPago
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.TipoRegistroVenta
 import com.gestor_ventures.back.repository.BaseFinancieraRepository
+import com.gestor_ventures.back.repository.CajaRepository
 import com.gestor_ventures.back.repository.CostoRepository
 import com.gestor_ventures.back.repository.GastoRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
@@ -13,7 +14,9 @@ import com.gestor_ventures.back.repository.VentaRepository
 import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.back.usecase.CalcularAhorroMensual
 import com.gestor_ventures.back.usecase.CalcularResumenFinanciero
+import com.gestor_ventures.back.usecase.CalcularSaldoEsperado
 import com.gestor_ventures.db.SemillaTemporal
+import com.gestor_ventures.db.dao.CajaDaoFalso
 import com.gestor_ventures.db.dao.CostoDaoFalso
 import com.gestor_ventures.db.dao.GastoDaoFalso
 import com.gestor_ventures.db.dao.GastoFijoDaoFalso
@@ -59,6 +62,7 @@ class InicioViewModelTest {
     private val ventaDao = VentaDaoFalso()
     private val metaAhorroDao = MetaAhorroDaoFalso()
     private val negocioDao = NegocioDaoFalso()
+    private val cajaDao = CajaDaoFalso()
 
     private val ventaRepository = VentaRepository(ventaDao, reloj)
     private val negocioRepository = NegocioRepository(negocioDao, reloj)
@@ -66,6 +70,15 @@ class InicioViewModelTest {
         BaseFinancieraRepository(GastoFijoDaoFalso(), metaAhorroDao, negocioDao, reloj)
     private val sesionRepository = sesionRepositoryDePrueba()
     private val negocioActivo = NegocioActivoRepository(negocioRepository, sesionRepository)
+
+    private val cajaRepository = CajaRepository(cajaDao, reloj)
+
+    private val calcularSaldoEsperado = CalcularSaldoEsperado(
+        cajaRepository = cajaRepository,
+        ventaRepository = ventaRepository,
+        gastoRepository = GastoRepository(GastoDaoFalso(), reloj),
+        costoRepository = CostoRepository(CostoDaoFalso(), reloj),
+    )
 
     private val calcularResumen = CalcularResumenFinanciero(
         ventaRepository = ventaRepository,
@@ -122,6 +135,7 @@ class InicioViewModelTest {
             sesionRepository = sesionRepository,
             ventaRepository = ventaRepository,
             calcularResumenFinanciero = calcularResumen,
+            calcularSaldoEsperado = calcularSaldoEsperado,
             reloj = reloj,
         )
         backgroundScope.launch { viewModel.uiState.collect { } }

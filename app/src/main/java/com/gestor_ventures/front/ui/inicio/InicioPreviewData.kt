@@ -26,23 +26,10 @@ object InicioPreviewData {
             tendenciaVentas = listOf(8_800.0, 13_200.0, 7_700.0, 19_800.0, 16_500.0, 26_400.0, 23_100.0, 33_000.0),
             progresoMetaAhorro = 0.68f,
         ),
-        cajasActivas = listOf(
-            CajaActivaUi(
-                cajaId = 1,
-                responsable = "Valentina",
-                turno = "mañana",
-                horaApertura = LocalTime.of(8, 0),
-                montoInicial = 50_000.0,
-                saldoEsperado = 92_500.0,
-            ),
-            CajaActivaUi(
-                cajaId = 2,
-                responsable = "Carlos",
-                turno = "tarde",
-                horaApertura = LocalTime.of(13, 0),
-                montoInicial = 30_000.0,
-                saldoEsperado = 56_000.0,
-            ),
+        cajaAbierta = CajaAbiertaUi(
+            horaApertura = LocalTime.of(8, 0),
+            montoInicial = 50_000.0,
+            saldoEsperado = 122_500.0,
         ),
     )
 }
