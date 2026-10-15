@@ -21,6 +21,13 @@ class CajaDaoFalso : CajaDao {
         return id
     }
 
+    override suspend fun actualizar(caja: CajaEntity) {
+        cajas.value = cajas.value.map { if (it.cajaId == caja.cajaId) caja else it }
+    }
+
+    override suspend fun obtener(cajaId: Long): CajaEntity? =
+        cajas.value.firstOrNull { it.cajaId == cajaId }
+
     override suspend fun obtenerAbierta(negocioId: Long): CajaEntity? =
         abiertaDe(cajas.value, negocioId)
 

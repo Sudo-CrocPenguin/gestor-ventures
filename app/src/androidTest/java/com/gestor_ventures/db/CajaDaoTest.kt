@@ -18,7 +18,7 @@ import org.junit.Test
 import java.time.LocalDateTime
 
 /**
- * HU-19. Abrir caja, contra una base de datos real en memoria.
+ * HU-19, HU-21 y HU-22. Abrir y cerrar caja, contra una base de datos real en memoria.
  *
  * Lo que se prueba acá no es guardar un monto: es que la consulta que responde "¿hay una
  * jornada en curso?" diga la verdad. De esa respuesta depende la única regla de la historia
@@ -118,6 +118,82 @@ class CajaDaoTest {
         cajaDao.insertar(caja(montoInicial = 50_000.0, apertura = ahora))
 
         assertEquals(50_000.0, cajaDao.observarAbierta(negocioId).first()?.montoInicial ?: 0.0, 0.001)
+    }
+
+    // ---------- HU-21 y HU-22: cerrar la jornada ----------
+
+    @Test
+    fun cerrarLaJornadaLeGuardaElMontoContadoLaHoraYLaNota() = runTest {
+        val id = cajaDao.insertar(caja(montoInicial = 50_000.0, apertura = ahora))
+        val cierre = ahora.plusHours(6).plusMinutes(30)
+
+        cajaDao.actualizar(
+            cajaDao.obtener(id)!!.copy(
+                montoRealCierre = 141_000.0,
+                fechaHoraCierre = cierre,
+                estadoCaja = EstadoCaja.CERRADA,
+                notaDiferencia = "Se dio vuelto de más en una venta",
+            ),
+        )
+
+        val cerrada = cajaDao.obtener(id)
+        assertEquals(141_000.0, cerrada?.montoRealCierre ?: 0.0, 0.001)
+        assertEquals(cierre, cerrada?.fechaHoraCierre)
+        assertEquals(EstadoCaja.CERRADA, cerrada?.estadoCaja)
+        assertEquals("Se dio vuelto de más en una venta", cerrada?.notaDiferencia)
+    }
+
+    @Test
+    fun cerrarLaJornadaNoLePisaConQueArranco() = runTest {
+        val id = cajaDao.insertar(caja(montoInicial = 50_000.0, apertura = ahora))
+
+        cajaDao.actualizar(
+            cajaDao.obtener(id)!!.copy(
+                montoRealCierre = 141_000.0,
+                fechaHoraCierre = ahora.plusHours(6),
+                estadoCaja = EstadoCaja.CERRADA,
+            ),
+        )
+
+        // El monto y la hora de apertura son el punto de partida de la cuenta: si el cierre los
+        // tocara, la diferencia que se le muestra al usuario saldría de datos cambiados.
+        val cerrada = cajaDao.obtener(id)
+        assertEquals(50_000.0, cerrada?.montoInicial ?: 0.0, 0.001)
+        assertEquals(ahora, cerrada?.fechaHoraApertura)
+    }
+
+    @Test
+    fun despuesDeCerrarSePuedeAbrirOtraElMismoDia() = runTest {
+        val primera = cajaDao.insertar(caja(montoInicial = 50_000.0, apertura = ahora))
+        cajaDao.actualizar(
+            cajaDao.obtener(primera)!!.copy(
+                montoRealCierre = 141_000.0,
+                fechaHoraCierre = ahora.plusHours(6),
+                estadoCaja = EstadoCaja.CERRADA,
+            ),
+        )
+
+        val segunda = cajaDao.insertar(caja(montoInicial = 20_000.0, apertura = ahora.plusHours(7)))
+
+        // El mockup dice que puede haber varias aperturas en un mismo día; lo que no puede
+        // haber es dos abiertas a la vez.
+        assertEquals(segunda, cajaDao.obtenerAbierta(negocioId)?.cajaId)
+    }
+
+    @Test
+    fun unaJornadaCerradaSinNotaEsValida() = runTest {
+        val id = cajaDao.insertar(caja(montoInicial = 50_000.0, apertura = ahora))
+
+        cajaDao.actualizar(
+            cajaDao.obtener(id)!!.copy(
+                montoRealCierre = 50_000.0,
+                fechaHoraCierre = ahora.plusHours(6),
+                estadoCaja = EstadoCaja.CERRADA,
+            ),
+        )
+
+        // Cuando la caja cuadra no hay nada que explicar: la nota admite nulos a propósito.
+        assertNull(cajaDao.obtener(id)?.notaDiferencia)
     }
 
     private fun caja(

@@ -3,6 +3,7 @@ package com.gestor_ventures.db.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.gestor_ventures.db.entity.CajaEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +23,19 @@ interface CajaDao {
 
     @Insert
     suspend fun insertar(caja: CajaEntity): Long
+
+    /**
+     * HU-21 y HU-22. Cierra la jornada: le pone el monto contado, la hora y la nota.
+     *
+     * Es un `@Update` sobre la misma fila y no una tabla aparte de cierres: una caja cerrada
+     * sigue siendo la misma jornada, solo que terminada. Partirla en dos obligaría a juntarlas
+     * de nuevo para el historial (HU-23).
+     */
+    @Update
+    suspend fun actualizar(caja: CajaEntity)
+
+    @Query("SELECT * FROM cajas WHERE caja_id = :cajaId")
+    suspend fun obtener(cajaId: Long): CajaEntity?
 
     /**
      * La caja abierta del negocio, si hay alguna. El repositorio la consulta antes de abrir
