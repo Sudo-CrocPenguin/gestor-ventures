@@ -75,4 +75,18 @@ interface VentaDao {
         """,
     )
     fun contarEntre(negocioId: Long, desde: LocalDateTime, hasta: LocalDateTime): Flow<Int>
+
+    /**
+     * HU-23. Lo mismo que [observarTotalEntre] pero de una sola vez.
+     *
+     * El historial recalcula la diferencia de cada jornada ya cerrada. Ese periodo ya terminó y no se va a
+     * mover, así que no hace falta quedarse escuchándolo: una consulta y listo.
+     */
+    @Query(
+        """
+        SELECT COALESCE(SUM(monto), 0) FROM ventas
+        WHERE negocio_id = :negocioId AND fecha_hora BETWEEN :desde AND :hasta
+        """,
+    )
+    suspend fun sumarEntre(negocioId: Long, desde: LocalDateTime, hasta: LocalDateTime): Double
 }

@@ -71,4 +71,17 @@ class CostoDaoFalso : CostoDao {
             !it.fechaRegistro.isBefore(desde) &&
             !it.fechaRegistro.isAfter(hasta)
     }
+
+    override suspend fun sumarEntre(
+        negocioId: Long,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
+    ): Double = costos.value
+        .filter {
+            it.negocioId == negocioId &&
+                !it.fechaRegistro.isBefore(desde) &&
+                !it.fechaRegistro.isAfter(hasta)
+        }
+        .sumOf { it.montoCosto }
+
 }

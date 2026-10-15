@@ -73,4 +73,18 @@ interface CostoDao {
         desde: LocalDateTime,
         hasta: LocalDateTime,
     ): Flow<List<TotalPorCategoria>>
+
+    /**
+     * HU-23. Lo mismo que [observarTotalEntre] pero de una sola vez.
+     *
+     * El historial recalcula la diferencia de cada jornada ya cerrada. Ese periodo ya terminó y no se va a
+     * mover, así que no hace falta quedarse escuchándolo: una consulta y listo.
+     */
+    @Query(
+        """
+        SELECT COALESCE(SUM(monto_costo), 0) FROM costos
+        WHERE negocio_id = :negocioId AND fecha_registro BETWEEN :desde AND :hasta
+        """,
+    )
+    suspend fun sumarEntre(negocioId: Long, desde: LocalDateTime, hasta: LocalDateTime): Double
 }

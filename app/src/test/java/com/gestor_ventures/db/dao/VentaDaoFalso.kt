@@ -62,4 +62,17 @@ class VentaDaoFalso : VentaDao {
     ) = filter {
         it.negocioId == negocioId && !it.fechaHora.isBefore(desde) && !it.fechaHora.isAfter(hasta)
     }
+
+    override suspend fun sumarEntre(
+        negocioId: Long,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
+    ): Double = ventas.value
+        .filter {
+            it.negocioId == negocioId &&
+                !it.fechaHora.isBefore(desde) &&
+                !it.fechaHora.isAfter(hasta)
+        }
+        .sumOf { it.monto }
+
 }
