@@ -9,7 +9,8 @@ data class InicioUiState(
     val fecha: LocalDate = LocalDate.now(),
     val alertasNuevas: Int = 0,
     val resumenHoy: ResumenHoyUi = ResumenHoyUi(),
-    val cajasActivas: List<CajaActivaUi> = emptyList(),
+    /** HU-20. La jornada en curso, o null si no hay ninguna abierta. */
+    val cajaAbierta: CajaAbiertaUi? = null,
     /** HU-08. La meta llegó al 100 % y el usuario todavía no ha definido la siguiente. */
     val metaCumplida: Boolean = false,
 )
@@ -27,11 +28,14 @@ data class ResumenHoyUi(
     val progresoMetaAhorro: Float? = null,
 )
 
-/** HU-19/HU-20. Caja abierta de un miembro del equipo con su saldo esperado. */
-data class CajaActivaUi(
-    val cajaId: Long,
-    val responsable: String,
-    val turno: String,
+/**
+ * HU-19 y HU-20. La jornada de caja abierta, con lo que debería haber en ella.
+ *
+ * Sin responsable ni turno: el mockup los muestra porque viene de la idea de varios vendedores
+ * con un Líder, pero la tabla `cajas` cuelga del negocio y no de una persona. Mientras eso no
+ * exista, inventarlo sería mostrar un dato que nadie guardó.
+ */
+data class CajaAbiertaUi(
     val horaApertura: LocalTime,
     val montoInicial: Double,
     val saldoEsperado: Double,

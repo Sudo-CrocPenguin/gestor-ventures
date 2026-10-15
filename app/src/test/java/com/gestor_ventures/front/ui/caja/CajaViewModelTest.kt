@@ -5,10 +5,19 @@ import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.repository.CajaRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
+import com.gestor_ventures.back.model.MetodoPago
+import com.gestor_ventures.back.model.TipoRegistroVenta
+import com.gestor_ventures.back.repository.CostoRepository
+import com.gestor_ventures.back.repository.GastoRepository
+import com.gestor_ventures.back.repository.VentaRepository
 import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
+import com.gestor_ventures.back.usecase.CalcularSaldoEsperado
 import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.CajaDaoFalso
+import com.gestor_ventures.db.dao.CostoDaoFalso
+import com.gestor_ventures.db.dao.GastoDaoFalso
 import com.gestor_ventures.db.dao.NegocioDaoFalso
+import com.gestor_ventures.db.dao.VentaDaoFalso
 import com.gestor_ventures.db.entity.NegocioEntity
 import com.gestor_ventures.db.enums.TipoActividad
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +37,7 @@ import org.junit.Before
 import org.junit.Test
 import java.time.LocalDateTime
 
-/** HU-19: abrir la jornada de caja con el efectivo con el que se arranca. */
+/** HU-19 y HU-20: abrir la jornada de caja y seguir su saldo. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class CajaViewModelTest {
 
@@ -38,8 +47,22 @@ class CajaViewModelTest {
 
     private val cajaDao = CajaDaoFalso()
     private val negocioDao = NegocioDaoFalso()
+    private val ventaDao = VentaDaoFalso()
+    private val gastoDao = GastoDaoFalso()
+    private val costoDao = CostoDaoFalso()
 
     private val repository = CajaRepository(cajaDao, reloj)
+    private val ventaRepository = VentaRepository(ventaDao, reloj)
+    private val gastoRepository = GastoRepository(gastoDao, reloj)
+    private val costoRepository = CostoRepository(costoDao, reloj)
+
+    private val calcularSaldoEsperado = CalcularSaldoEsperado(
+        cajaRepository = repository,
+        ventaRepository = ventaRepository,
+        gastoRepository = gastoRepository,
+        costoRepository = costoRepository,
+    )
+
     private val negocioActivo = NegocioActivoRepository(
         NegocioRepository(negocioDao, reloj),
         sesionRepositoryDePrueba(),
@@ -62,7 +85,7 @@ class CajaViewModelTest {
                 fechaCreacion = ahora,
             ),
         )
-        viewModel = CajaViewModel(repository, negocioActivo)
+        viewModel = CajaViewModel(repository, calcularSaldoEsperado, negocioActivo)
     }
 
     @After
@@ -195,5 +218,69 @@ class CajaViewModelTest {
         viewModel.onMontoChange("30000")
 
         assertNull(estado.error)
+    }
+
+    // ---------- HU-20: el saldo esperado ----------
+
+    private suspend fun vender(monto: Double) = ventaRepository.registrarVenta(
+        negocioId = 1L,
+        tipoRegistro = TipoRegistroVenta.DETALLADO,
+        monto = monto,
+        fechaHora = ahora,
+        productoServicio = "Torta",
+        metodoPago = MetodoPago.EFECTIVO,
+    )
+
+    @Test
+    fun recienAbiertaElSaldoEsLoQueSeConto() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+
+        assertEquals(50_000.0, estado.caja?.saldoEsperado ?: -1.0, 0.001)
+        assertTrue(estado.caja?.sinMovimientos ?: false)
+    }
+
+    @Test
+    fun registrarUnaVentaMueveElSaldoSolo() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+
+        // HU-20: nadie le avisa a la caja; la pantalla se entera sola.
+        vender(25_000.0)
+        advanceUntilIdle()
+
+        assertEquals(75_000.0, estado.caja?.saldoEsperado ?: -1.0, 0.001)
+        assertEquals(25_000.0, estado.caja?.ventas ?: -1.0, 0.001)
+    }
+
+    @Test
+    fun elDesgloseAcompanaAlSaldo() = runTest(dispatcher) {
+        advanceUntilIdle()
+        abrirCon("50000")
+        advanceUntilIdle()
+        vender(25_000.0)
+        gastoRepository.registrarGasto(1L, "Domicilio", 12_000.0, ahora)
+        costoRepository.registrarCosto(1L, "Harina", 8_000.0, ahora)
+        advanceUntilIdle()
+
+        val caja = estado.caja
+        assertEquals(25_000.0, caja?.ventas ?: -1.0, 0.001)
+        assertEquals(12_000.0, caja?.gastos ?: -1.0, 0.001)
+        assertEquals(8_000.0, caja?.costos ?: -1.0, 0.001)
+        assertEquals(55_000.0, caja?.saldoEsperado ?: -1.0, 0.001)
+        assertFalse(caja?.sinMovimientos ?: true)
+    }
+
+    @Test
+    fun sinCajaAbiertaNoHaySaldoQueMostrar() = runTest(dispatcher) {
+        advanceUntilIdle()
+        vender(25_000.0)
+        advanceUntilIdle()
+
+        // La venta existe, pero sin jornada abierta no hay saldo de caja que calcular.
+        assertNull(estado.caja)
+        assertTrue(estado.sinCaja)
     }
 }

@@ -78,7 +78,7 @@ fun InicioScreen(
         }
         ResumenHoyCard(resumen = uiState.resumenHoy, onVerFinanzas = onVerFinanzas)
         AccionesRapidas(onRegistrarVenta = onRegistrarVenta, onAbrirCaja = onAbrirCaja)
-        CajasActivasCard(cajas = uiState.cajasActivas)
+        CajaDelTurnoCard(caja = uiState.cajaAbierta)
     }
 }
 

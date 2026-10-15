@@ -2,9 +2,10 @@ package com.gestor_ventures.front.ui.caja
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gestor_ventures.back.model.Caja
 import com.gestor_ventures.back.repository.CajaRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
+import com.gestor_ventures.back.usecase.CalcularSaldoEsperado
+import com.gestor_ventures.back.usecase.SaldoDeCaja
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,16 +22,17 @@ import javax.inject.Inject
 private const val MaxDigitosMonto = 12
 
 /**
- * HU-19. Abrir la jornada de caja del negocio activo.
+ * HU-19 y HU-20. Abrir la jornada de caja y seguir su saldo.
  *
- * La jornada la manda el repositorio y lo que el usuario está escribiendo vive acá: así el
- * campo responde al instante y, al abrir, la pantalla cambia sola sin tener que pedir nada
- * de vuelta.
+ * El saldo lo manda [CalcularSaldoEsperado] y lo que el usuario está escribiendo vive acá: así
+ * el campo responde al instante y, al abrir o al registrar una venta, la pantalla cambia sola
+ * sin tener que pedir nada de vuelta.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class CajaViewModel @Inject constructor(
     private val repository: CajaRepository,
+    private val calcularSaldoEsperado: CalcularSaldoEsperado,
     private val negocioActivoRepository: NegocioActivoRepository,
 ) : ViewModel() {
 
@@ -41,10 +43,10 @@ class CajaViewModel @Inject constructor(
         viewModelScope.launch {
             negocioActivoRepository.negocioActivoId
                 .flatMapLatest { negocioId ->
-                    if (negocioId == null) flowOf(null) else repository.cajaAbierta(negocioId)
+                    if (negocioId == null) flowOf(null) else calcularSaldoEsperado(negocioId)
                 }
-                .collect { caja ->
-                    _uiState.update { it.copy(caja = caja?.let(::aCajaUi), cargando = false) }
+                .collect { saldo ->
+                    _uiState.update { it.copy(caja = saldo?.let(::aCajaUi), cargando = false) }
                 }
         }
     }
@@ -85,8 +87,12 @@ class CajaViewModel @Inject constructor(
         }
     }
 
-    private fun aCajaUi(caja: Caja) = CajaAbiertaUi(
-        montoInicial = caja.montoInicial,
-        apertura = caja.fechaHoraApertura,
+    private fun aCajaUi(saldo: SaldoDeCaja) = CajaAbiertaUi(
+        montoInicial = saldo.caja.montoInicial,
+        apertura = saldo.caja.fechaHoraApertura,
+        ventas = saldo.ventas,
+        gastos = saldo.gastos,
+        costos = saldo.costos,
+        saldoEsperado = saldo.saldoEsperado,
     )
 }
