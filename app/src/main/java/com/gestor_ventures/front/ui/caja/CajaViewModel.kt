@@ -87,6 +87,44 @@ class CajaViewModel @Inject constructor(
         }
     }
 
+    // ---------- HU-21 y HU-22: cerrar ----------
+
+    fun abrirCierre() {
+        _uiState.update { it.copy(cierre = FormularioCierre(), error = null) }
+    }
+
+    fun cerrarCierre() {
+        _uiState.update { it.copy(cierre = null, error = null) }
+    }
+
+    fun onMontoRealChange(texto: String) {
+        val digitos = texto.filter(Char::isDigit).take(MaxDigitosMonto)
+        _uiState.update { estado ->
+            estado.copy(cierre = estado.cierre?.copy(montoReal = digitos), error = null)
+        }
+    }
+
+    fun onNotaChange(texto: String) {
+        _uiState.update { estado -> estado.copy(cierre = estado.cierre?.copy(nota = texto)) }
+    }
+
+    fun cerrarCaja() {
+        val cierre = _uiState.value.cierre ?: return
+        if (!cierre.puedeCerrar) return
+
+        viewModelScope.launch {
+            val negocioId = negocioActivoRepository.negocioActivoId.first() ?: return@launch
+            val monto = cierre.montoValor ?: return@launch
+
+            val error = repository.cerrarCaja(negocioId, monto, cierre.nota)
+
+            // Con error la hoja se queda abierta: lo escrito no se pierde y se puede corregir.
+            _uiState.update {
+                it.copy(error = error, cierre = if (error == null) null else cierre)
+            }
+        }
+    }
+
     private fun aCajaUi(saldo: SaldoDeCaja) = CajaAbiertaUi(
         montoInicial = saldo.caja.montoInicial,
         apertura = saldo.caja.fechaHoraApertura,

@@ -33,7 +33,6 @@ import com.gestor_ventures.R
 import com.gestor_ventures.front.components.GvBackTopBar
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvCardHeader
-import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPrimaryButton
 import com.gestor_ventures.front.components.StatusPill
 import com.gestor_ventures.front.theme.GestorVenturesTheme
@@ -54,6 +53,11 @@ fun CajaRoute(onBack: () -> Unit, viewModel: CajaViewModel = hiltViewModel()) {
         onMontoChange = viewModel::onMontoChange,
         onAbrirCaja = viewModel::abrirCaja,
         onCerrarFormulario = viewModel::cerrarFormulario,
+        onAbrirCierre = viewModel::abrirCierre,
+        onMontoRealChange = viewModel::onMontoRealChange,
+        onNotaChange = viewModel::onNotaChange,
+        onConfirmarCierre = viewModel::cerrarCaja,
+        onCerrarCierre = viewModel::cerrarCierre,
     )
 }
 
@@ -71,6 +75,11 @@ fun CajaScreen(
     onMontoChange: (String) -> Unit,
     onAbrirCaja: () -> Unit,
     onCerrarFormulario: () -> Unit,
+    onAbrirCierre: () -> Unit,
+    onMontoRealChange: (String) -> Unit,
+    onNotaChange: (String) -> Unit,
+    onConfirmarCierre: () -> Unit,
+    onCerrarCierre: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize()) {
@@ -95,12 +104,15 @@ fun CajaScreen(
             }
         }
 
-        if (uiState.caja == null) {
+        // Mientras no se sepa si hay caja no se ofrece ninguna de las dos acciones: proponer
+        // "abrir" para cambiarlo por "cerrar" un instante después es peor que esperar.
+        if (!uiState.cargando) {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxWidth()) {
                 GvPrimaryButton(
-                    text = stringResource(R.string.caja_abrir),
-                    onClick = onAbrirFormulario,
-                    enabled = uiState.sinCaja,
+                    text = stringResource(
+                        if (uiState.caja == null) R.string.caja_abrir else R.string.caja_cerrar,
+                    ),
+                    onClick = if (uiState.caja == null) onAbrirFormulario else onAbrirCierre,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                 )
             }
@@ -114,6 +126,19 @@ fun CajaScreen(
             onMontoChange = onMontoChange,
             onAbrir = onAbrirCaja,
             onCerrar = onCerrarFormulario,
+        )
+    }
+
+    uiState.cierre?.let { cierre ->
+        CierreSheet(
+            cierre = cierre,
+            saldoEsperado = uiState.caja?.saldoEsperado ?: 0.0,
+            diferencia = uiState.diferencia,
+            error = uiState.error,
+            onMontoRealChange = onMontoRealChange,
+            onNotaChange = onNotaChange,
+            onConfirmar = onConfirmarCierre,
+            onCerrar = onCerrarCierre,
         )
     }
 }
@@ -206,9 +231,6 @@ private fun JornadaAbierta(caja: CajaAbiertaUi, modifier: Modifier = Modifier) {
             )
         }
     }
-
-    // Lo que falta de la épica, dicho de frente en vez de dejar la pantalla a medias.
-    GvInfoNote(stringResource(R.string.caja_cierre_pendiente))
 }
 
 /**
@@ -328,6 +350,11 @@ private fun VistaPreviaCaja(uiState: CajaUiState) {
                 onMontoChange = {},
                 onAbrirCaja = {},
                 onCerrarFormulario = {},
+                onAbrirCierre = {},
+                onMontoRealChange = {},
+                onNotaChange = {},
+                onConfirmarCierre = {},
+                onCerrarCierre = {},
             )
         }
     }

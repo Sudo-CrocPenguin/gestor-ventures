@@ -2,6 +2,7 @@ package com.gestor_ventures.front.ui.caja
 
 import androidx.annotation.StringRes
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.DiferenciaDeCaja
 import com.gestor_ventures.back.model.ErrorCaja
 import com.gestor_ventures.front.util.formatMiles
 import java.time.LocalDateTime
@@ -17,9 +18,23 @@ data class CajaUiState(
     val caja: CajaAbiertaUi? = null,
     val cargando: Boolean = true,
     val formulario: FormularioApertura? = null,
+    val cierre: FormularioCierre? = null,
     val error: ErrorCaja? = null,
 ) {
     val sinCaja: Boolean get() = !cargando && caja == null
+
+    /**
+     * HU-22. Lo contado contra lo esperado, mientras el usuario escribe.
+     *
+     * Null hasta que hay algo escrito: antes de eso no hay diferencia que mostrar, y un
+     * "faltan $142.500" apenas se abre la hoja sería una alarma falsa.
+     */
+    val diferencia: DiferenciaDeCaja?
+        get() {
+            val esperado = caja?.saldoEsperado ?: return null
+            val real = cierre?.montoValor ?: return null
+            return DiferenciaDeCaja(esperado = esperado, real = real)
+        }
 }
 
 /**
@@ -56,6 +71,26 @@ data class FormularioApertura(
      * se quedó vacío.
      */
     val puedeAbrir: Boolean get() = montoInicial.isNotBlank()
+}
+
+/**
+ * HU-21 y HU-22. Formulario de cierre: lo que de verdad hay en la caja y por qué no cuadra.
+ *
+ * La nota va acá aunque sea de HU-22 porque es el mismo momento: se escribe mirando la
+ * diferencia que acaba de aparecer, no en una pantalla aparte.
+ */
+data class FormularioCierre(
+    val montoReal: String = "",
+    val nota: String = "",
+) {
+    val montoFormateado: String
+        get() = if (montoReal.isEmpty()) "" else formatMiles(montoReal.toLongOrNull() ?: 0L)
+
+    /** El monto escrito como número, o null si todavía no hay nada. */
+    val montoValor: Double? get() = montoReal.toLongOrNull()?.toDouble()
+
+    /** Igual que al abrir: cero se admite, pero tiene que estar escrito. */
+    val puedeCerrar: Boolean get() = montoReal.isNotBlank()
 }
 
 /** Texto que ve el usuario para cada regla que rechaza el repositorio. */
