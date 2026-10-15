@@ -16,9 +16,10 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 /**
- * HU-19, HU-21 y HU-22. Abrir y cerrar caja, contra una base de datos real en memoria.
+ * HU-19 a HU-23. Abrir, cerrar y listar cajas, contra una base de datos real en memoria.
  *
  * Lo que se prueba acá no es guardar un monto: es que la consulta que responde "¿hay una
  * jornada en curso?" diga la verdad. De esa respuesta depende la única regla de la historia
@@ -194,6 +195,99 @@ class CajaDaoTest {
 
         // Cuando la caja cuadra no hay nada que explicar: la nota admite nulos a propósito.
         assertNull(cajaDao.obtener(id)?.notaDiferencia)
+    }
+
+    // ---------- HU-23: el historial ----------
+
+    private suspend fun jornadaCerrada(
+        montoInicial: Double,
+        apertura: LocalDateTime,
+        cierre: LocalDateTime,
+        negocio: Long = negocioId,
+    ): Long {
+        val id = cajaDao.insertar(caja(montoInicial, apertura, negocio))
+        cajaDao.actualizar(
+            cajaDao.obtener(id)!!.copy(
+                montoRealCierre = montoInicial,
+                fechaHoraCierre = cierre,
+                estadoCaja = EstadoCaja.CERRADA,
+            ),
+        )
+        return id
+    }
+
+    @Test
+    fun elHistorialTraeLasJornadasCerradasDelPeriodo() = runTest {
+        jornadaCerrada(50_000.0, ahora, ahora.plusHours(6))
+        jornadaCerrada(20_000.0, ahora.minusDays(1), ahora.minusDays(1).plusHours(6))
+
+        val cerradas = cajaDao.observarCerradasEntre(
+            negocioId,
+            ahora.minusDays(7).with(LocalTime.MIN),
+            ahora.with(LocalTime.MAX),
+        ).first()
+
+        assertEquals(2, cerradas.size)
+    }
+
+    @Test
+    fun laJornadaAbiertaNoSaleEnElHistorial() = runTest {
+        jornadaCerrada(50_000.0, ahora.minusDays(1), ahora.minusDays(1).plusHours(6))
+        cajaDao.insertar(caja(montoInicial = 20_000.0, apertura = ahora))
+
+        val cerradas = cajaDao.observarCerradasEntre(
+            negocioId,
+            ahora.minusDays(7).with(LocalTime.MIN),
+            ahora.with(LocalTime.MAX),
+        ).first()
+
+        // El historial es de lo que ya terminó; lo de hoy se mira en la pantalla de caja.
+        assertEquals(1, cerradas.size)
+        assertEquals(EstadoCaja.CERRADA, cerradas.single().estadoCaja)
+    }
+
+    @Test
+    fun elHistorialVaDeLaMasRecienteALaMasAntigua() = runTest {
+        val vieja = jornadaCerrada(10_000.0, ahora.minusDays(2), ahora.minusDays(2).plusHours(6))
+        val media = jornadaCerrada(20_000.0, ahora.minusDays(1), ahora.minusDays(1).plusHours(6))
+        val nueva = jornadaCerrada(30_000.0, ahora, ahora.plusHours(6))
+
+        val cerradas = cajaDao.observarCerradasEntre(
+            negocioId,
+            ahora.minusDays(7).with(LocalTime.MIN),
+            ahora.with(LocalTime.MAX),
+        ).first()
+
+        assertEquals(listOf(nueva, media, vieja), cerradas.map { it.cajaId })
+    }
+
+    @Test
+    fun loDeFueraDelPeriodoNoEntra() = runTest {
+        jornadaCerrada(50_000.0, ahora, ahora.plusHours(6))
+        jornadaCerrada(99_000.0, ahora.minusDays(30), ahora.minusDays(30).plusHours(6))
+
+        val cerradas = cajaDao.observarCerradasEntre(
+            negocioId,
+            ahora.minusDays(7).with(LocalTime.MIN),
+            ahora.with(LocalTime.MAX),
+        ).first()
+
+        assertEquals(50_000.0, cerradas.single().montoInicial, 0.001)
+    }
+
+    @Test
+    fun elHistorialDeUnNegocioNoTraeElDeOtro() = runTest {
+        val otroNegocioId = negocioDao.insertar(negocio("Café del Parque"))
+        jornadaCerrada(50_000.0, ahora, ahora.plusHours(6))
+        jornadaCerrada(30_000.0, ahora, ahora.plusHours(6), negocio = otroNegocioId)
+
+        val cerradas = cajaDao.observarCerradasEntre(
+            negocioId,
+            ahora.minusDays(7).with(LocalTime.MIN),
+            ahora.with(LocalTime.MAX),
+        ).first()
+
+        assertEquals(50_000.0, cerradas.single().montoInicial, 0.001)
     }
 
     private fun caja(

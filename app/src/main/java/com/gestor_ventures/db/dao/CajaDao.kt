@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.gestor_ventures.db.entity.CajaEntity
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 /**
  * HU-19 a HU-23. Las jornadas de caja del negocio.
@@ -54,6 +55,27 @@ interface CajaDao {
         """,
     )
     suspend fun obtenerAbierta(negocioId: Long): CajaEntity?
+
+    /**
+     * HU-23. Las jornadas ya cerradas de un periodo, de la más reciente a la más antigua.
+     *
+     * Filtra por la hora de cierre y no por la de apertura: lo que el usuario busca cuando mira
+     * el historial es cómo terminó cada día, y un turno que arrancó un lunes a las 11 de la
+     * noche y cerró el martes pertenece al martes en su cabeza.
+     */
+    @Query(
+        """
+        SELECT * FROM cajas
+        WHERE negocio_id = :negocioId AND estado_caja = 'CERRADA'
+          AND fecha_hora_cierre BETWEEN :desde AND :hasta
+        ORDER BY fecha_hora_cierre DESC, caja_id DESC
+        """,
+    )
+    fun observarCerradasEntre(
+        negocioId: Long,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
+    ): Flow<List<CajaEntity>>
 
     /** La misma consulta, pero seguida: la pantalla cambia sola al abrir o cerrar la caja. */
     @Query(

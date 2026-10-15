@@ -2,6 +2,7 @@ package com.gestor_ventures.db.dao
 
 import com.gestor_ventures.db.entity.CajaEntity
 import com.gestor_ventures.db.enums.EstadoCaja
+import java.time.LocalDateTime
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -30,6 +31,22 @@ class CajaDaoFalso : CajaDao {
 
     override suspend fun obtenerAbierta(negocioId: Long): CajaEntity? =
         abiertaDe(cajas.value, negocioId)
+
+    override fun observarCerradasEntre(
+        negocioId: Long,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
+    ): Flow<List<CajaEntity>> = cajas.map { lista ->
+        lista.filter {
+            it.negocioId == negocioId &&
+                it.estadoCaja == EstadoCaja.CERRADA &&
+                it.fechaHoraCierre?.let { cierre ->
+                    !cierre.isBefore(desde) && !cierre.isAfter(hasta)
+                } == true
+        }.sortedWith(
+            compareByDescending<CajaEntity> { it.fechaHoraCierre }.thenByDescending { it.cajaId },
+        )
+    }
 
     override fun observarAbierta(negocioId: Long): Flow<CajaEntity?> =
         cajas.map { lista -> abiertaDe(lista, negocioId) }
