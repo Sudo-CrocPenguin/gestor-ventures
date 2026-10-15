@@ -26,6 +26,31 @@ data class Caja(
 val JornadaSinCerrar: LocalDateTime = LocalDateTime.of(9999, 12, 31, 23, 59, 59)
 
 /**
+ * HU-23. Una jornada que ya terminó.
+ *
+ * Es un modelo aparte de [Caja] y no la misma clase con campos nulables: una caja cerrada
+ * siempre tiene hora de cierre y monto contado, y una abierta nunca. Mezclarlas obligaría a
+ * preguntar "¿y si es nulo?" en cada pantalla que las use.
+ */
+data class CajaCerrada(
+    val id: Long,
+    val montoInicial: Double,
+    val apertura: LocalDateTime,
+    val cierre: LocalDateTime,
+    val montoReal: Double,
+    val nota: String? = null,
+)
+
+/**
+ * HU-20 y HU-23. La cuenta del saldo de una jornada, en un solo lugar.
+ *
+ * La usan la caja en curso y el historial. Escrita dos veces, el día que alguien cambie una se
+ * va a olvidar de la otra, y la app mostraría dos cifras distintas para lo mismo.
+ */
+fun saldoDeCaja(montoInicial: Double, ventas: Double, gastos: Double, costos: Double): Double =
+    montoInicial + ventas - gastos - costos
+
+/**
  * HU-22. Lo que se contó al cerrar contra lo que el sistema esperaba.
  *
  * La diferencia es real menos esperado, como lo pide la historia: positiva significa que sobró

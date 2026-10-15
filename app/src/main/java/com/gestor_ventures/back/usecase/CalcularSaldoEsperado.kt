@@ -1,6 +1,7 @@
 package com.gestor_ventures.back.usecase
 
 import com.gestor_ventures.back.model.Caja
+import com.gestor_ventures.back.model.saldoDeCaja
 import com.gestor_ventures.back.repository.CajaRepository
 import com.gestor_ventures.back.repository.CostoRepository
 import com.gestor_ventures.back.repository.GastoRepository
@@ -68,5 +69,6 @@ data class SaldoDeCaja(
     val salidas: Double get() = gastos + costos
 
     /** Con lo que se arrancó, más lo que entró, menos lo que salió. */
-    val saldoEsperado: Double get() = caja.montoInicial + entradas - salidas
+    val saldoEsperado: Double
+        get() = saldoDeCaja(caja.montoInicial, ventas = ventas, gastos = gastos, costos = costos)
 }

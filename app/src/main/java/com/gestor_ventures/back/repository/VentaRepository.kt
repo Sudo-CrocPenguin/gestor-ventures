@@ -148,6 +148,11 @@ class VentaRepository @Inject constructor(
     fun totalDesde(negocioId: Long, desde: LocalDateTime): Flow<Double> =
         ventaDao.observarTotalEntre(negocioId, desde, JornadaSinCerrar)
 
+    /** HU-23: lo que se vendió dentro de una jornada ya cerrada, de una sola consulta. */
+    suspend fun sumarEntre(negocioId: Long, desde: LocalDateTime, hasta: LocalDateTime): Double =
+        ventaDao.sumarEntre(negocioId, desde, hasta)
+
+
     /** HU-17: las ventas de un rango de días, de la más reciente a la más antigua. */
     fun ventasEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Venta>> =
         ventaDao.observarEntre(negocioId, desde.inicio(), hasta.fin())
