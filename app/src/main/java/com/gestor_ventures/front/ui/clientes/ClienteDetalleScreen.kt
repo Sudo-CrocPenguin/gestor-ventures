@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -93,8 +94,9 @@ fun ClienteDetalleScreen(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = stringResource(
-                        R.string.cliente_cuantas_compras,
+                    text = pluralStringResource(
+                        R.plurals.cliente_cuantas_compras,
+                        uiState.compras.size,
                         uiState.compras.size,
                     ),
                     style = MaterialTheme.typography.bodySmall,
@@ -140,8 +142,9 @@ private fun Contacto(cliente: Cliente, modifier: Modifier = Modifier) {
     GvCard(modifier) {
         GvCardHeader(title = stringResource(R.string.cliente_contacto))
 
-        Linea(stringResource(R.string.cliente_telefono), cliente.telefono)
-        Linea(stringResource(R.string.cliente_correo), cliente.correo)
+        // Sin el "(opcional)" del formulario: acá ya no hay nada que decidir, solo que leer.
+        Linea(stringResource(R.string.cliente_telefono_perfil), cliente.telefono)
+        Linea(stringResource(R.string.cliente_correo_perfil), cliente.correo)
 
         cliente.notas?.let { notas ->
             Text(

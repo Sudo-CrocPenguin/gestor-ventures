@@ -52,6 +52,9 @@ fun CajaDelTurnoCard(
                     formatPesos(caja.montoInicial),
                 ),
                 iconRes = R.drawable.ic_box,
+                // La hora y el monto inicial no caben en una línea junto al saldo, y lo que
+                // se cortaba era justo el monto.
+                subtitleMaxLines = 2,
                 trailing = { MoneyText(monto = caja.saldoEsperado) },
             )
         }
