@@ -16,6 +16,8 @@ data class Gasto(
     /** Con hora desde HU-20: la caja necesita saber en qué jornada cayó el gasto. */
     val fecha: LocalDateTime,
     val categoriaId: Long? = null,
+    /** HU-18. Cuándo se corrigió, o nulo si nunca se tocó desde que se registró. */
+    val fechaModificacion: LocalDateTime? = null,
 )
 
 /** HU-15. Lo acumulado en una categoría; [categoriaId] nulo es el montón sin clasificar. */

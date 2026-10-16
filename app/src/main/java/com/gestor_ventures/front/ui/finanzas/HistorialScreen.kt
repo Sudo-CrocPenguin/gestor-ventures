@@ -415,12 +415,25 @@ private fun subtituloDe(
     conFecha: Boolean,
 ): String {
     val detalle = detalleDe(movimiento, categoria)
-    if (!conFecha) return detalle
-    return stringResource(
-        R.string.historial_con_fecha,
-        formatDiaCorto(movimiento.fechaHora.toLocalDate()),
-        detalle,
-    )
+    val conDia = if (conFecha) {
+        stringResource(
+            R.string.historial_con_fecha,
+            formatDiaCorto(movimiento.fechaHora.toLocalDate()),
+            detalle,
+        )
+    } else {
+        detalle
+    }
+
+    // HU-18. Saber que una cifra se corrigió es parte de poder confiar en ella: sin esto, un
+    // número editado y uno original se ven exactamente igual.
+    return movimiento.fechaModificacion?.let { corregido ->
+        stringResource(
+            R.string.historial_editado,
+            conDia,
+            formatDiaCorto(corregido.toLocalDate()),
+        )
+    } ?: conDia
 }
 
 @Composable

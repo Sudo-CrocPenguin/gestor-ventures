@@ -15,6 +15,9 @@ sealed interface Movimiento {
     val monto: Double
     val fechaHora: LocalDateTime
 
+    /** HU-18. Cuándo se corrigió este registro, o nulo si nunca se tocó. */
+    val fechaModificacion: LocalDateTime?
+
     /** Entra plata o sale. Es lo único que el historial necesita saber sin abrir el registro. */
     val entra: Boolean
 
@@ -22,6 +25,7 @@ sealed interface Movimiento {
         override val id: Long get() = venta.id
         override val monto: Double get() = venta.monto
         override val fechaHora: LocalDateTime get() = venta.fechaHora
+        override val fechaModificacion: LocalDateTime? get() = venta.fechaModificacion
         override val entra: Boolean get() = true
     }
 
@@ -30,6 +34,7 @@ sealed interface Movimiento {
         override val monto: Double get() = gasto.monto
 
         override val fechaHora: LocalDateTime get() = gasto.fecha
+        override val fechaModificacion: LocalDateTime? get() = gasto.fechaModificacion
         override val entra: Boolean get() = false
     }
 
@@ -37,6 +42,7 @@ sealed interface Movimiento {
         override val id: Long get() = costo.id
         override val monto: Double get() = costo.monto
         override val fechaHora: LocalDateTime get() = costo.fecha
+        override val fechaModificacion: LocalDateTime? get() = costo.fechaModificacion
         override val entra: Boolean get() = false
     }
 }

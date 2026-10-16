@@ -95,5 +95,20 @@ private fun aMedianocheLocal(epochDay: Long): Long =
         .toInstant()
         .toEpochMilli()
 
+/**
+ * v4 → v5: HU-18 guarda cuándo se corrigió cada registro.
+ *
+ * Columna nueva y nada más, así que basta un ALTER por tabla: no hay que reconstruirlas como
+ * en [MIGRACION_3_4]. Lo que ya estaba queda con la fecha en nulo, que es la verdad — esos
+ * registros nunca se editaron, o se editaron antes de que la app lo anotara.
+ */
+val MIGRACION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        listOf("ventas", "gastos", "costos").forEach { tabla ->
+            db.execSQL("ALTER TABLE `$tabla` ADD COLUMN `fecha_modificacion` INTEGER")
+        }
+    }
+}
+
 /** Todas las migraciones, en orden, para pasárselas al constructor de la base de datos. */
-val MIGRACIONES = arrayOf(MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4)
+val MIGRACIONES = arrayOf(MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4, MIGRACION_4_5)

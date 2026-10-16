@@ -183,4 +183,42 @@ class GastoRepositoryTest {
 
         assertEquals(emptyList<Any>(), repository.gastosDelMes(negocioId).first())
     }
+
+    // ---------- HU-18: la fecha de modificación ----------
+
+    @Test
+    fun unGastoRecienRegistradoNoTieneFechaDeModificacion() = runTest {
+        registrar(descripcion = "Domicilio", monto = 12_000.0)
+
+        // Nunca se tocó: nulo es la verdad, no un dato faltante.
+        assertNull(repository.gastosDelMes(negocioId).first().single().fechaModificacion)
+    }
+
+    @Test
+    fun editarUnGastoLeDejaLaFechaDeModificacion() = runTest {
+        registrar(descripcion = "Domicilio", monto = 12_000.0)
+        val gasto = repository.gastosDelMes(negocioId).first().single()
+
+        repository.editarGasto(
+            gastoId = gasto.id,
+            descripcion = "Domicilio del sábado",
+            monto = 15_000.0,
+            fecha = hoy.atStartOfDay(),
+        )
+
+        // La pone el reloj, no el usuario: es el rastro de que la cifra ya no es la original.
+        assertEquals(ahora, repository.gastosDelMes(negocioId).first().single().fechaModificacion)
+    }
+
+    @Test
+    fun unaEdicionRechazadaNoDejaRastroDeModificacion() = runTest {
+        registrar(descripcion = "Domicilio", monto = 12_000.0)
+        val gasto = repository.gastosDelMes(negocioId).first().single()
+
+        repository.editarGasto(gasto.id, "Domicilio", 0.0, hoy.atStartOfDay())
+
+        // Si marcara el gasto como editado, el historial diría que alguien lo tocó cuando en
+        // realidad el cambio nunca se guardó.
+        assertNull(repository.gastosDelMes(negocioId).first().single().fechaModificacion)
+    }
 }

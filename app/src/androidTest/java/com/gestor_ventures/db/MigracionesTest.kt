@@ -142,13 +142,57 @@ class MigracionesTest {
     }
 
     @Test
+    fun migracion_4_5_agregaLaFechaDeModificacionSinPerderNada() {
+        helper.createDatabase(NombreBaseDePrueba, 4).use { db ->
+            db.execSQL(InsertarUsuario)
+            db.execSQL(InsertarNegocio)
+            db.execSQL(
+                """
+                INSERT INTO ventas
+                    (venta_id, negocio_id, tipo_registro, producto_servicio, monto, metodo_pago,
+                     fecha_hora, nota)
+                VALUES (1, 1, 'DETALLADO', 'Torta de chocolate', 25000.0, 'EFECTIVO', 0, NULL)
+                """,
+            )
+            db.execSQL(
+                """
+                INSERT INTO gastos (gasto_id, negocio_id, categoria_id, descripcion, monto, fecha_hora)
+                VALUES (1, 1, NULL, 'Domicilio', 12000.0, 0)
+                """,
+            )
+            db.execSQL(
+                """
+                INSERT INTO costos
+                    (costo_id, negocio_id, categoria_id, producto_servicio, monto_costo, fecha_registro)
+                VALUES (1, 1, NULL, 'Harina', 8000.0, 0)
+                """,
+            )
+        }
+
+        val db = helper.runMigrationsAndValidate(NombreBaseDePrueba, 5, true, MIGRACION_4_5)
+
+        // Lo que ya estaba queda sin fecha de modificación, que es la verdad: nunca se editó.
+        listOf(
+            "SELECT monto, fecha_modificacion FROM ventas",
+            "SELECT monto, fecha_modificacion FROM gastos",
+            "SELECT monto_costo, fecha_modificacion FROM costos",
+        ).forEach { consulta ->
+            db.query(consulta).use { fila ->
+                assertTrue(consulta, fila.moveToFirst())
+                assertTrue(consulta, fila.getDouble(0) > 0)
+                assertTrue(consulta, fila.isNull(1))
+            }
+        }
+    }
+
+    @Test
     fun laCadenaCompletaDeMigracionesLlegaHastaLaUltimaVersion() {
         helper.createDatabase(NombreBaseDePrueba, 1).use { db ->
             db.execSQL(InsertarUsuario)
         }
 
         // Quien instaló la app cuando salió y la actualiza hoy pasa por todas de una vez.
-        val db = helper.runMigrationsAndValidate(NombreBaseDePrueba, 4, true, *MIGRACIONES)
+        val db = helper.runMigrationsAndValidate(NombreBaseDePrueba, 5, true, *MIGRACIONES)
 
         db.query("SELECT nombre FROM usuarios").use { fila ->
             assertTrue(fila.moveToFirst())
