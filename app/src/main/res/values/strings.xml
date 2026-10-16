@@ -47,6 +47,16 @@
     <string name="cliente_guardar_cambios">Guardar cambios</string>
     <string name="cliente_sin_contacto">Sin teléfono ni correo</string>
     <string name="cliente_acciones_de">Opciones de %1$s</string>
+    <string name="cliente_accion_perfil">Ver historial de compras</string>
+    <string name="cliente_contacto">Contacto</string>
+    <string name="cliente_sin_dato">Sin registrar</string>
+    <string name="cliente_total_acumulado">Total acumulado</string>
+    <string name="cliente_cuantas_compras">En %1$d compras</string>
+    <string name="cliente_historial_compras">Historial de compras</string>
+    <string name="cliente_sin_compras">Este cliente todavía no te ha comprado nada.</string>
+    <string name="cliente_compra_sin_detalle">Venta rápida</string>
+    <string name="cliente_compra_cuando">%1$s · %2$s</string>
+    <string name="cliente_citas_pendientes">Las citas y los pedidos de este cliente aparecerán acá cuando esté lista la agenda.</string>
     <string name="cliente_accion_whatsapp">Escribir por WhatsApp</string>
     <string name="cliente_sin_telefono_whatsapp">Este cliente no tiene teléfono registrado</string>
     <string name="cliente_accion_editar">Corregir cliente</string>

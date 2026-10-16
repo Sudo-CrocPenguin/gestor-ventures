@@ -35,6 +35,13 @@ interface ClienteDao {
     suspend fun obtener(clienteId: Long): ClienteEntity?
 
     /**
+     * HU-30. El mismo cliente, pero seguido: su perfil tiene que reflejar al instante lo que
+     * se le corrija desde la lista, sin que nadie se acuerde de recargarlo.
+     */
+    @Query("SELECT * FROM clientes WHERE cliente_id = :clienteId")
+    fun observar(clienteId: Long): Flow<ClienteEntity?>
+
+    /**
      * Todos los del negocio, por nombre. El COLLATE NOCASE es para que "ana" y "Ana" queden
      * juntas: quien escribe rápido no usa mayúsculas, y la lista no tiene por qué delatarlo.
      */

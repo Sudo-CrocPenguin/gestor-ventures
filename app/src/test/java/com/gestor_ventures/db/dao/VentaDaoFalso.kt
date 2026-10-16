@@ -75,4 +75,14 @@ class VentaDaoFalso : VentaDao {
         }
         .sumOf { it.monto }
 
+
+    override fun observarDeCliente(clienteId: Long): Flow<List<VentaEntity>> =
+        ventas.map { lista ->
+            lista.filter { it.clienteId == clienteId }
+                .sortedWith(
+                    compareByDescending<VentaEntity> { it.fechaHora }
+                        .thenByDescending { it.ventaId },
+                )
+        }
+
 }

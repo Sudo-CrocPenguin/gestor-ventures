@@ -18,6 +18,7 @@ import com.gestor_ventures.R
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
 import com.gestor_ventures.front.ui.caja.CajaRoute
 import com.gestor_ventures.front.ui.caja.HistorialCajaRoute
+import com.gestor_ventures.front.ui.clientes.ClienteDetalleRoute
 import com.gestor_ventures.front.ui.clientes.ClientesRoute
 import com.gestor_ventures.front.ui.finanzas.CategoriasRoute
 import com.gestor_ventures.front.ui.finanzas.FinanzasRoute
@@ -59,6 +60,10 @@ object Rutas {
     /** HU-40. Ingresos y egresos a lo largo del tiempo. */
     const val Reportes = "reportes"
 
+    /** HU-30. El perfil de un cliente con su historial de compras. */
+    const val ClienteDetalle = "cliente/{$ArgumentoClienteId}"
+    fun clienteDetalle(clienteId: Long) = "cliente/$clienteId"
+
     /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
     const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
     fun baseFinanciera(negocioId: String) = "base_financiera/$negocioId"
@@ -70,6 +75,9 @@ object Rutas {
 
 /** Nombre del id de negocio dentro de la ruta. */
 const val ArgumentoNegocioId = "negocioId"
+
+/** Nombre del id de cliente dentro de la ruta. */
+const val ArgumentoClienteId = "clienteId"
 
 @Composable
 fun AppNavHost(
@@ -198,7 +206,19 @@ fun AppNavHost(
 
         // HU-29. A quién le vende el negocio.
         composable(TopLevelDestination.Clientes.route) {
-            ClientesRoute()
+            ClientesRoute(
+                onVerPerfil = { clienteId ->
+                    navController.navigate(Rutas.clienteDetalle(clienteId))
+                },
+            )
+        }
+
+        // HU-30. Qué le ha comprado ese cliente al negocio.
+        composable(
+            route = Rutas.ClienteDetalle,
+            arguments = listOf(navArgument(ArgumentoClienteId) { type = NavType.StringType }),
+        ) {
+            ClienteDetalleRoute(onBack = { navController.popBackStack() })
         }
 
         // Pestañas cuya pantalla aún no existe: se reemplazan a medida que se construyen.

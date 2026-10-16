@@ -33,6 +33,9 @@ class ClienteDaoFalso : ClienteDao {
     override suspend fun obtener(clienteId: Long): ClienteEntity? =
         clientes.value.firstOrNull { it.clienteId == clienteId }
 
+    override fun observar(clienteId: Long): Flow<ClienteEntity?> =
+        clientes.map { lista -> lista.firstOrNull { it.clienteId == clienteId } }
+
     override fun observarDeNegocio(negocioId: Long): Flow<List<ClienteEntity>> =
         clientes.map { lista ->
             lista.filter { it.negocioId == negocioId }
