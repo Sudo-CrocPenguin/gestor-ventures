@@ -1,5 +1,6 @@
 package com.gestor_ventures.front.ui.clientes
 
+import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -23,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
@@ -40,12 +43,16 @@ import com.gestor_ventures.front.util.aIniciales
 @Composable
 fun ClientesRoute(viewModel: ClientesViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val contexto = LocalContext.current
 
     ClientesScreen(
         uiState = uiState,
         onBusquedaChange = viewModel::onBusquedaChange,
         onAgregar = viewModel::abrirFormularioNuevo,
         onAbrirAcciones = viewModel::abrirAcciones,
+        onAbrirWhatsApp = { enlace ->
+            contexto.startActivity(Intent(Intent.ACTION_VIEW, enlace.toUri()))
+        },
         onEditar = viewModel::editarElElegido,
         onEliminar = viewModel::eliminarElElegido,
         onCerrarAcciones = viewModel::cerrarAcciones,
@@ -70,6 +77,7 @@ fun ClientesScreen(
     onBusquedaChange: (String) -> Unit,
     onAgregar: () -> Unit,
     onAbrirAcciones: (Cliente) -> Unit,
+    onAbrirWhatsApp: (String) -> Unit,
     onEditar: () -> Unit,
     onEliminar: () -> Unit,
     onCerrarAcciones: () -> Unit,
@@ -121,9 +129,22 @@ fun ClientesScreen(
     }
 
     uiState.acciones?.let { cliente ->
+        val whatsapp = uiState.whatsappDelElegido
         GvAccionesSheet(
             titulo = cliente.nombre,
             acciones = listOf(
+                AccionSheet(
+                    texto = stringResource(R.string.cliente_accion_whatsapp),
+                    iconRes = R.drawable.ic_message,
+                    // HU-31: sin teléfono no hay a quién escribirle, y se dice por qué.
+                    habilitada = whatsapp != null,
+                    detalle = if (whatsapp == null) {
+                        stringResource(R.string.cliente_sin_telefono_whatsapp)
+                    } else {
+                        null
+                    },
+                    onClick = { whatsapp?.let(onAbrirWhatsApp) },
+                ),
                 AccionSheet(
                     texto = stringResource(R.string.cliente_accion_editar),
                     iconRes = R.drawable.ic_pencil,
@@ -220,6 +241,7 @@ private fun VistaPreviaClientes(uiState: ClientesUiState) {
                 onBusquedaChange = {},
                 onAgregar = {},
                 onAbrirAcciones = {},
+                onAbrirWhatsApp = {},
                 onEditar = {},
                 onEliminar = {},
                 onCerrarAcciones = {},

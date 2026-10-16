@@ -47,6 +47,8 @@
     <string name="cliente_guardar_cambios">Guardar cambios</string>
     <string name="cliente_sin_contacto">Sin teléfono ni correo</string>
     <string name="cliente_acciones_de">Opciones de %1$s</string>
+    <string name="cliente_accion_whatsapp">Escribir por WhatsApp</string>
+    <string name="cliente_sin_telefono_whatsapp">Este cliente no tiene teléfono registrado</string>
     <string name="cliente_accion_editar">Corregir cliente</string>
     <string name="cliente_accion_eliminar">Eliminar cliente</string>
     <string name="cliente_error_nombre">Escribe el nombre del cliente.</string>

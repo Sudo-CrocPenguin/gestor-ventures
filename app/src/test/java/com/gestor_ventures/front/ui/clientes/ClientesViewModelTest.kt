@@ -336,4 +336,36 @@ class ClientesViewModelTest {
 
         assertEquals("lau", estado.busqueda)
     }
+
+    // ---------- HU-31: WhatsApp ----------
+
+    @Test
+    fun elClienteConTelefonoTraeSuEnlaceDeWhatsApp() = runTest(dispatcher) {
+        advanceUntilIdle()
+        registrar("Laura Gómez", telefono = "3001112233")
+        advanceUntilIdle()
+
+        viewModel.abrirAcciones(estado.clientes.single())
+
+        assertEquals("https://wa.me/573001112233", estado.whatsappDelElegido)
+    }
+
+    @Test
+    fun elClienteSinTelefonoNoTraeEnlace() = runTest(dispatcher) {
+        advanceUntilIdle()
+        registrar("Camila Torres")
+        advanceUntilIdle()
+
+        viewModel.abrirAcciones(estado.clientes.single())
+
+        // Es lo que apaga el botón: sin teléfono no hay a quién escribirle.
+        assertNull(estado.whatsappDelElegido)
+    }
+
+    @Test
+    fun sinNadieElegidoNoHayEnlace() = runTest(dispatcher) {
+        advanceUntilIdle()
+
+        assertNull(estado.whatsappDelElegido)
+    }
 }
