@@ -460,6 +460,7 @@
     <string name="caja_sobra_detalle">Lo contado es mayor a lo esperado.</string>
     <string name="caja_falta">Faltan %1$s</string>
     <string name="caja_falta_detalle">Lo contado es menor a lo esperado.</string>
+    <string name="historial_editado">%1$s · editado el %2$s</string>
     <string name="periodo_personalizado">Personalizado</string>
     <string name="periodo_rango_titulo">Elige el rango</string>
     <string name="periodo_desde">Desde</string>

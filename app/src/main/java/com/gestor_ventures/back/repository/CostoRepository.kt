@@ -71,6 +71,9 @@ class CostoRepository @Inject constructor(
                 montoCosto = monto,
                 fechaRegistro = fecha,
                 categoriaId = categoriaId,
+                // HU-18: la pone el reloj al corregir, no el usuario. Es el rastro de que
+                // esta cifra ya no es la que se registró la primera vez.
+                fechaModificacion = reloj.ahora(),
             ),
         )
         return null
@@ -137,6 +140,7 @@ class CostoRepository @Inject constructor(
         monto = entidad.montoCosto,
         fecha = entidad.fechaRegistro,
         categoriaId = entidad.categoriaId,
+        fechaModificacion = entidad.fechaModificacion,
     )
 }
 

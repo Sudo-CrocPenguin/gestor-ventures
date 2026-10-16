@@ -58,7 +58,16 @@ data class VentaEntity(
     val fechaHora: LocalDateTime,
 
     /** HU-11. Apunte libre del negocio sobre la venta ("pedido para el sábado"). */
-    val nota: String? = null
+    val nota: String? = null,
+
+    /**
+     * HU-18. Cuándo se corrigió por última vez, o nulo si nunca se tocó.
+     *
+     * Se guarda para poder distinguir un registro original de uno corregido: en el historial,
+     * saber que una cifra se editó es parte de poder confiar en ella. Ver [MIGRACION_4_5].
+     */
+    @ColumnInfo(name = "fecha_modificacion")
+    val fechaModificacion: LocalDateTime? = null
 )
 
 /** HU-13. Costo directo asociado a un producto/servicio, usado para calcular margen. */
@@ -98,7 +107,16 @@ data class CostoEntity(
     val montoCosto: Double, // > 0
 
     @ColumnInfo(name = "fecha_registro")
-    val fechaRegistro: LocalDateTime
+    val fechaRegistro: LocalDateTime,
+
+    /**
+     * HU-18. Cuándo se corrigió por última vez, o nulo si nunca se tocó.
+     *
+     * Se guarda para poder distinguir un registro original de uno corregido: en el historial,
+     * saber que una cifra se editó es parte de poder confiar en ella. Ver [MIGRACION_4_5].
+     */
+    @ColumnInfo(name = "fecha_modificacion")
+    val fechaModificacion: LocalDateTime? = null
 )
 
 /** HU-14. Gasto general del negocio, distinto de los gastos fijos (HU-06). */
@@ -144,5 +162,14 @@ data class GastoEntity(
      * hora; esto deja a los tres iguales. Ver [MIGRACION_3_4].
      */
     @ColumnInfo(name = "fecha_hora")
-    val fechaHora: LocalDateTime
+    val fechaHora: LocalDateTime,
+
+    /**
+     * HU-18. Cuándo se corrigió por última vez, o nulo si nunca se tocó.
+     *
+     * Se guarda para poder distinguir un registro original de uno corregido: en el historial,
+     * saber que una cifra se editó es parte de poder confiar en ella. Ver [MIGRACION_4_5].
+     */
+    @ColumnInfo(name = "fecha_modificacion")
+    val fechaModificacion: LocalDateTime? = null
 )

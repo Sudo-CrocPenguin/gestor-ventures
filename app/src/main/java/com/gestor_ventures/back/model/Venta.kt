@@ -19,6 +19,8 @@ data class Venta(
     val clienteId: Long? = null,
     /** Apunte libre del negocio. La venta rápida lo usa para no perder el detalle del día. */
     val nota: String? = null,
+    /** HU-18. Cuándo se corrigió, o nulo si nunca se tocó desde que se registró. */
+    val fechaModificacion: LocalDateTime? = null,
 )
 
 /** HU-11/HU-12. Detallada pide qué se vendió y cómo pagaron; rápida solo el total. */

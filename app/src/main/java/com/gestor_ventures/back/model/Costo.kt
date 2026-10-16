@@ -12,6 +12,8 @@ data class Costo(
     val monto: Double,
     val fecha: LocalDateTime,
     val categoriaId: Long? = null,
+    /** HU-18. Cuándo se corrigió, o nulo si nunca se tocó desde que se registró. */
+    val fechaModificacion: LocalDateTime? = null,
 )
 
 /**

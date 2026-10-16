@@ -111,6 +111,9 @@ class VentaRepository @Inject constructor(
                 metodoPago = metodoPago?.aDb().takeIf { esDetallada },
                 clienteId = clienteId.takeIf { esDetallada },
                 nota = nota?.trim()?.takeIf { it.isNotEmpty() },
+                // HU-18: la pone el reloj al corregir, no el usuario. Es el rastro de que
+                // esta cifra ya no es la que se registró la primera vez.
+                fechaModificacion = reloj.ahora(),
             ),
         )
         return ResultadoVenta.Exito(ventaId)
@@ -196,6 +199,7 @@ class VentaRepository @Inject constructor(
         metodoPago = entidad.metodoPago?.aDominio(),
         clienteId = entidad.clienteId,
         nota = entidad.nota,
+        fechaModificacion = entidad.fechaModificacion,
     )
 }
 
