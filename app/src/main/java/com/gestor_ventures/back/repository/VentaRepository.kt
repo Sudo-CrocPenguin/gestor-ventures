@@ -147,6 +147,10 @@ class VentaRepository @Inject constructor(
     fun totalEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<Double> =
         ventaDao.observarTotalEntre(negocioId, desde.inicio(), hasta.fin())
 
+    /** HU-30: lo que un cliente le ha comprado al negocio, de lo más reciente a lo más viejo. */
+    fun ventasDeCliente(clienteId: Long): Flow<List<Venta>> =
+        ventaDao.observarDeCliente(clienteId).map { entidades -> entidades.map(::aVenta) }
+
     /** HU-20: lo vendido desde que se abrió la caja, para el saldo esperado de la jornada. */
     fun totalDesde(negocioId: Long, desde: LocalDateTime): Flow<Double> =
         ventaDao.observarTotalEntre(negocioId, desde, JornadaSinCerrar)

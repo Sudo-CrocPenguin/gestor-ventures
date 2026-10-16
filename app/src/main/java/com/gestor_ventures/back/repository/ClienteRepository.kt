@@ -50,6 +50,10 @@ class ClienteRepository @Inject constructor(
             .map { lista -> lista.map(::aCliente) }
     }
 
+    /** HU-30: el cliente seguido, para que su perfil refleje lo que se le corrija. */
+    fun observarCliente(clienteId: Long): Flow<Cliente?> =
+        clienteDao.observar(clienteId).map { entidad -> entidad?.let(::aCliente) }
+
     suspend fun obtenerCliente(clienteId: Long): Cliente? =
         clienteDao.obtener(clienteId)?.let(::aCliente)
 

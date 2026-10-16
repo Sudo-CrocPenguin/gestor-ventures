@@ -41,7 +41,10 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.util.aIniciales
 
 @Composable
-fun ClientesRoute(viewModel: ClientesViewModel = hiltViewModel()) {
+fun ClientesRoute(
+    onVerPerfil: (Long) -> Unit,
+    viewModel: ClientesViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
 
@@ -50,6 +53,10 @@ fun ClientesRoute(viewModel: ClientesViewModel = hiltViewModel()) {
         onBusquedaChange = viewModel::onBusquedaChange,
         onAgregar = viewModel::abrirFormularioNuevo,
         onAbrirAcciones = viewModel::abrirAcciones,
+        onVerPerfil = { cliente ->
+            viewModel.cerrarAcciones()
+            onVerPerfil(cliente.id)
+        },
         onAbrirWhatsApp = { enlace ->
             contexto.startActivity(Intent(Intent.ACTION_VIEW, enlace.toUri()))
         },
@@ -77,6 +84,7 @@ fun ClientesScreen(
     onBusquedaChange: (String) -> Unit,
     onAgregar: () -> Unit,
     onAbrirAcciones: (Cliente) -> Unit,
+    onVerPerfil: (Cliente) -> Unit,
     onAbrirWhatsApp: (String) -> Unit,
     onEditar: () -> Unit,
     onEliminar: () -> Unit,
@@ -133,6 +141,11 @@ fun ClientesScreen(
         GvAccionesSheet(
             titulo = cliente.nombre,
             acciones = listOf(
+                AccionSheet(
+                    texto = stringResource(R.string.cliente_accion_perfil),
+                    iconRes = R.drawable.ic_list,
+                    onClick = { onVerPerfil(cliente) },
+                ),
                 AccionSheet(
                     texto = stringResource(R.string.cliente_accion_whatsapp),
                     iconRes = R.drawable.ic_message,
@@ -241,6 +254,7 @@ private fun VistaPreviaClientes(uiState: ClientesUiState) {
                 onBusquedaChange = {},
                 onAgregar = {},
                 onAbrirAcciones = {},
+                onVerPerfil = {},
                 onAbrirWhatsApp = {},
                 onEditar = {},
                 onEliminar = {},

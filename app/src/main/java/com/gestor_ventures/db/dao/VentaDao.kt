@@ -67,6 +67,21 @@ interface VentaDao {
         hasta: LocalDateTime,
     ): Flow<Double>
 
+    /**
+     * HU-30. Las ventas que se le hicieron a un cliente, de la más reciente a la más antigua.
+     *
+     * No lleva el negocio: un cliente ya pertenece a uno solo (HU-29), así que filtrar otra vez
+     * por negocio sería preguntar dos veces lo mismo.
+     */
+    @Query(
+        """
+        SELECT * FROM ventas
+        WHERE cliente_id = :clienteId
+        ORDER BY fecha_hora DESC, venta_id DESC
+        """,
+    )
+    fun observarDeCliente(clienteId: Long): Flow<List<VentaEntity>>
+
     /** Cuántas ventas se registraron en el rango, para el resumen del inicio. */
     @Query(
         """
