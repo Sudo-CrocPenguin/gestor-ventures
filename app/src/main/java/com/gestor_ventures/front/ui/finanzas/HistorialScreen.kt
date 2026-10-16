@@ -50,6 +50,7 @@ import com.gestor_ventures.front.components.GvAccionesSheet
 import com.gestor_ventures.front.components.GvBackTopBar
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvChip
+import com.gestor_ventures.front.model.labelRes
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvSegmentedToggle
 import com.gestor_ventures.front.components.ListRow
@@ -454,13 +455,6 @@ private fun Movimiento.categoriaId(): Long? = when (this) {
     is Movimiento.DeVenta -> null
     is Movimiento.DeGasto -> gasto.categoriaId
     is Movimiento.DeCosto -> costo.categoriaId
-}
-
-private fun PeriodoPredefinido.labelRes(): Int = when (this) {
-    PeriodoPredefinido.Hoy -> R.string.periodo_hoy
-    PeriodoPredefinido.Ayer -> R.string.periodo_ayer
-    PeriodoPredefinido.Semana -> R.string.periodo_semana
-    PeriodoPredefinido.Mes -> R.string.periodo_mes
 }
 
 private fun FiltroMovimientos.labelRes(): Int = when (this) {

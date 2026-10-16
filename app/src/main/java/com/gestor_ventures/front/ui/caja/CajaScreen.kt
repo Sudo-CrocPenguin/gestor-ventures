@@ -34,6 +34,7 @@ import com.gestor_ventures.front.components.GvBackTopBar
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvCardHeader
 import com.gestor_ventures.front.components.GvPrimaryButton
+import com.gestor_ventures.front.components.GvTextLink
 import com.gestor_ventures.front.components.StatusPill
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.theme.NumericTextStyle
@@ -43,12 +44,17 @@ import com.gestor_ventures.front.util.formatPesos
 import java.time.LocalDateTime
 
 @Composable
-fun CajaRoute(onBack: () -> Unit, viewModel: CajaViewModel = hiltViewModel()) {
+fun CajaRoute(
+    onBack: () -> Unit,
+    onVerHistorial: () -> Unit,
+    viewModel: CajaViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CajaScreen(
         uiState = uiState,
         onBack = onBack,
+        onVerHistorial = onVerHistorial,
         onAbrirFormulario = viewModel::abrirFormulario,
         onMontoChange = viewModel::onMontoChange,
         onAbrirCaja = viewModel::abrirCaja,
@@ -71,6 +77,7 @@ fun CajaRoute(onBack: () -> Unit, viewModel: CajaViewModel = hiltViewModel()) {
 fun CajaScreen(
     uiState: CajaUiState,
     onBack: () -> Unit,
+    onVerHistorial: () -> Unit,
     onAbrirFormulario: () -> Unit,
     onMontoChange: (String) -> Unit,
     onAbrirCaja: () -> Unit,
@@ -101,6 +108,18 @@ fun CajaScreen(
             when {
                 uiState.caja != null -> JornadaAbierta(uiState.caja)
                 uiState.sinCaja -> SinJornada()
+            }
+
+            // HU-23. Se ofrece siempre: lo de días anteriores se consulta igual con la caja
+            // abierta que sin ella.
+            if (!uiState.cargando) {
+                GvTextLink(
+                    text = stringResource(R.string.caja_ver_historial),
+                    onClick = onVerHistorial,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                )
             }
         }
 
@@ -346,6 +365,7 @@ private fun VistaPreviaCaja(uiState: CajaUiState) {
             CajaScreen(
                 uiState = uiState,
                 onBack = {},
+                onVerHistorial = {},
                 onAbrirFormulario = {},
                 onMontoChange = {},
                 onAbrirCaja = {},

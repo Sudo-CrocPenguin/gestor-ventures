@@ -17,6 +17,7 @@ import androidx.navigation.navArgument
 import com.gestor_ventures.R
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
 import com.gestor_ventures.front.ui.caja.CajaRoute
+import com.gestor_ventures.front.ui.caja.HistorialCajaRoute
 import com.gestor_ventures.front.ui.clientes.ClientesRoute
 import com.gestor_ventures.front.ui.finanzas.CategoriasRoute
 import com.gestor_ventures.front.ui.finanzas.FinanzasRoute
@@ -50,6 +51,9 @@ object Rutas {
 
     /** HU-19. La jornada de caja del negocio activo. */
     const val Caja = "caja"
+
+    /** HU-23. Las jornadas de caja que ya terminaron. */
+    const val HistorialCaja = "historial_caja"
 
     /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
     const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
@@ -169,7 +173,15 @@ fun AppNavHost(
 
         // HU-19. La jornada de caja: con cuánto se arrancó el turno.
         composable(Rutas.Caja) {
-            CajaRoute(onBack = { navController.popBackStack() })
+            CajaRoute(
+                onBack = { navController.popBackStack() },
+                onVerHistorial = { navController.navigate(Rutas.HistorialCaja) },
+            )
+        }
+
+        // HU-23: se entra desde la caja, a revisar cómo terminaron los días anteriores.
+        composable(Rutas.HistorialCaja) {
+            HistorialCajaRoute(onBack = { navController.popBackStack() })
         }
 
         // HU-29. A quién le vende el negocio.
