@@ -1,6 +1,8 @@
 package com.gestor_ventures.front.ui.caja
 
 import com.gestor_ventures.back.model.PeriodoPredefinido
+import com.gestor_ventures.back.model.SeleccionDePeriodo
+import com.gestor_ventures.front.model.FormularioRango
 import java.time.LocalDateTime
 
 /**
@@ -11,7 +13,8 @@ import java.time.LocalDateTime
  */
 data class HistorialCajaUiState(
     val cierres: List<CierreUi> = emptyList(),
-    val periodo: PeriodoPredefinido = PeriodoPredefinido.Semana,
+    val seleccion: SeleccionDePeriodo = SeleccionDePeriodo.Rapido(PeriodoPredefinido.Semana),
+    val rango: FormularioRango? = null,
     val cargando: Boolean = true,
 ) {
     val vacio: Boolean get() = !cargando && cierres.isEmpty()

@@ -49,8 +49,8 @@ import com.gestor_ventures.front.components.AccionSheet
 import com.gestor_ventures.front.components.GvAccionesSheet
 import com.gestor_ventures.front.components.GvBackTopBar
 import com.gestor_ventures.front.components.GvCard
-import com.gestor_ventures.front.components.GvChip
-import com.gestor_ventures.front.model.labelRes
+import com.gestor_ventures.front.components.GvChipsDePeriodo
+import com.gestor_ventures.front.components.GvRangoSheet
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvSegmentedToggle
 import com.gestor_ventures.front.components.ListRow
@@ -69,6 +69,11 @@ fun HistorialRoute(onBack: () -> Unit, viewModel: HistorialViewModel = hiltViewM
         uiState = uiState,
         onBack = onBack,
         onPeriodoChange = viewModel::onPeriodoChange,
+        onPersonalizar = viewModel::abrirRango,
+        onDesdeChange = viewModel::onDesdeChange,
+        onHastaChange = viewModel::onHastaChange,
+        onAplicarRango = viewModel::aplicarRango,
+        onCerrarRango = viewModel::cerrarRango,
         onFiltroChange = viewModel::onFiltroChange,
         onAbrirAcciones = viewModel::abrirAcciones,
         onCerrarAcciones = viewModel::cerrarAcciones,
@@ -99,6 +104,11 @@ fun HistorialScreen(
     uiState: HistorialUiState,
     onBack: () -> Unit,
     onPeriodoChange: (PeriodoPredefinido) -> Unit,
+    onPersonalizar: () -> Unit,
+    onDesdeChange: (LocalDate) -> Unit,
+    onHastaChange: (LocalDate) -> Unit,
+    onAplicarRango: () -> Unit,
+    onCerrarRango: () -> Unit,
     onFiltroChange: (FiltroMovimientos) -> Unit,
     onAbrirAcciones: (Movimiento) -> Unit,
     onCerrarAcciones: () -> Unit,
@@ -128,7 +138,12 @@ fun HistorialScreen(
                 .padding(top = 12.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Periodos(seleccionado = uiState.periodo, onSeleccionar = onPeriodoChange)
+            GvChipsDePeriodo(
+                seleccion = uiState.seleccion,
+                onRapido = onPeriodoChange,
+                onPersonalizar = onPersonalizar,
+                modifier = Modifier.fillMaxWidth(),
+            )
 
             GvSegmentedToggle(
                 opciones = FiltroMovimientos.entries,
@@ -221,29 +236,6 @@ fun HistorialScreen(
         )
 
         null -> Unit
-    }
-}
-
-/** Los periodos de un toque. Se desplazan porque en una pantalla angosta no caben los cuatro. */
-@Composable
-private fun Periodos(
-    seleccionado: PeriodoPredefinido,
-    onSeleccionar: (PeriodoPredefinido) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        PeriodoPredefinido.entries.forEach { periodo ->
-            GvChip(
-                text = stringResource(periodo.labelRes()),
-                selected = periodo == seleccionado,
-                onClick = { onSeleccionar(periodo) },
-            )
-        }
     }
 }
 
@@ -522,6 +514,11 @@ private fun VistaPreviaHistorial(uiState: HistorialUiState) {
                 uiState = uiState,
                 onBack = {},
                 onPeriodoChange = {},
+                onPersonalizar = {},
+                onDesdeChange = {},
+                onHastaChange = {},
+                onAplicarRango = {},
+                onCerrarRango = {},
                 onFiltroChange = {},
                 onAbrirAcciones = {},
                 onCerrarAcciones = {},

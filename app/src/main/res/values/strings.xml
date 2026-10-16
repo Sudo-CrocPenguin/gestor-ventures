@@ -460,6 +460,13 @@
     <string name="caja_sobra_detalle">Lo contado es mayor a lo esperado.</string>
     <string name="caja_falta">Faltan %1$s</string>
     <string name="caja_falta_detalle">Lo contado es menor a lo esperado.</string>
+    <string name="periodo_personalizado">Personalizado</string>
+    <string name="periodo_rango_titulo">Elige el rango</string>
+    <string name="periodo_desde">Desde</string>
+    <string name="periodo_hasta">Hasta</string>
+    <string name="periodo_fecha_placeholder">Toca para elegir</string>
+    <string name="periodo_error_invertido">La fecha de inicio tiene que ser anterior o igual a la de fin.</string>
+    <string name="periodo_aplicar">Aplicar</string>
     <string name="caja_ver_historial">Ver cierres anteriores</string>
     <string name="historial_caja_titulo">Historial de cierres</string>
     <string name="historial_caja_cierres">Cierres del periodo</string>

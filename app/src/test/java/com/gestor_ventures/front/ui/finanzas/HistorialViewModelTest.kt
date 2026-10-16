@@ -4,6 +4,7 @@ import com.gestor_ventures.back.model.FiltroMovimientos
 import com.gestor_ventures.back.model.MetodoPago
 import com.gestor_ventures.back.model.Movimiento
 import com.gestor_ventures.back.model.PeriodoPredefinido
+import com.gestor_ventures.back.model.SeleccionDePeriodo
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.TipoRegistroVenta
 import com.gestor_ventures.back.repository.CategoriaRepository
@@ -134,7 +135,7 @@ class HistorialViewModelTest {
         abrirPantalla()
         advanceUntilIdle()
 
-        assertEquals(PeriodoPredefinido.Hoy, estado.periodo)
+        assertEquals(SeleccionDePeriodo.Rapido(PeriodoPredefinido.Hoy), estado.seleccion)
         assertEquals(1, estado.movimientos.size)
     }
 

@@ -6,6 +6,9 @@ import com.gestor_ventures.back.model.Categoria
 import com.gestor_ventures.back.model.FiltroMovimientos
 import com.gestor_ventures.back.model.Movimiento
 import com.gestor_ventures.back.model.PeriodoPredefinido
+import com.gestor_ventures.back.model.SeleccionDePeriodo
+import com.gestor_ventures.back.model.personalizado
+import com.gestor_ventures.front.model.FormularioRango
 import com.gestor_ventures.back.model.rango
 import com.gestor_ventures.back.repository.CostoRepository
 import com.gestor_ventures.back.repository.GastoRepository
@@ -56,12 +59,13 @@ class HistorialViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HistorialUiState())
     val uiState: StateFlow<HistorialUiState> = _uiState.asStateFlow()
 
-    private val periodo = MutableStateFlow(PeriodoPredefinido.Hoy)
+    private val seleccion =
+        MutableStateFlow<SeleccionDePeriodo>(SeleccionDePeriodo.Rapido(PeriodoPredefinido.Hoy))
 
     init {
         viewModelScope.launch {
-            combine(negocioActivoRepository.negocioActivoId, periodo) { negocioId, periodo ->
-                negocioId to periodo
+            combine(negocioActivoRepository.negocioActivoId, seleccion) { negocioId, elegido ->
+                negocioId to elegido
             }.flatMapLatest { (negocioId, periodo) ->
                 if (negocioId == null) {
                     flowOf(emptyList<Movimiento>() to emptyList<Categoria>())
@@ -80,8 +84,51 @@ class HistorialViewModel @Inject constructor(
     }
 
     fun onPeriodoChange(nuevo: PeriodoPredefinido) {
-        periodo.value = nuevo
-        _uiState.update { it.copy(periodo = nuevo, cargando = true) }
+        aplicar(SeleccionDePeriodo.Rapido(nuevo))
+    }
+
+    /** HU-17. Abre la hoja del rango con lo que ya estuviera elegido, si era personalizado. */
+    fun abrirRango() {
+        val actual = _uiState.value.seleccion
+        _uiState.update {
+            it.copy(
+                rango = when (actual) {
+                    is SeleccionDePeriodo.Personalizado -> FormularioRango(actual.desde, actual.hasta)
+                    else -> FormularioRango()
+                },
+            )
+        }
+    }
+
+    fun cerrarRango() {
+        _uiState.update { it.copy(rango = null) }
+    }
+
+    fun onDesdeChange(fecha: LocalDate) {
+        _uiState.update { it.copy(rango = it.rango?.copy(desde = fecha)) }
+    }
+
+    fun onHastaChange(fecha: LocalDate) {
+        _uiState.update { it.copy(rango = it.rango?.copy(hasta = fecha)) }
+    }
+
+    /**
+     * Aplica el rango escrito a mano. Si `personalizado` lo rechaza —fechas al revés— no se
+     * aplica nada y la hoja se queda abierta con el aviso.
+     */
+    fun aplicarRango() {
+        val formulario = _uiState.value.rango ?: return
+        val desde = formulario.desde ?: return
+        val hasta = formulario.hasta ?: return
+        val elegido = personalizado(desde, hasta) ?: return
+
+        aplicar(elegido)
+        _uiState.update { it.copy(rango = null) }
+    }
+
+    private fun aplicar(nuevo: SeleccionDePeriodo) {
+        seleccion.value = nuevo
+        _uiState.update { it.copy(seleccion = nuevo, cargando = true) }
     }
 
     fun onFiltroChange(nuevo: FiltroMovimientos) {

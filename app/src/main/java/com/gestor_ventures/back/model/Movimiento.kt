@@ -1,7 +1,5 @@
 package com.gestor_ventures.back.model
 
-import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 /**
@@ -51,30 +49,3 @@ sealed interface Movimiento {
  * secciones de Finanzas.
  */
 enum class FiltroMovimientos { Todos, Ventas, Salidas }
-
-/** HU-17. El periodo que se está mirando, con los dos extremos incluidos. */
-data class RangoFechas(val desde: LocalDate, val hasta: LocalDate) {
-    val esUnSoloDia: Boolean get() = desde == hasta
-}
-
-/**
- * HU-17. Los periodos que se eligen de un toque.
- *
- * Todos terminan hoy y no al final del periodo: no existen movimientos futuros —ni una venta ni
- * un gasto se dejan registrar con fecha posterior a hoy— así que un rango que se estire hacia
- * adelante solo agregaría días vacíos.
- */
-enum class PeriodoPredefinido { Hoy, Ayer, Semana, Mes }
-
-/**
- * Resuelve el periodo contra el día en que se está parado.
- *
- * "Semana" y "Mes" son la semana y el mes en curso, no los últimos siete o treinta días: es lo
- * que una persona quiere decir cuando dice "cómo voy este mes".
- */
-fun PeriodoPredefinido.rango(hoy: LocalDate): RangoFechas = when (this) {
-    PeriodoPredefinido.Hoy -> RangoFechas(hoy, hoy)
-    PeriodoPredefinido.Ayer -> RangoFechas(hoy.minusDays(1), hoy.minusDays(1))
-    PeriodoPredefinido.Semana -> RangoFechas(hoy.with(DayOfWeek.MONDAY), hoy)
-    PeriodoPredefinido.Mes -> RangoFechas(hoy.withDayOfMonth(1), hoy)
-}
