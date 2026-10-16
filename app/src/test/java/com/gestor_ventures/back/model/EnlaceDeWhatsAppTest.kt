@@ -1,6 +1,9 @@
 package com.gestor_ventures.back.model
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -48,5 +51,48 @@ class EnlaceDeWhatsAppTest {
     @Test
     fun unFijoDeSieteDigitosTambienRecibeElIndicativo() {
         assertEquals("https://wa.me/571234567", enlaceDeWhatsApp("1234567"))
+    }
+
+    // ---------- HU-32: el enlace con el mensaje adentro ----------
+
+    @Test
+    fun conMensajeElEnlaceAbreElChatConElTextoEscrito() {
+        assertEquals(
+            "https://wa.me/573001112233?text=Hola%20Ana",
+            enlaceDeWhatsApp("3001112233", "Hola Ana"),
+        )
+    }
+
+    @Test
+    fun losEspaciosNoSeVuelvenSignosDeMas() {
+        val enlace = enlaceDeWhatsApp("3001112233", "Te espero el sabado")
+
+        // URLEncoder los convierte en "+", que algunos clientes muestran tal cual en el texto.
+        assertTrue(enlace!!.contains("%20"))
+        assertFalse(enlace.contains("+"))
+    }
+
+    @Test
+    fun lasTildesYLosSignosViajanCodificados() {
+        val enlace = enlaceDeWhatsApp("3001112233", "¿Nos vemos mañana?")
+
+        assertNotNull(enlace)
+        assertFalse(enlace!!.contains("¿"))
+        assertFalse(enlace.contains("ñ"))
+    }
+
+    @Test
+    fun sinMensajeElEnlaceQuedaComoEstaba() {
+        assertEquals("https://wa.me/573001112233", enlaceDeWhatsApp("3001112233", null))
+    }
+
+    @Test
+    fun unMensajeEnBlancoEsComoNoMandarNinguno() {
+        assertEquals("https://wa.me/573001112233", enlaceDeWhatsApp("3001112233", "   "))
+    }
+
+    @Test
+    fun sinTelefonoNoHayEnlaceAunqueHayaMensaje() {
+        assertNull(enlaceDeWhatsApp(null, "Hola"))
     }
 }
