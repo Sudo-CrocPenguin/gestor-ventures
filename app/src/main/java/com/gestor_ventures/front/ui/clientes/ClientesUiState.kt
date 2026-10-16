@@ -8,18 +8,24 @@ import com.gestor_ventures.back.model.ErrorCliente
 /**
  * HU-29. Los clientes del negocio activo.
  *
- * Todavía no hay búsqueda ni historial de compras: eso es HU-33 y HU-30. Esta pantalla responde
- * solo "¿a quién le vendo y cómo lo ubico?".
+ * El historial de compras todavía no está: eso es HU-30. Esta pantalla responde "¿a quién le
+ * vendo, cómo lo ubico y cómo lo encuentro?".
  */
 data class ClientesUiState(
     val clientes: List<Cliente> = emptyList(),
+    /** HU-33. Lo que el usuario está buscando, por nombre o por número. */
+    val busqueda: String = "",
     val cargando: Boolean = true,
     val formulario: FormularioCliente? = null,
     /** El cliente que el usuario tocó, mientras elige qué hacer con él. */
     val acciones: Cliente? = null,
     val error: ErrorCliente? = null,
 ) {
-    val vacio: Boolean get() = !cargando && clientes.isEmpty()
+    /** El negocio no tiene clientes todavía, que es distinto de que la búsqueda no encuentre. */
+    val vacio: Boolean get() = !cargando && clientes.isEmpty() && busqueda.isBlank()
+
+    /** HU-33. Hay clientes, pero ninguno coincide con lo escrito. */
+    val sinResultados: Boolean get() = !cargando && clientes.isEmpty() && busqueda.isNotBlank()
 }
 
 /**

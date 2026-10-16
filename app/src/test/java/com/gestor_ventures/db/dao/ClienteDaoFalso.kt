@@ -39,6 +39,19 @@ class ClienteDaoFalso : ClienteDao {
                 .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.nombre })
         }
 
+    override fun buscarEnNegocio(
+        negocioId: Long,
+        texto: String,
+        digitos: String,
+    ): Flow<List<ClienteEntity>> = clientes.map { lista ->
+        lista.filter {
+            it.negocioId == negocioId && (
+                it.nombre.contains(texto, ignoreCase = true) ||
+                    (digitos.isNotEmpty() && it.telefono?.contains(digitos) == true)
+                )
+        }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.nombre })
+    }
+
     override suspend fun existeConTelefono(
         negocioId: Long,
         telefono: String,

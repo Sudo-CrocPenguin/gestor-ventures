@@ -32,6 +32,7 @@ import com.gestor_ventures.front.components.GvAccionesSheet
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPrimaryButton
+import com.gestor_ventures.front.components.GvTextField
 import com.gestor_ventures.front.components.ListRow
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.util.aIniciales
@@ -42,6 +43,7 @@ fun ClientesRoute(viewModel: ClientesViewModel = hiltViewModel()) {
 
     ClientesScreen(
         uiState = uiState,
+        onBusquedaChange = viewModel::onBusquedaChange,
         onAgregar = viewModel::abrirFormularioNuevo,
         onAbrirAcciones = viewModel::abrirAcciones,
         onEditar = viewModel::editarElElegido,
@@ -65,6 +67,7 @@ fun ClientesRoute(viewModel: ClientesViewModel = hiltViewModel()) {
 @Composable
 fun ClientesScreen(
     uiState: ClientesUiState,
+    onBusquedaChange: (String) -> Unit,
     onAgregar: () -> Unit,
     onAbrirAcciones: (Cliente) -> Unit,
     onEditar: () -> Unit,
@@ -86,8 +89,21 @@ fun ClientesScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            // HU-33. El buscador va arriba y siempre visible: esconderlo detrás de una lupa
+            // obliga a un toque de más en la pantalla donde más se busca.
+            GvTextField(
+                label = stringResource(R.string.clientes_buscar),
+                value = uiState.busqueda,
+                onValueChange = onBusquedaChange,
+                placeholder = stringResource(R.string.clientes_buscar_placeholder),
+            )
+
             AnimatedVisibility(visible = uiState.vacio) {
                 GvInfoNote(stringResource(R.string.clientes_vacio))
+            }
+
+            AnimatedVisibility(visible = uiState.sinResultados) {
+                GvInfoNote(stringResource(R.string.clientes_sin_resultados, uiState.busqueda))
             }
 
             uiState.clientes.forEach { cliente ->
@@ -201,6 +217,7 @@ private fun VistaPreviaClientes(uiState: ClientesUiState) {
         Surface(color = MaterialTheme.colorScheme.background) {
             ClientesScreen(
                 uiState = uiState,
+                onBusquedaChange = {},
                 onAgregar = {},
                 onAbrirAcciones = {},
                 onEditar = {},

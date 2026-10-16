@@ -33,6 +33,23 @@ class ClienteRepository @Inject constructor(
     fun clientesDeNegocio(negocioId: Long): Flow<List<Cliente>> =
         clienteDao.observarDeNegocio(negocioId).map { lista -> lista.map(::aCliente) }
 
+    /**
+     * HU-33. Busca por nombre o por número dentro del negocio.
+     *
+     * Con la búsqueda vacía devuelve la lista completa: un campo en blanco no es un filtro, y
+     * dejar la pantalla sin nada hasta que alguien escriba sería esconder lo que ya existe.
+     *
+     * El teléfono se busca en puros dígitos porque así se guarda (HU-29): quien escribe
+     * "300 111" tiene que encontrar al que tiene "3001112233".
+     */
+    fun buscarClientes(negocioId: Long, texto: String): Flow<List<Cliente>> {
+        val limpio = texto.trim()
+        if (limpio.isEmpty()) return clientesDeNegocio(negocioId)
+
+        return clienteDao.buscarEnNegocio(negocioId, limpio, soloDigitos(limpio))
+            .map { lista -> lista.map(::aCliente) }
+    }
+
     suspend fun obtenerCliente(clienteId: Long): Cliente? =
         clienteDao.obtener(clienteId)?.let(::aCliente)
 

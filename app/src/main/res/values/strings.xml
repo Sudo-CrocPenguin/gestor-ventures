@@ -28,6 +28,9 @@
     <string name="menu_general">General</string>
     <string name="menu_info_negocio">Información del negocio</string>
     <string name="menu_gastos_fijos">Gastos fijos y obligaciones</string>
+    <string name="clientes_buscar">Buscar cliente</string>
+    <string name="clientes_buscar_placeholder">Nombre o número</string>
+    <string name="clientes_sin_resultados">Ningún cliente coincide con «%1$s».</string>
     <string name="clientes_vacio">Todavía no tienes clientes. Agrega el primero para tener sus datos a la mano.</string>
     <string name="clientes_agregar">Agregar cliente</string>
     <string name="cliente_titulo_nuevo">Nuevo cliente</string>

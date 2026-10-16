@@ -48,6 +48,33 @@ interface ClienteDao {
     fun observarDeNegocio(negocioId: Long): Flow<List<ClienteEntity>>
 
     /**
+     * HU-33. Los del negocio que coinciden con lo escrito, por nombre o por número.
+     *
+     * Van dos textos y no uno: [texto] se busca en el nombre tal cual se escribió, y [digitos]
+     * en el teléfono ya sin espacios ni guiones, porque así es como está guardado. Quien busca
+     * "300 111" espera encontrar al que tiene "3001112233".
+     *
+     * [digitos] vacío apaga la parte del teléfono: si no, al escribir un nombre la condición
+     * se volvería "el teléfono contiene nada", que en SQL es cierto para todos.
+     */
+    @Query(
+        """
+        SELECT * FROM clientes
+        WHERE negocio_id = :negocioId
+          AND (
+            nombre LIKE '%' || :texto || '%'
+            OR (:digitos != '' AND telefono LIKE '%' || :digitos || '%')
+          )
+        ORDER BY nombre COLLATE NOCASE ASC, cliente_id ASC
+        """,
+    )
+    fun buscarEnNegocio(
+        negocioId: Long,
+        texto: String,
+        digitos: String,
+    ): Flow<List<ClienteEntity>>
+
+    /**
      * Si el negocio ya tiene otro cliente con ese teléfono. [exceptoId] deja fuera al que se
      * está editando: si no, corregirle las notas a alguien fallaría por chocar consigo mismo.
      */

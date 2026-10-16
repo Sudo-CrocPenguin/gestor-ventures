@@ -28,7 +28,7 @@ import org.junit.Before
 import org.junit.Test
 import java.time.LocalDateTime
 
-/** HU-29: registrar, corregir y borrar los clientes del negocio activo. */
+/** HU-29 y HU-33: registrar, corregir, borrar y buscar los clientes del negocio activo. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClientesViewModelTest {
 
@@ -252,5 +252,88 @@ class ClientesViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf("Ana", "camila", "diego"), estado.clientes.map { it.nombre })
+    }
+
+    // ---------- HU-33: buscar ----------
+
+    @Test
+    fun buscarPorNombreDejaSoloLosQueCoinciden() = runTest(dispatcher) {
+        advanceUntilIdle()
+        registrar("Laura Gómez", telefono = "3001112233")
+        advanceUntilIdle()
+        registrar("Andrés Ruiz", telefono = "3109998877")
+        advanceUntilIdle()
+
+        viewModel.onBusquedaChange("laura")
+        advanceUntilIdle()
+
+        assertEquals("Laura Gómez", estado.clientes.single().nombre)
+    }
+
+    @Test
+    fun buscarPorNumeroEncuentraAunqueSeEscribaConEspacios() = runTest(dispatcher) {
+        advanceUntilIdle()
+        registrar("Laura Gómez", telefono = "3001112233")
+        advanceUntilIdle()
+        registrar("Andrés Ruiz", telefono = "3109998877")
+        advanceUntilIdle()
+
+        // El teléfono se guarda en puros dígitos; lo escrito se normaliza igual antes de buscar.
+        viewModel.onBusquedaChange("300 111")
+        advanceUntilIdle()
+
+        assertEquals("Laura Gómez", estado.clientes.single().nombre)
+    }
+
+    @Test
+    fun laBusquedaNoDistingueMayusculas() = runTest(dispatcher) {
+        advanceUntilIdle()
+        registrar("Laura Gómez")
+        advanceUntilIdle()
+
+        viewModel.onBusquedaChange("GÓMEZ")
+        advanceUntilIdle()
+
+        assertEquals(1, estado.clientes.size)
+    }
+
+    @Test
+    fun borrarLaBusquedaDevuelveLaListaCompleta() = runTest(dispatcher) {
+        advanceUntilIdle()
+        registrar("Laura Gómez")
+        advanceUntilIdle()
+        registrar("Andrés Ruiz")
+        advanceUntilIdle()
+        viewModel.onBusquedaChange("laura")
+        advanceUntilIdle()
+
+        viewModel.onBusquedaChange("")
+        advanceUntilIdle()
+
+        // Un campo en blanco no es un filtro: esconder la lista sería esconder lo que existe.
+        assertEquals(2, estado.clientes.size)
+    }
+
+    @Test
+    fun sinCoincidenciasLoDiceEnVezDeParecerVacio() = runTest(dispatcher) {
+        advanceUntilIdle()
+        registrar("Laura Gómez")
+        advanceUntilIdle()
+
+        viewModel.onBusquedaChange("zzz")
+        advanceUntilIdle()
+
+        // "No encontré a nadie" y "todavía no tienes clientes" son dos cosas distintas.
+        assertTrue(estado.sinResultados)
+        assertFalse(estado.vacio)
+    }
+
+    @Test
+    fun elCampoSePintaAlInstanteSinEsperarLaConsulta() = runTest(dispatcher) {
+        advanceUntilIdle()
+
+        viewModel.onBusquedaChange("lau")
+
+        assertEquals("lau", estado.busqueda)
     }
 }
