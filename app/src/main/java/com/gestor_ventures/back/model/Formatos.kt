@@ -42,9 +42,22 @@ private const val LargoLocal = 10
  * diez dígitos va a terminar con un enlace equivocado. Lo correcto sería pedir el indicativo
  * en el formulario (HU-29), y eso es un cambio de la historia, no de esta función.
  */
-fun enlaceDeWhatsApp(telefono: String?): String? {
+fun enlaceDeWhatsApp(telefono: String?, mensaje: String? = null): String? {
     val digitos = telefono?.let(::soloDigitos)?.takeIf { it.isNotEmpty() } ?: return null
     val internacional =
         if (digitos.length > LargoLocal) digitos else IndicativoColombia + digitos
-    return "https://wa.me/$internacional"
+
+    // HU-32: con mensaje, WhatsApp abre el chat con el texto ya escrito. Lo escribe el usuario
+    // y lo manda él: la app no envía nada por su cuenta.
+    val texto = mensaje?.trim()?.takeIf { it.isNotEmpty() } ?: return "https://wa.me/$internacional"
+    return "https://wa.me/$internacional?text=" + codificarParaUrl(texto)
 }
+
+/**
+ * Codifica el texto para meterlo en la dirección.
+ *
+ * `URLEncoder` convierte los espacios en "+", que en el texto de un mensaje se vería así
+ * literalmente en algunos clientes, así que se dejan como %20.
+ */
+private fun codificarParaUrl(texto: String): String =
+    java.net.URLEncoder.encode(texto, "UTF-8").replace("+", "%20")
