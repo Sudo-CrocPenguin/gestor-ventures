@@ -174,6 +174,71 @@ class ClienteDaoTest {
         notas = notas,
     )
 
+    // ---------- HU-33: buscar ----------
+
+    @Test
+    fun buscarPorNombreEncuentraPorUnPedazo() = runTest {
+        clienteDao.insertar(cliente("Laura Gómez", telefono = "3001112233"))
+        clienteDao.insertar(cliente("Andrés Ruiz", telefono = "3109998877"))
+
+        val encontrados = clienteDao.buscarEnNegocio(negocioId, "ruiz", "").first()
+
+        assertEquals("Andrés Ruiz", encontrados.single().nombre)
+    }
+
+    @Test
+    fun unaLetraAcentuadaEsOtraLetra() = runTest {
+        clienteDao.insertar(cliente("Laura Gómez"))
+
+        // "gom" no está dentro de "Gómez": entre la g y la m hay una ó, no una o. Es cómo
+        // funciona cualquier búsqueda por texto, pero conviene tenerlo escrito.
+        assertEquals(0, clienteDao.buscarEnNegocio(negocioId, "gom", "").first().size)
+        assertEquals(1, clienteDao.buscarEnNegocio(negocioId, "góm", "").first().size)
+    }
+
+    @Test
+    fun buscarPorNumeroEncuentraPorUnPedazo() = runTest {
+        clienteDao.insertar(cliente("Laura Gómez", telefono = "3001112233"))
+        clienteDao.insertar(cliente("Andrés Ruiz", telefono = "3109998877"))
+
+        val encontrados = clienteDao.buscarEnNegocio(negocioId, "300 111", "300111").first()
+
+        assertEquals("Laura Gómez", encontrados.single().nombre)
+    }
+
+    @Test
+    fun buscarSinDigitosNoTraeATodosPorElTelefono() = runTest {
+        clienteDao.insertar(cliente("Laura Gómez", telefono = "3001112233"))
+        clienteDao.insertar(cliente("Andrés Ruiz", telefono = "3109998877"))
+
+        // Con los dígitos vacíos la condición del teléfono se apaga; si no, "contiene nada"
+        // sería cierto para todos y la búsqueda no filtraría nada.
+        val encontrados = clienteDao.buscarEnNegocio(negocioId, "laura", "").first()
+
+        assertEquals(1, encontrados.size)
+    }
+
+    @Test
+    fun buscarNoDistingueMayusculasSinAcentos() = runTest {
+        clienteDao.insertar(cliente("Laura Gomez"))
+
+        val encontrados = clienteDao.buscarEnNegocio(negocioId, "LAURA", "").first()
+
+        assertEquals(1, encontrados.size)
+    }
+
+    @Test
+    fun buscarTampocoDistingueMayusculasConAcentos() = runTest {
+        clienteDao.insertar(cliente("Laura Gómez"))
+
+        val encontrados = clienteDao.buscarEnNegocio(negocioId, "GÓMEZ", "").first()
+
+        // SQLite en Android sí iguala mayúsculas acentuadas. Queda probado porque no es
+        // evidente: la documentación de SQLite advierte que LIKE solo ignora mayúsculas en
+        // ASCII, y si eso cambiara, la búsqueda empezaría a fallar en silencio.
+        assertEquals(1, encontrados.size)
+    }
+
     private fun negocio(nombre: String) = NegocioEntity(
         usuarioId = SemillaTemporal.USUARIO_ID,
         nombreNegocio = nombre,

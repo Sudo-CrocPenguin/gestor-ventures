@@ -10,6 +10,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -33,22 +34,37 @@ class ClientesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ClientesUiState())
     val uiState: StateFlow<ClientesUiState> = _uiState.asStateFlow()
 
+    private val busqueda = MutableStateFlow("")
+
     init {
         // La lista la manda el repositorio; lo que el usuario está haciendo vive acá y responde
         // al instante, sin pasar por la base de datos para mostrar una letra escrita.
         viewModelScope.launch {
-            negocioActivoRepository.negocioActivoId
-                .flatMapLatest { negocioId ->
+            combine(negocioActivoRepository.negocioActivoId, busqueda) { negocioId, texto ->
+                negocioId to texto
+            }
+                .flatMapLatest { (negocioId, texto) ->
                     if (negocioId == null) {
                         flowOf(emptyList())
                     } else {
-                        repository.clientesDeNegocio(negocioId)
+                        repository.buscarClientes(negocioId, texto)
                     }
                 }
                 .collect { clientes ->
                     _uiState.update { it.copy(clientes = clientes, cargando = false) }
                 }
         }
+    }
+
+    /**
+     * HU-33. Cada letra rehace la consulta: eso es lo que pide "resultados en tiempo real".
+     *
+     * El campo se pinta al instante y la lista llega cuando llegue; esperar a la base de datos
+     * para mostrar la letra recién escrita haría sentir la pantalla trabada.
+     */
+    fun onBusquedaChange(texto: String) {
+        busqueda.value = texto
+        _uiState.update { it.copy(busqueda = texto) }
     }
 
     // ---------- Formulario ----------
