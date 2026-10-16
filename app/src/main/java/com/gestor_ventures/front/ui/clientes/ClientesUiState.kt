@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.gestor_ventures.R
 import com.gestor_ventures.back.model.Cliente
 import com.gestor_ventures.back.model.ErrorCliente
+import com.gestor_ventures.back.model.enlaceDeWhatsApp
 
 /**
  * HU-29. Los clientes del negocio activo.
@@ -47,6 +48,15 @@ data class FormularioCliente(
      */
     val puedeGuardar: Boolean get() = nombre.isNotBlank()
 }
+
+/**
+ * HU-31. El enlace de WhatsApp del cliente que se tocó, o null si no tiene teléfono.
+ *
+ * Se arma acá y no en la pantalla para que el botón apagado y el enlace salgan del mismo dato:
+ * si cada uno lo decidiera por su lado, podrían no estar de acuerdo.
+ */
+val ClientesUiState.whatsappDelElegido: String?
+    get() = enlaceDeWhatsApp(acciones?.telefono)
 
 /** Texto que ve el usuario para cada regla que rechaza el repositorio. */
 @StringRes

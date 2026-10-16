@@ -64,21 +64,25 @@ data class AccionSheet(
     val texto: String,
     @param:DrawableRes val iconRes: Int,
     val destructiva: Boolean = false,
+    /** Apagada se ve, pero no se toca. Se sigue mostrando para que no desaparezca la opción. */
+    val habilitada: Boolean = true,
+    /** Por qué está apagada. Una acción muerta sin explicación parece un error de la app. */
+    val detalle: String? = null,
     val onClick: () -> Unit,
 )
 
 @Composable
 private fun FilaAccion(accion: AccionSheet, modifier: Modifier = Modifier) {
-    val color = if (accion.destructiva) {
-        MaterialTheme.colorScheme.error
-    } else {
-        MaterialTheme.colorScheme.onSurface
+    val color = when {
+        !accion.habilitada -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        accion.destructiva -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onSurface
     }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = accion.onClick)
+            .clickable(enabled = accion.habilitada, onClick = accion.onClick)
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -89,10 +93,19 @@ private fun FilaAccion(accion: AccionSheet, modifier: Modifier = Modifier) {
             tint = color,
             modifier = Modifier.size(19.dp),
         )
-        Text(
-            text = accion.texto,
-            style = MaterialTheme.typography.bodyLarge,
-            color = color,
-        )
+        Column {
+            Text(
+                text = accion.texto,
+                style = MaterialTheme.typography.bodyLarge,
+                color = color,
+            )
+            accion.detalle?.let { detalle ->
+                Text(
+                    text = detalle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
