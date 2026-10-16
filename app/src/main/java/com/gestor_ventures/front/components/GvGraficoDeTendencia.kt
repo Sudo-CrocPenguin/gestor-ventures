@@ -189,7 +189,13 @@ object ColoresDeTendencia {
     val gastos: Color
         @Composable get() = MaterialTheme.colorScheme.error
 
-    /** Los costos van en el color de marca: salen igual que un gasto, pero no son lo mismo. */
+    /**
+     * Los costos van en ámbar y no en el color de marca.
+     *
+     * Con el acento, un negocio que eligió rojo como su color terminaba con dos de las tres
+     * series casi del mismo rojo, y en el gráfico se confundían. El color de marca puede ser
+     * cualquiera, así que las series no pueden depender de él.
+     */
     val costos: Color
-        @Composable get() = GestorVenturesTheme.colors.acento
+        @Composable get() = GestorVenturesTheme.colors.warning
 }

@@ -26,6 +26,8 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 fun ListRow(
     title: String,
     subtitle: String,
+    /** Cuántas líneas admite el subtítulo. Dos cuando el dato no cabe en una y se cortaría. */
+    subtitleMaxLines: Int = 1,
     @DrawableRes iconRes: Int,
     modifier: Modifier = Modifier,
     iconContainerColor: Color = MaterialTheme.colorScheme.primaryContainer,
@@ -62,7 +64,7 @@ fun ListRow(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
+                maxLines = subtitleMaxLines,
                 overflow = TextOverflow.Ellipsis,
             )
         }
