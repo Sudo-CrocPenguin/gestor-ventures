@@ -14,6 +14,7 @@ import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
 import com.gestor_ventures.db.dao.NegocioDao
 import com.gestor_ventures.db.dao.ObligacionDao
+import com.gestor_ventures.db.dao.RecordatorioClienteDao
 import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.dao.VentaDao
 import dagger.Module
@@ -70,6 +71,10 @@ object DatabaseModule {
 
     @Provides
     fun proveerCajaDao(db: GestorVenturesDatabase): CajaDao = db.cajaDao()
+
+    @Provides
+    fun proveerRecordatorioClienteDao(db: GestorVenturesDatabase): RecordatorioClienteDao =
+        db.recordatorioClienteDao()
 
     @Provides
     @Singleton
