@@ -33,6 +33,7 @@ import com.gestor_ventures.front.components.GvChip
 import com.gestor_ventures.front.components.GvGraficoDeTendencia
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.SerieDeTendencia
+import com.gestor_ventures.front.components.TrazoDeLinea
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.theme.NumericTextStyle
 import com.gestor_ventures.front.util.formatDiaCorto
@@ -93,10 +94,16 @@ fun ReportesScreen(
                                 color = ColoresDeTendencia.ingresos,
                             ),
                             SerieDeTendencia(
-                                nombre = stringResource(R.string.reportes_egresos),
-                                valores = uiState.puntos.map { it.egresos },
-                                color = ColoresDeTendencia.egresos,
-                                punteada = true,
+                                nombre = stringResource(R.string.reportes_gastos),
+                                valores = uiState.puntos.map { it.gastos },
+                                color = ColoresDeTendencia.gastos,
+                                trazo = TrazoDeLinea.Guiones,
+                            ),
+                            SerieDeTendencia(
+                                nombre = stringResource(R.string.reportes_costos),
+                                valores = uiState.puntos.map { it.costos },
+                                color = ColoresDeTendencia.costos,
+                                trazo = TrazoDeLinea.Puntos,
                             ),
                         ),
                         etiquetas = uiState.puntos.map { etiquetaDe(it.inicio, uiState.escala) },
@@ -121,13 +128,28 @@ private fun TotalesDelPeriodo(uiState: ReportesUiState, modifier: Modifier = Mod
             Dato(
                 etiqueta = stringResource(R.string.reportes_ingresos_del_periodo),
                 monto = uiState.totalIngresos,
-                color = GestorVenturesTheme.colors.success,
+                color = ColoresDeTendencia.ingresos,
+                modifier = Modifier.weight(1f),
+            )
+            Dato(
+                etiqueta = stringResource(R.string.reportes_gastos_del_periodo),
+                monto = uiState.totalGastos,
+                color = ColoresDeTendencia.gastos,
+                modifier = Modifier.weight(1f),
+            )
+        }
+
+        Row(Modifier.padding(top = 12.dp).fillMaxWidth()) {
+            Dato(
+                etiqueta = stringResource(R.string.reportes_costos_del_periodo),
+                monto = uiState.totalCostos,
+                color = ColoresDeTendencia.costos,
                 modifier = Modifier.weight(1f),
             )
             Dato(
                 etiqueta = stringResource(R.string.reportes_egresos_del_periodo),
                 monto = uiState.totalEgresos,
-                color = MaterialTheme.colorScheme.error,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -188,12 +210,12 @@ private fun ReportesPreview() {
         ReportesUiState(
             cargando = false,
             puntos = listOf(
-                PuntoUi(mes, 820_000.0, 430_000.0),
-                PuntoUi(mes.plusMonths(1), 940_000.0, 510_000.0),
-                PuntoUi(mes.plusMonths(2), 760_000.0, 470_000.0),
-                PuntoUi(mes.plusMonths(3), 1_180_000.0, 560_000.0),
-                PuntoUi(mes.plusMonths(4), 1_050_000.0, 520_000.0),
-                PuntoUi(mes.plusMonths(5), 1_385_000.0, 610_000.0),
+                PuntoUi(mes, 820_000.0, 260_000.0, 170_000.0),
+                PuntoUi(mes.plusMonths(1), 940_000.0, 300_000.0, 210_000.0),
+                PuntoUi(mes.plusMonths(2), 760_000.0, 280_000.0, 190_000.0),
+                PuntoUi(mes.plusMonths(3), 1_180_000.0, 320_000.0, 240_000.0),
+                PuntoUi(mes.plusMonths(4), 1_050_000.0, 290_000.0, 230_000.0),
+                PuntoUi(mes.plusMonths(5), 1_385_000.0, 340_000.0, 270_000.0),
             ),
         ),
     )
@@ -206,7 +228,7 @@ private fun ReportesVacioPreview() {
     VistaPreviaReportes(
         ReportesUiState(
             cargando = false,
-            puntos = (0..5).map { PuntoUi(mes.plusMonths(it.toLong()), 0.0, 0.0) },
+            puntos = (0..5).map { PuntoUi(mes.plusMonths(it.toLong()), 0.0, 0.0, 0.0) },
         ),
     )
 }

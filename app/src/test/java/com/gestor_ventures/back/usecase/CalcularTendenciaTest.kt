@@ -127,14 +127,36 @@ class CalcularTendenciaTest {
     }
 
     @Test
-    fun losEgresosJuntanGastosYCostos() = runTest {
+    fun losGastosYLosCostosSeGuardanAparte() = runTest {
         gastar(12_000.0, hoy.withDayOfMonth(3))
         costear(8_000.0, hoy.withDayOfMonth(4))
 
-        val puntos = mensual()
+        val punto = mensual().last()
 
-        assertEquals(20_000.0, puntos.last().egresos, 0.001)
-        assertEquals(0.0, puntos.last().ingresos, 0.001)
+        // HU-16 los distingue: un costo es lo que cuesta producir, un gasto es todo lo demás.
+        // Quien mira la tendencia necesita saber cuál de los dos se le está disparando.
+        assertEquals(12_000.0, punto.gastos, 0.001)
+        assertEquals(8_000.0, punto.costos, 0.001)
+        assertEquals(0.0, punto.ingresos, 0.001)
+    }
+
+    @Test
+    fun laLineaDeEgresosSumaLosDos() = runTest {
+        gastar(12_000.0, hoy.withDayOfMonth(3))
+        costear(8_000.0, hoy.withDayOfMonth(4))
+
+        // La comparación de un vistazo sigue siendo "cuánto entró contra cuánto salió".
+        assertEquals(20_000.0, mensual().last().egresos, 0.001)
+    }
+
+    @Test
+    fun unGastoNoSeCuentaComoCostoNiAlReves() = runTest {
+        gastar(12_000.0, hoy.withDayOfMonth(3))
+
+        val punto = mensual().last()
+
+        assertEquals(12_000.0, punto.gastos, 0.001)
+        assertEquals(0.0, punto.costos, 0.001)
     }
 
     @Test
