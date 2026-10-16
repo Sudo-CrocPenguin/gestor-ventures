@@ -471,9 +471,12 @@
     <string name="reportes_titulo">Ingresos y gastos</string>
     <string name="reportes_semanal">Semanal</string>
     <string name="reportes_mensual">Mensual</string>
-    <string name="reportes_ingresos_vs_egresos">Ingresos vs. egresos</string>
+    <string name="reportes_ingresos_vs_egresos">Cómo viene el negocio</string>
     <string name="reportes_ingresos">Ingresos</string>
-    <string name="reportes_egresos">Egresos</string>
+    <string name="reportes_gastos">Gastos</string>
+    <string name="reportes_costos">Costos</string>
+    <string name="reportes_gastos_del_periodo">Gastos del periodo</string>
+    <string name="reportes_costos_del_periodo">Costos del periodo</string>
     <string name="reportes_ingresos_del_periodo">Ingresos del periodo</string>
     <string name="reportes_egresos_del_periodo">Egresos del periodo</string>
     <string name="reportes_ganancia">Ganancia del periodo</string>

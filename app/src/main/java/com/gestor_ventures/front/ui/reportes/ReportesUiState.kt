@@ -17,22 +17,35 @@ data class ReportesUiState(
     val cargando: Boolean = true,
 ) {
     /** El periodo completo no tuvo un solo movimiento: no hay tendencia que mostrar. */
-    val vacio: Boolean get() = !cargando && puntos.all { it.ingresos == 0.0 && it.egresos == 0.0 }
+    val vacio: Boolean
+        get() = !cargando && puntos.all { it.ingresos == 0.0 && it.egresos == 0.0 }
 
     val totalIngresos: Double get() = puntos.sumOf { it.ingresos }
 
-    val totalEgresos: Double get() = puntos.sumOf { it.egresos }
+    val totalGastos: Double get() = puntos.sumOf { it.gastos }
+
+    val totalCostos: Double get() = puntos.sumOf { it.costos }
+
+    val totalEgresos: Double get() = totalGastos + totalCostos
 
     /** Lo que quedó en todo el periodo. Puede ser negativo, y así se muestra. */
     val ganancia: Double get() = totalIngresos - totalEgresos
 }
 
-/** Un tramo del gráfico, ya listo para dibujarse. */
+/**
+ * Un tramo del gráfico, ya listo para dibujarse.
+ *
+ * Gastos y costos van aparte porque así los distingue el resumen de HU-16: un costo es lo que
+ * cuesta producir lo que se vende y un gasto es todo lo demás. La línea de egresos los suma.
+ */
 data class PuntoUi(
     val inicio: LocalDate,
     val ingresos: Double,
-    val egresos: Double,
-)
+    val gastos: Double,
+    val costos: Double,
+) {
+    val egresos: Double get() = gastos + costos
+}
 
 /** Cómo se llama cada escala en los chips. */
 @StringRes

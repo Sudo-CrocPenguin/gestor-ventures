@@ -19,12 +19,22 @@ enum class EscalaDeTiempo { Semanal, Mensual }
 private const val SemanasAMostrar = 8
 private const val MesesAMostrar = 6
 
-/** HU-40. Un tramo del gráfico: lo que entró y lo que salió en ese pedazo de tiempo. */
+/**
+ * HU-40. Un tramo del gráfico: qué entró y qué salió en ese pedazo de tiempo.
+ *
+ * Los gastos y los costos van por separado y no sumados, porque el resumen financiero de HU-16
+ * los distingue: un costo es lo que cuesta producir lo que se vende y un gasto es todo lo
+ * demás. Quien mira la tendencia necesita saber cuál de los dos se le está disparando.
+ */
 data class PuntoDeTendencia(
     val inicio: LocalDate,
     val ingresos: Double,
-    val egresos: Double,
+    val gastos: Double,
+    val costos: Double,
 ) {
+    /** Todo lo que salió, para la línea que se compara contra los ingresos. */
+    val egresos: Double get() = gastos + costos
+
     /** Lo que quedó en ese tramo. Puede ser negativo, y así se muestra. */
     val ganancia: Double get() = ingresos - egresos
 }
@@ -37,8 +47,9 @@ data class PuntoDeTendencia(
  * sobre todo son tres `Flow`: al registrar una venta el gráfico se redibuja solo, que es lo que
  * pide el criterio de "actualizar automáticamente".
  *
- * Los egresos juntan gastos y costos porque la pregunta del gráfico es "¿cuánto entró y cuánto
- * salió?", y para esa pregunta los dos son lo mismo. El detalle sigue en Finanzas.
+ * Cada tramo guarda los gastos y los costos aparte. La línea que se compara contra los
+ * ingresos los suma —la pregunta de un vistazo es "¿cuánto entró y cuánto salió?"— pero el
+ * detalle queda disponible, que es lo que pide graficar el resumen de HU-16.
  */
 @Singleton
 class CalcularTendencia @Inject constructor(
@@ -67,8 +78,8 @@ class CalcularTendencia @Inject constructor(
                     ingresos = ventas
                         .filter { it.fechaHora.toLocalDate() in tramo }
                         .sumOf { it.monto },
-                    egresos = gastos.filter { it.fecha.toLocalDate() in tramo }.sumOf { it.monto } +
-                        costos.filter { it.fecha.toLocalDate() in tramo }.sumOf { it.monto },
+                    gastos = gastos.filter { it.fecha.toLocalDate() in tramo }.sumOf { it.monto },
+                    costos = costos.filter { it.fecha.toLocalDate() in tramo }.sumOf { it.monto },
                 )
             }
         }

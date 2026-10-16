@@ -62,6 +62,7 @@ class ReportesViewModel @Inject constructor(
     private fun aPuntoUi(punto: PuntoDeTendencia) = PuntoUi(
         inicio = punto.inicio,
         ingresos = punto.ingresos,
-        egresos = punto.egresos,
+        gastos = punto.gastos,
+        costos = punto.costos,
     )
 }

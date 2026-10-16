@@ -29,13 +29,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 
+/**
+ * Cómo se dibuja la línea de una serie.
+ *
+ * Cada una lleva un trazo distinto además del color: con tres series encima, el color solo no
+ * alcanza para quien no lo distingue.
+ */
+enum class TrazoDeLinea { Solido, Guiones, Puntos }
+
 /** Una serie del gráfico: su nombre, sus valores y cómo se dibuja. */
 data class SerieDeTendencia(
     val nombre: String,
     val valores: List<Double>,
     val color: Color,
-    /** Punteada para la segunda serie: el color solo no alcanza para quien no lo distingue. */
-    val punteada: Boolean = false,
+    val trazo: TrazoDeLinea = TrazoDeLinea.Solido,
 )
 
 /**
@@ -105,7 +112,7 @@ fun GvGraficoDeTendencia(
                     Offset(x = indice * paso, y = radio + alto * (1f - normalizado))
                 }
 
-                if (!serie.punteada) {
+                if (serie.trazo == TrazoDeLinea.Solido) {
                     val area = Path().apply {
                         moveTo(puntos.first().x, size.height)
                         puntos.forEach { lineTo(it.x, it.y) }
@@ -131,12 +138,15 @@ fun GvGraficoDeTendencia(
                         width = 2.dp.toPx(),
                         cap = StrokeCap.Round,
                         join = StrokeJoin.Round,
-                        pathEffect = if (serie.punteada) {
-                            PathEffect.dashPathEffect(
-                                floatArrayOf(4.dp.toPx(), 3.dp.toPx()),
+                        pathEffect = when (serie.trazo) {
+                            TrazoDeLinea.Solido -> null
+                            TrazoDeLinea.Guiones -> PathEffect.dashPathEffect(
+                                floatArrayOf(5.dp.toPx(), 4.dp.toPx()),
                             )
-                        } else {
-                            null
+
+                            TrazoDeLinea.Puntos -> PathEffect.dashPathEffect(
+                                floatArrayOf(1.5.dp.toPx(), 3.5.dp.toPx()),
+                            )
                         },
                     ),
                 )
@@ -171,11 +181,15 @@ private fun Box9(color: Color) {
     )
 }
 
-/** Los dos colores del gráfico, para que las pantallas no los elijan cada una por su lado. */
+/** Los colores del gráfico, para que las pantallas no los elijan cada una por su lado. */
 object ColoresDeTendencia {
     val ingresos: Color
         @Composable get() = GestorVenturesTheme.colors.success
 
-    val egresos: Color
+    val gastos: Color
         @Composable get() = MaterialTheme.colorScheme.error
+
+    /** Los costos van en el color de marca: salen igual que un gasto, pero no son lo mismo. */
+    val costos: Color
+        @Composable get() = GestorVenturesTheme.colors.acento
 }
