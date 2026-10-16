@@ -31,15 +31,16 @@ import com.gestor_ventures.back.model.PeriodoPredefinido
 import com.gestor_ventures.front.components.GvBackTopBar
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvCardHeader
-import com.gestor_ventures.front.components.GvChip
+import com.gestor_ventures.front.components.GvChipsDePeriodo
+import com.gestor_ventures.front.components.GvRangoSheet
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.StatusPill
-import com.gestor_ventures.front.model.labelRes
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.theme.NumericTextStyle
 import com.gestor_ventures.front.util.formatHour
 import com.gestor_ventures.front.util.formatLongDate
 import com.gestor_ventures.front.util.formatPesos
+import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.math.abs
 
@@ -51,6 +52,11 @@ fun HistorialCajaRoute(onBack: () -> Unit, viewModel: HistorialCajaViewModel = h
         uiState = uiState,
         onBack = onBack,
         onPeriodoChange = viewModel::onPeriodoChange,
+        onPersonalizar = viewModel::abrirRango,
+        onDesdeChange = viewModel::onDesdeChange,
+        onHastaChange = viewModel::onHastaChange,
+        onAplicarRango = viewModel::aplicarRango,
+        onCerrarRango = viewModel::cerrarRango,
     )
 }
 
@@ -66,6 +72,11 @@ fun HistorialCajaScreen(
     uiState: HistorialCajaUiState,
     onBack: () -> Unit,
     onPeriodoChange: (PeriodoPredefinido) -> Unit,
+    onPersonalizar: () -> Unit,
+    onDesdeChange: (LocalDate) -> Unit,
+    onHastaChange: (LocalDate) -> Unit,
+    onAplicarRango: () -> Unit,
+    onCerrarRango: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize()) {
@@ -78,18 +89,11 @@ fun HistorialCajaScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                PeriodoPredefinido.entries.forEach { periodo ->
-                    GvChip(
-                        text = stringResource(periodo.labelRes()),
-                        selected = periodo == uiState.periodo,
-                        onClick = { onPeriodoChange(periodo) },
-                    )
-                }
-            }
+            GvChipsDePeriodo(
+                seleccion = uiState.seleccion,
+                onRapido = onPeriodoChange,
+                onPersonalizar = onPersonalizar,
+            )
 
             if (!uiState.cargando) {
                 ResumenDelPeriodo(uiState)
@@ -103,6 +107,16 @@ fun HistorialCajaScreen(
                 key(cierre.id) { FilaDeCierre(cierre) }
             }
         }
+    }
+
+    uiState.rango?.let { formulario ->
+        GvRangoSheet(
+            formulario = formulario,
+            onDesdeChange = onDesdeChange,
+            onHastaChange = onHastaChange,
+            onAplicar = onAplicarRango,
+            onCerrar = onCerrarRango,
+        )
     }
 }
 
@@ -287,7 +301,16 @@ private fun HistorialCajaVacioPreview() {
 private fun VistaPreviaHistorial(uiState: HistorialCajaUiState) {
     GestorVenturesTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            HistorialCajaScreen(uiState = uiState, onBack = {}, onPeriodoChange = {})
+            HistorialCajaScreen(
+                uiState = uiState,
+                onBack = {},
+                onPeriodoChange = {},
+                onPersonalizar = {},
+                onDesdeChange = {},
+                onHastaChange = {},
+                onAplicarRango = {},
+                onCerrarRango = {},
+            )
         }
     }
 }

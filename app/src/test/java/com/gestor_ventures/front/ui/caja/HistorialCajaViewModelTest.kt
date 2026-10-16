@@ -2,6 +2,7 @@ package com.gestor_ventures.front.ui.caja
 
 import com.gestor_ventures.back.model.MetodoPago
 import com.gestor_ventures.back.model.PeriodoPredefinido
+import com.gestor_ventures.back.model.SeleccionDePeriodo
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.TipoRegistroVenta
 import com.gestor_ventures.back.repository.CajaRepository
@@ -30,6 +31,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -144,7 +146,7 @@ class HistorialCajaViewModelTest {
         abrirPantalla()
         advanceUntilIdle()
 
-        assertEquals(PeriodoPredefinido.Semana, estado.periodo)
+        assertEquals(SeleccionDePeriodo.Rapido(PeriodoPredefinido.Semana), estado.seleccion)
     }
 
     @Test
@@ -211,7 +213,7 @@ class HistorialCajaViewModelTest {
 
         // Sin advanceUntilIdle: esperar a la base de datos para pintar el chip se sentiría
         // como que la pantalla no responde.
-        assertEquals(PeriodoPredefinido.Mes, estado.periodo)
+        assertEquals(SeleccionDePeriodo.Rapido(PeriodoPredefinido.Mes), estado.seleccion)
     }
 
     @Test
@@ -247,5 +249,121 @@ class HistorialCajaViewModelTest {
         advanceUntilIdle()
 
         assertNull(estado.cierres.single().nota)
+    }
+
+    // ---------- HU-17: el rango escrito a mano ----------
+
+    private fun escribirRango(desde: java.time.LocalDate?, hasta: java.time.LocalDate?) {
+        viewModel.abrirRango()
+        desde?.let(viewModel::onDesdeChange)
+        hasta?.let(viewModel::onHastaChange)
+    }
+
+    @Test
+    fun unRangoEscritoAManoFiltraPorEsasFechas() = runTest(dispatcher) {
+        jornada(50_000.0, hoy.withHour(8), hoy.withHour(14), 50_000.0)
+        jornada(20_000.0, hoy.minusDays(10).withHour(8), hoy.minusDays(10).withHour(14), 20_000.0)
+        abrirPantalla()
+        advanceUntilIdle()
+
+        escribirRango(hoy.minusDays(12).toLocalDate(), hoy.minusDays(8).toLocalDate())
+        viewModel.aplicarRango()
+        advanceUntilIdle()
+
+        assertEquals(1, estado.cantidad)
+        assertEquals(20_000.0, estado.cierres.single().montoInicial, 0.001)
+    }
+
+    @Test
+    fun conLasFechasAlRevesNoSePuedeAplicar() = runTest(dispatcher) {
+        abrirPantalla()
+        advanceUntilIdle()
+
+        escribirRango(hoy.toLocalDate(), hoy.minusDays(5).toLocalDate())
+
+        // El criterio de HU-17: la de inicio tiene que ser anterior o igual a la de fin.
+        assertTrue(estado.rango?.invertido ?: false)
+        assertFalse(estado.rango?.valido ?: true)
+    }
+
+    @Test
+    fun aplicarUnRangoInvertidoNoCambiaNada() = runTest(dispatcher) {
+        abrirPantalla()
+        advanceUntilIdle()
+        val antes = estado.seleccion
+
+        escribirRango(hoy.toLocalDate(), hoy.minusDays(5).toLocalDate())
+        viewModel.aplicarRango()
+        advanceUntilIdle()
+
+        // Ni se aplica ni se cierra la hoja: el usuario tiene que poder corregir las fechas.
+        assertEquals(antes, estado.seleccion)
+        assertNotNull(estado.rango)
+    }
+
+    @Test
+    fun conUnaSolaFechaTampocoSePuedeAplicar() = runTest(dispatcher) {
+        abrirPantalla()
+        advanceUntilIdle()
+
+        escribirRango(hoy.toLocalDate(), null)
+
+        assertFalse(estado.rango?.valido ?: true)
+        // Pero no es un error: todavía no terminó de llenarlo.
+        assertFalse(estado.rango?.invertido ?: true)
+    }
+
+    @Test
+    fun unRangoDeUnSoloDiaEsValido() = runTest(dispatcher) {
+        jornada(50_000.0, hoy.withHour(8), hoy.withHour(14), 50_000.0)
+        abrirPantalla()
+        advanceUntilIdle()
+
+        escribirRango(hoy.toLocalDate(), hoy.toLocalDate())
+        viewModel.aplicarRango()
+        advanceUntilIdle()
+
+        // "Anterior o igual": el mismo día en los dos extremos cuenta.
+        assertEquals(1, estado.cantidad)
+    }
+
+    @Test
+    fun volverAAbrirLaHojaTraeElRangoQueYaEstabaPuesto() = runTest(dispatcher) {
+        abrirPantalla()
+        advanceUntilIdle()
+        escribirRango(hoy.minusDays(5).toLocalDate(), hoy.toLocalDate())
+        viewModel.aplicarRango()
+        advanceUntilIdle()
+
+        viewModel.abrirRango()
+
+        assertEquals(hoy.minusDays(5).toLocalDate(), estado.rango?.desde)
+        assertEquals(hoy.toLocalDate(), estado.rango?.hasta)
+    }
+
+    @Test
+    fun elegirUnPeriodoRapidoDeshaceElRangoEscrito() = runTest(dispatcher) {
+        abrirPantalla()
+        advanceUntilIdle()
+        escribirRango(hoy.minusDays(5).toLocalDate(), hoy.toLocalDate())
+        viewModel.aplicarRango()
+        advanceUntilIdle()
+
+        viewModel.onPeriodoChange(PeriodoPredefinido.Mes)
+
+        assertEquals(SeleccionDePeriodo.Rapido(PeriodoPredefinido.Mes), estado.seleccion)
+    }
+
+    @Test
+    fun cerrarLaHojaDelRangoNoAplicaNada() = runTest(dispatcher) {
+        abrirPantalla()
+        advanceUntilIdle()
+        val antes = estado.seleccion
+
+        escribirRango(hoy.minusDays(5).toLocalDate(), hoy.toLocalDate())
+        viewModel.cerrarRango()
+
+        assertNull(estado.rango)
+        assertEquals(antes, estado.seleccion)
     }
 }

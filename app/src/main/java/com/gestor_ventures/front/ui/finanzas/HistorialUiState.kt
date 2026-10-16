@@ -6,6 +6,8 @@ import com.gestor_ventures.back.model.ErrorGasto
 import com.gestor_ventures.back.model.FiltroMovimientos
 import com.gestor_ventures.back.model.Movimiento
 import com.gestor_ventures.back.model.PeriodoPredefinido
+import com.gestor_ventures.back.model.SeleccionDePeriodo
+import com.gestor_ventures.front.model.FormularioRango
 
 /**
  * HU-17. El historial de movimientos del periodo que se esté mirando.
@@ -15,7 +17,8 @@ import com.gestor_ventures.back.model.PeriodoPredefinido
  * desapareciera el total de salidas, el historial dejaría de responder "¿cómo me fue?".
  */
 data class HistorialUiState(
-    val periodo: PeriodoPredefinido = PeriodoPredefinido.Hoy,
+    val seleccion: SeleccionDePeriodo = SeleccionDePeriodo.Rapido(PeriodoPredefinido.Hoy),
+    val rango: FormularioRango? = null,
     val filtro: FiltroMovimientos = FiltroMovimientos.Todos,
     val todos: List<Movimiento> = emptyList(),
     /** Para poder decir en qué categoría quedó un gasto, en vez de mostrar su id. */
@@ -46,7 +49,13 @@ data class HistorialUiState(
      * hoy o el lunes pasado.
      */
     val variosDias: Boolean
-        get() = periodo == PeriodoPredefinido.Semana || periodo == PeriodoPredefinido.Mes
+        get() = when (val elegido = seleccion) {
+            is SeleccionDePeriodo.Rapido ->
+                elegido.periodo == PeriodoPredefinido.Semana ||
+                    elegido.periodo == PeriodoPredefinido.Mes
+
+            is SeleccionDePeriodo.Personalizado -> elegido.desde != elegido.hasta
+        }
 
     /** El periodo no tuvo nada, que es distinto de que el filtro no encuentre nada. */
     val periodoVacio: Boolean get() = !cargando && todos.isEmpty()
