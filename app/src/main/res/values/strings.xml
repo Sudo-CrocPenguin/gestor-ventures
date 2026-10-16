@@ -460,6 +460,15 @@
     <string name="caja_sobra_detalle">Lo contado es mayor a lo esperado.</string>
     <string name="caja_falta">Faltan %1$s</string>
     <string name="caja_falta_detalle">Lo contado es menor a lo esperado.</string>
+    <string name="caja_ver_historial">Ver cierres anteriores</string>
+    <string name="historial_caja_titulo">Historial de cierres</string>
+    <string name="historial_caja_cierres">Cierres del periodo</string>
+    <string name="historial_caja_con_diferencia">Con diferencia</string>
+    <string name="historial_caja_horario">Abierta de %1$s a %2$s</string>
+    <string name="historial_caja_esperado">Esperado en caja</string>
+    <string name="historial_caja_contado">Contado al cerrar</string>
+    <string name="historial_caja_cuadro">Cuadró</string>
+    <string name="historial_caja_vacio">Todavía no has cerrado ninguna caja en este periodo.</string>
     <string name="caja_error_monto">El monto inicial no puede ser negativo.</string>
     <string name="caja_error_ya_abierta">Ya tienes una caja abierta. Ciérrala antes de abrir otra.</string>
     <string name="caja_error_no_abierta">Esta caja ya no está abierta.</string>
