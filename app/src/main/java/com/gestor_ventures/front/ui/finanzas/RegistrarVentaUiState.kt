@@ -2,6 +2,7 @@ package com.gestor_ventures.front.ui.finanzas
 
 import androidx.annotation.StringRes
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.Cliente
 import com.gestor_ventures.back.model.ErrorVenta
 import com.gestor_ventures.front.model.MetodoPagoUi
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
@@ -20,6 +21,9 @@ data class RegistrarVentaUiState(
     val monto: String = "",
     val productoServicio: String = "",
     val metodoPago: MetodoPagoUi = MetodoPagoUi.Efectivo,
+    /** HU-29/HU-30. A quién se le vendió. Opcional: a mucha gente se le vende sin registrarla. */
+    val clienteId: Long? = null,
+    val clientes: List<Cliente> = emptyList(),
     val nota: String = "",
     val fechaHora: LocalDateTime = LocalDateTime.MIN,
     val guardando: Boolean = false,

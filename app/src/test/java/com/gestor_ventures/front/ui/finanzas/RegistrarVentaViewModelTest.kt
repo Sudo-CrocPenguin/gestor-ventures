@@ -4,8 +4,10 @@ import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
 import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
+import com.gestor_ventures.back.repository.ClienteRepository
 import com.gestor_ventures.back.repository.VentaRepository
 import com.gestor_ventures.db.SemillaTemporal
+import com.gestor_ventures.db.dao.ClienteDaoFalso
 import com.gestor_ventures.db.dao.NegocioDaoFalso
 import com.gestor_ventures.db.dao.VentaDaoFalso
 import com.gestor_ventures.db.entity.NegocioEntity
@@ -74,8 +76,15 @@ class RegistrarVentaViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun crearViewModel() =
-        RegistrarVentaViewModel(VentaRepository(ventaDao, reloj), negocioActivo, reloj)
+    private val clienteDao = ClienteDaoFalso()
+    private val clienteRepository = ClienteRepository(clienteDao)
+
+    private fun crearViewModel() = RegistrarVentaViewModel(
+        VentaRepository(ventaDao, reloj),
+        clienteRepository,
+        negocioActivo,
+        reloj,
+    )
 
     @Test
     fun arrancaEnVentaDetallada() {
@@ -267,5 +276,74 @@ class RegistrarVentaViewModelTest {
 
         assertTrue(guardadas.isEmpty())
         assertEquals(ErrorVentaUi.SinNegocio, estado.error)
+    }
+
+    // ---------- HU-29/HU-30: a quién se le vendió ----------
+
+    private suspend fun crearCliente(nombre: String) =
+        clienteRepository.crearCliente(negocioId = 1L, nombre = nombre)
+
+    @Test
+    fun losClientesDelNegocioLleganAlFormulario() = runTest(dispatcher) {
+        crearCliente("Laura Gómez")
+        viewModel = crearViewModel()
+        advanceUntilIdle()
+
+        assertEquals("Laura Gómez", estado.clientes.single().nombre)
+    }
+
+    @Test
+    fun laVentaArrancaSinCliente() = runTest(dispatcher) {
+        advanceUntilIdle()
+
+        // En un mostrador la mayoría de las ventas no tienen a quién apuntarle.
+        assertNull(estado.clienteId)
+    }
+
+    @Test
+    fun elegirUnClienteLoDejaEnLaVentaGuardada() = runTest(dispatcher) {
+        crearCliente("Laura Gómez")
+        viewModel = crearViewModel()
+        advanceUntilIdle()
+        val cliente = estado.clientes.single()
+
+        viewModel.onMontoChange("25000")
+        viewModel.onProductoServicioChange("Torta")
+        viewModel.onClienteChange(cliente.id)
+        viewModel.guardar()
+        advanceUntilIdle()
+
+        assertEquals(cliente.id, ventaDao.ventas.value.single().clienteId)
+    }
+
+    @Test
+    fun volverATocarAlMismoClienteLoQuita() = runTest(dispatcher) {
+        crearCliente("Laura Gómez")
+        viewModel = crearViewModel()
+        advanceUntilIdle()
+        val cliente = estado.clientes.single()
+
+        viewModel.onClienteChange(cliente.id)
+        viewModel.onClienteChange(cliente.id)
+
+        // Es la forma de dejar la venta sin cliente después de haberlo elegido sin querer.
+        assertNull(estado.clienteId)
+    }
+
+    @Test
+    fun laVentaRapidaNoGuardaCliente() = runTest(dispatcher) {
+        crearCliente("Laura Gómez")
+        viewModel = crearViewModel()
+        advanceUntilIdle()
+        val cliente = estado.clientes.single()
+
+        viewModel.onClienteChange(cliente.id)
+        viewModel.onTipoRegistroChange(TipoRegistroVentaUi.Rapido)
+        viewModel.onMontoChange("90000")
+        viewModel.guardar()
+        advanceUntilIdle()
+
+        // Una venta rápida es el total del día: no hay un cliente al que apuntársela.
+        assertNull(ventaDao.ventas.value.single().clienteId)
     }
 }
