@@ -105,7 +105,8 @@ com.gestor_ventures/
 │   │   ├── agenda/                   HU-24 a HU-28
 │   │   ├── clientes/                 HU-29 a HU-33
 │   │   ├── asistente/                HU-34 a HU-39
-│   │   └── notificaciones/           HU-40, HU-41
+│   │   ├── reportes/                 HU-40 (gráficos de tendencia)
+│   │   └── notificaciones/           HU-41
 │   ├── components/                 Componentes visuales reutilizables (GvCard, MoneyText…)
 │   ├── model/                      Modelos de UI compartidos (UsuarioUi, NegocioUi, RolNegocio)
 │   ├── navigation/                 Pestañas (TopLevelDestination), AppNavHost, barra inferior
@@ -190,6 +191,10 @@ que trabaje sobre un negocio lo inyecta en vez de recibir el id por la navegaci�
   - `CalcularDiferenciaCaja` (HU-22): monto esperado (HU-20) vs. monto real de cierre.
   - `CalcularMontoReinversion` (HU-09 / HU-36): porcentaje configurado × ganancia
     estimada.
+  - `CalcularTendencia` (HU-40): reparte las ventas, gastos y costos del periodo en
+    tramos (semanas o meses) para graficar cómo vienen en el tiempo. Trae los
+    movimientos una vez y los agrupa en memoria: tres consultas en vez de una por tramo,
+    y tres `Flow`, así que el gráfico se redibuja solo al registrar algo.
   - `GenerarAlertas` (HU-38): evalúa las tres condiciones — caída de ventas, gasto
     elevado, meta de ahorro en riesgo — y crea las alertas correspondientes.
   - `ConsultarAsistente` (HU-34 / HU-35 / HU-37): arma el contexto financiero del

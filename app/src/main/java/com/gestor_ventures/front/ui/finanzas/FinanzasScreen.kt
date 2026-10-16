@@ -31,7 +31,11 @@ enum class SeccionFinanzas(@param:StringRes val labelRes: Int) {
 
 /** Pestaña de Finanzas: el resumen del mes y el detalle de lo que lo compone. */
 @Composable
-fun FinanzasRoute(onVerHistorial: () -> Unit, modifier: Modifier = Modifier) {
+fun FinanzasRoute(
+    onVerHistorial: () -> Unit,
+    onVerGraficos: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var seccion by rememberSaveable { mutableStateOf(SeccionFinanzas.Resumen) }
 
     Column(modifier.fillMaxSize()) {
@@ -46,7 +50,10 @@ fun FinanzasRoute(onVerHistorial: () -> Unit, modifier: Modifier = Modifier) {
         // Cada sección trae su propio contenido desplazable y su botón fijo abajo.
         Box(Modifier.weight(1f)) {
             when (seccion) {
-                SeccionFinanzas.Resumen -> ResumenFinancieroRoute(onVerHistorial = onVerHistorial)
+                SeccionFinanzas.Resumen -> ResumenFinancieroRoute(
+                    onVerHistorial = onVerHistorial,
+                    onVerGraficos = onVerGraficos,
+                )
                 SeccionFinanzas.Gastos -> GastosRoute()
                 SeccionFinanzas.Costos -> CostosRoute()
             }

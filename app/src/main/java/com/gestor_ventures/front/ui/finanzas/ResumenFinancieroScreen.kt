@@ -48,11 +48,16 @@ import kotlin.math.roundToInt
 @Composable
 fun ResumenFinancieroRoute(
     onVerHistorial: () -> Unit,
+    onVerGraficos: () -> Unit,
     viewModel: ResumenFinancieroViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    ResumenFinancieroScreen(uiState = uiState, onVerHistorial = onVerHistorial)
+    ResumenFinancieroScreen(
+        uiState = uiState,
+        onVerHistorial = onVerHistorial,
+        onVerGraficos = onVerGraficos,
+    )
 }
 
 /**
@@ -65,6 +70,7 @@ fun ResumenFinancieroRoute(
 fun ResumenFinancieroScreen(
     uiState: ResumenFinancieroUiState,
     onVerHistorial: () -> Unit,
+    onVerGraficos: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val resumen = uiState.resumen ?: return
@@ -82,6 +88,14 @@ fun ResumenFinancieroScreen(
             GvInfoNote(stringResource(R.string.resumen_vacio))
         } else {
             MovimientosCard(resumen, onVerHistorial = onVerHistorial)
+
+            // HU-40. La tendencia responde algo distinto a las cifras del mes: si voy
+            // subiendo o bajando. Por eso vive en su propia pantalla y no en una tarjeta más.
+            GvTextLink(
+                text = stringResource(R.string.finanzas_ver_graficos),
+                onClick = onVerGraficos,
+                modifier = Modifier.fillMaxWidth(),
+            )
             DisponibleCard(resumen)
             Nota(enRojo = resumen.disponible < 0)
         }
@@ -426,6 +440,7 @@ private fun VistaPreviaResumen(resumen: ResumenFinanciero) {
             ResumenFinancieroScreen(
                 uiState = ResumenFinancieroUiState(resumen = resumen, cargando = false),
                 onVerHistorial = {},
+                onVerGraficos = {},
             )
         }
     }

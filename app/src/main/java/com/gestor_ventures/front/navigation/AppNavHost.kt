@@ -24,6 +24,7 @@ import com.gestor_ventures.front.ui.finanzas.FinanzasRoute
 import com.gestor_ventures.front.ui.finanzas.HistorialRoute
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
+import com.gestor_ventures.front.ui.reportes.ReportesRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
 import com.gestor_ventures.front.ui.negocio.GastosYObligacionesRoute
 import com.gestor_ventures.front.ui.negocio.MetaYReinversionRoute
@@ -54,6 +55,9 @@ object Rutas {
 
     /** HU-23. Las jornadas de caja que ya terminaron. */
     const val HistorialCaja = "historial_caja"
+
+    /** HU-40. Ingresos y egresos a lo largo del tiempo. */
+    const val Reportes = "reportes"
 
     /** Paso 2 del onboarding; necesita saber a qué negocio configurarle la base financiera. */
     const val BaseFinanciera = "base_financiera/{$ArgumentoNegocioId}"
@@ -110,7 +114,15 @@ fun AppNavHost(
 
         // HU-13, HU-14 y HU-16: el resumen del mes y el detalle que lo compone.
         composable(TopLevelDestination.Finanzas.route) {
-            FinanzasRoute(onVerHistorial = { navController.navigate(Rutas.Historial) })
+            FinanzasRoute(
+                onVerHistorial = { navController.navigate(Rutas.Historial) },
+                onVerGraficos = { navController.navigate(Rutas.Reportes) },
+            )
+        }
+
+        // HU-40: se entra desde Finanzas, a mirar la tendencia en vez de las cifras del mes.
+        composable(Rutas.Reportes) {
+            ReportesRoute(onBack = { navController.popBackStack() })
         }
 
         // HU-17: se entra desde el resumen, a arreglar algo que quedó mal registrado.

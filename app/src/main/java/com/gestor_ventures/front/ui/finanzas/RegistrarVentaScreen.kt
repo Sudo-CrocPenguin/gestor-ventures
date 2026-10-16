@@ -55,6 +55,7 @@ fun RegistrarVentaRoute(
         onProductoServicioChange = viewModel::onProductoServicioChange,
         onMetodoPagoChange = viewModel::onMetodoPagoChange,
         onNotaChange = viewModel::onNotaChange,
+        onClienteChange = viewModel::onClienteChange,
         onGuardar = viewModel::guardar,
     )
 }
@@ -76,6 +77,7 @@ fun RegistrarVentaScreen(
     onProductoServicioChange: (String) -> Unit,
     onMetodoPagoChange: (MetodoPagoUi) -> Unit,
     onNotaChange: (String) -> Unit,
+    onClienteChange: (Long?) -> Unit,
     onGuardar: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -118,6 +120,9 @@ fun RegistrarVentaScreen(
                 onProductoServicioChange = onProductoServicioChange,
                 onMetodoPagoChange = onMetodoPagoChange,
                 onNotaChange = onNotaChange,
+                clientes = uiState.clientes,
+                clienteId = uiState.clienteId,
+                onClienteChange = onClienteChange,
             )
 
             AnimatedVisibility(visible = uiState.error != null) {
@@ -175,6 +180,7 @@ private fun VistaPrevia(uiState: RegistrarVentaUiState) {
                 onProductoServicioChange = {},
                 onMetodoPagoChange = {},
                 onNotaChange = {},
+                onClienteChange = {},
                 onGuardar = {},
             )
         }

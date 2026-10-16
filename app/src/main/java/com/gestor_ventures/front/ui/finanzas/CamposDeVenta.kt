@@ -1,6 +1,9 @@
 package com.gestor_ventures.front.ui.finanzas
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +18,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.Cliente
 import com.gestor_ventures.front.components.GvChip
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvTextField
@@ -43,6 +47,9 @@ fun CamposDeVenta(
     onMetodoPagoChange: (MetodoPagoUi) -> Unit,
     onNotaChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    clientes: List<Cliente> = emptyList(),
+    clienteId: Long? = null,
+    onClienteChange: ((Long?) -> Unit)? = null,
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         AnimatedVisibility(visible = !esDetallada) {
@@ -70,6 +77,16 @@ fun CamposDeVenta(
                 placeholder = stringResource(R.string.venta_producto_placeholder),
             )
             MetodoDePago(seleccionado = metodoPago, onMetodoPagoChange = onMetodoPagoChange)
+
+            // HU-29/HU-30. Solo en la venta detallada: la rápida es un total del día y no
+            // tiene a quién apuntarle. El repositorio descarta el cliente igual si es rápida.
+            onClienteChange?.let { alElegir ->
+                ClienteDeLaVenta(
+                    clientes = clientes,
+                    seleccionado = clienteId,
+                    onClienteChange = alElegir,
+                )
+            }
         } else {
             GvTextField(
                 label = stringResource(R.string.venta_nota),
@@ -77,6 +94,52 @@ fun CamposDeVenta(
                 onValueChange = onNotaChange,
                 placeholder = stringResource(R.string.venta_nota_placeholder),
             )
+        }
+    }
+}
+
+/**
+ * HU-29/HU-30. A quién se le vendió.
+ *
+ * Es opcional y se dice: en un mostrador, a la mayoría de la gente se le vende sin registrarla,
+ * y un campo obligatorio acá haría que cada venta cueste un cliente inventado.
+ */
+@Composable
+private fun ClienteDeLaVenta(
+    clientes: List<Cliente>,
+    seleccionado: Long?,
+    onClienteChange: (Long?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier) {
+        Text(
+            text = stringResource(R.string.venta_cliente),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+
+        if (clientes.isEmpty()) {
+            // Sin clientes no hay nada que elegir, pero tampoco es un error: se dice dónde se
+            // crean y la venta se guarda igual.
+            GvInfoNote(stringResource(R.string.venta_sin_clientes))
+            return@Column
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            clientes.forEach { cliente ->
+                GvChip(
+                    text = cliente.nombre,
+                    selected = cliente.id == seleccionado,
+                    onClick = { onClienteChange(cliente.id) },
+                )
+            }
         }
     }
 }
