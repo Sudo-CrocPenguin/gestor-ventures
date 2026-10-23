@@ -19,6 +19,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * HU-35. Las ideas de promociones del negocio activo: pedir una nueva, guardarla o
+ * descartarla. La lista se actualiza sola con cada cambio.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class PromocionesViewModel @Inject constructor(
@@ -40,6 +44,7 @@ class PromocionesViewModel @Inject constructor(
         }
     }
 
+    /** Pide una idea nueva. Si falla, se muestra el aviso y se puede volver a pedir. */
     fun sugerir() {
         if (_uiState.value.generando) return
         _uiState.update { it.copy(generando = true, error = null) }

@@ -32,12 +32,17 @@ private const val SemanasDeDetalle = 8L
 
 private const val ProductosDestacados = 5
 
+/** Los que más compran: a quienes se les puede premiar la fidelidad. */
 private const val ClientesDestacados = 5
 
+/** Un mes sin comprar ya es un cliente que se está yendo. */
 private const val DiasSinComprar = 30L
 
 /**
  * HU-34 a HU-37. Las reglas del asistente y los datos reales del negocio, en texto.
+ *
+ * HU-35. También lleva cómo compran los clientes (HU-30), que es lo que necesita una promoción
+ * para tener a quién dirigirse.
  *
  * Vive aparte porque lo usan varias preguntas al asistente: el chat (HU-34, HU-36, HU-37) y
  * las sugerencias de promociones (HU-35). Todos tienen que ver los mismos números.
@@ -184,6 +189,13 @@ class ContextoDelNegocio @Inject constructor(
         appendLine("- Dinero disponible: ${pesos(resumen.disponible)}")
     }
 
+    /**
+     * HU-35. Los clientes del negocio: cuántos hay, quiénes compran más y quiénes dejaron de
+     * comprar. Solo cuentan las ventas con cliente registrado; las ventas rápidas no tienen.
+     *
+     * Van con su nombre, para que el asistente pueda sugerir a quién escribirle. Eso quiere
+     * decir que esos nombres salen del teléfono hacia Gemini.
+     */
     private fun StringBuilder.appendClientes(
         clientes: List<Cliente>,
         ventas: List<Venta>,

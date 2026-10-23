@@ -5,12 +5,20 @@ import com.gestor_ventures.back.repository.AsistenteRepository
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
+/**
+ * HU-35. Le pide al asistente una idea de promoción para atraer más clientes.
+ *
+ * Usa los mismos datos del negocio que el chat ([ContextoDelNegocio]), con una tarea más
+ * concreta: una sola promoción, realista, que no regale el margen y que diga por qué los datos
+ * dicen que puede funcionar.
+ */
 class SugerirPromocion @Inject constructor(
     private val asistenteRepository: AsistenteRepository,
     private val contextoDelNegocio: ContextoDelNegocio,
 ) {
 
     suspend operator fun invoke(negocioId: Long): ResultadoSugerencia {
+        // Los títulos de las últimas ideas van en el pedido para que no proponga lo mismo otra vez.
         val anteriores = asistenteRepository.sugerencias(negocioId).first().take(SugerenciasParaNoRepetir)
         val instrucciones = buildString {
             append(contextoDelNegocio.instruccionesPara(negocioId))

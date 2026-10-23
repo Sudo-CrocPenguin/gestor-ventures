@@ -48,6 +48,10 @@ fun PromocionesRoute(onBack: () -> Unit, viewModel: PromocionesViewModel = hiltV
     )
 }
 
+/**
+ * HU-35. Ideas de promociones: las nuevas arriba, con guardar y descartar, y las guardadas
+ * abajo, en su propia sección.
+ */
 @Composable
 fun PromocionesScreen(
     uiState: PromocionesUiState,
@@ -132,6 +136,7 @@ fun PromocionesScreen(
     }
 }
 
+/** Una idea. Sin [onGuardar] es una ya guardada, y solo se puede quitar. */
 @Composable
 private fun TarjetaSugerencia(
     sugerencia: Sugerencia,

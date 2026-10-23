@@ -31,6 +31,7 @@ enum class ErrorAsistente {
 }
 
 /** La respuesta del asistente, o por qué no la hubo. */
+/** HU-35. Una idea de promoción. [guardada] en false es una idea nueva, todavía sin decidir. */
 data class Sugerencia(
     val id: Long,
     val contenido: String,
@@ -38,6 +39,7 @@ data class Sugerencia(
     val fechaGeneracion: LocalDateTime,
 )
 
+/** La idea nueva, o por qué no se pudo generar. */
 sealed interface ResultadoSugerencia {
     data class Generada(val sugerencia: Sugerencia) : ResultadoSugerencia
     data class Fallo(val error: ErrorAsistente) : ResultadoSugerencia

@@ -25,12 +25,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Rápido y con nivel gratuito: alcanza de sobra para resumir números. */
+/** La tabla de sugerencias admite otros tipos más adelante; por ahora solo hay promociones. */
 private const val TipoPromocion = "promocion"
 
 private const val ModeloGemini = "gemini-2.5-flash"
 
 /**
- * HU-34. Habla con Gemini y guarda cada pregunta con su respuesta.
+ * HU-34 y HU-35. Habla con Gemini y guarda cada pregunta con su respuesta, y cada idea de
+ * promoción.
  *
  * Solo se guarda lo que salió bien: una pregunta sin respuesta no le sirve al historial, y la
  * pantalla se la devuelve al usuario para que la vuelva a enviar.
@@ -86,9 +88,11 @@ class AsistenteRepository @Inject constructor(
      * Qué quiere decir cada código de error de Gemini. Si la clave es inválida, responde 400
      * o 403; si se pasó el límite gratuito, 429.
      */
+    /** HU-35. Las ideas nuevas y las guardadas. Se actualiza sola al guardar o descartar. */
     fun sugerencias(negocioId: Long): Flow<List<Sugerencia>> =
         sugerenciaDao.observarVisibles(negocioId).map { filas -> filas.map(::aSugerencia) }
 
+    /** HU-35. Le pide a Gemini una idea y la guarda como nueva, sin decidir. */
     suspend fun sugerirPromocion(negocioId: Long, instrucciones: String, pedido: String): ResultadoSugerencia {
         val texto = when (val generado = generar(instrucciones, listOf(mensajeDelUsuario(pedido)))) {
             is Generado.Texto -> generado.texto
@@ -112,6 +116,10 @@ class AsistenteRepository @Inject constructor(
         sugerenciaDao.actualizarEstado(sugerenciaId, EstadoSugerencia.DESCARTADA)
     }
 
+    /**
+     * La llamada a Gemini, compartida por el chat y las promociones: revisa la clave, manda el
+     * pedido y traduce los errores. Así los dos fallan igual y con los mismos avisos.
+     */
     private suspend fun generar(instrucciones: String, contenidos: List<ContenidoGemini>): Generado {
         val apiKey = BuildConfig.GEMINI_API_KEY
         if (apiKey.isBlank()) return Generado.Error(ErrorAsistente.SinApiKey)
@@ -136,6 +144,7 @@ class AsistenteRepository @Inject constructor(
     private fun mensajeDelUsuario(texto: String) =
         ContenidoGemini(role = "user", parts = listOf(ParteGemini(texto)))
 
+    /** Lo que devuelve [generar]: el texto, o qué salió mal. */
     private sealed interface Generado {
         data class Texto(val texto: String) : Generado
         data class Error(val error: ErrorAsistente) : Generado

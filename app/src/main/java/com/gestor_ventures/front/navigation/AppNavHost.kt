@@ -45,6 +45,7 @@ object Rutas {
     /** HU-04. Editar el perfil de quien tiene la sesión abierta, desde el menú lateral. */
     const val Perfil = "perfil"
 
+    /** HU-35. Ideas de promociones del asistente. */
     const val Promociones = "promociones"
 
     /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
