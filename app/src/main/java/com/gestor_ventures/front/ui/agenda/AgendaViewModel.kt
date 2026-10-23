@@ -30,10 +30,11 @@ import javax.inject.Inject
 private const val MaxDigitosCantidad = 4
 
 /**
- * HU-24 y HU-25. La agenda del negocio activo: lo que viene, desde hoy.
+ * HU-24, HU-25 y HU-27. La agenda del negocio activo, en el periodo que se esté mirando.
  *
- * Escucha las citas, los pedidos y los clientes al mismo tiempo, así que la lista cambia sola
- * al agendar algo, al cambiar un estado o al cambiar de negocio en el menú.
+ * Escucha las citas, los pedidos y los clientes al mismo tiempo, así que la vista cambia sola
+ * al agendar algo, al cambiar un estado, al moverse de periodo o al cambiar de negocio en el
+ * menú. Solo se traen los días del periodo, incluidos los que ya pasaron.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -48,6 +49,7 @@ class AgendaViewModel @Inject constructor(
     )
     val uiState: StateFlow<AgendaUiState> = _uiState.asStateFlow()
 
+    /** HU-27. La vista y la fecha elegidas; cambiarlas vuelve a pedir los datos del nuevo periodo. */
     private val periodo = MutableStateFlow(VistaAgenda.Semana to agendaRepository.hoy())
 
     init {
@@ -80,6 +82,7 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /** HU-27. Cambia entre día, semana y mes sin moverse de la fecha. */
     fun onVistaChange(vista: VistaAgenda) {
         cambiarPeriodo(vista, _uiState.value.fecha)
     }
@@ -94,10 +97,12 @@ class AgendaViewModel @Inject constructor(
         cambiarPeriodo(estado.vista, estado.vista.mover(estado.fecha, 1))
     }
 
+    /** HU-27. Vuelve al periodo que tiene a hoy, en la misma vista. */
     fun irAHoy() {
         cambiarPeriodo(_uiState.value.vista, agendaRepository.hoy())
     }
 
+    /** HU-27. Tocar un día del mes abre la vista de ese día. */
     fun abrirDia(dia: LocalDate) {
         cambiarPeriodo(VistaAgenda.Dia, dia)
     }
@@ -117,6 +122,10 @@ class AgendaViewModel @Inject constructor(
         _uiState.update { it.copy(formularioPedido = FormularioPedido(fechaEntrega = fecha), error = null) }
     }
 
+    /**
+     * HU-27. Si se está mirando un solo día, de hoy en adelante, la cita o el pedido nuevo ya
+     * trae esa fecha: es casi seguro que es para ese día. En la semana o el mes no se adivina.
+     */
     private fun fechaSugerida(): LocalDate? {
         val estado = _uiState.value
         return estado.fecha.takeIf { estado.vista == VistaAgenda.Dia && !it.isBefore(estado.hoy) }

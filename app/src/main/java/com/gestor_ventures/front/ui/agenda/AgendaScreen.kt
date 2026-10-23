@@ -96,9 +96,10 @@ fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
 }
 
 /**
- * HU-24 y HU-25. La pestaña Agenda: lo que viene por delante y el botón para agregar más.
+ * HU-24, HU-25 y HU-27. La pestaña Agenda, como calendario de día, semana o mes.
  *
- * El botón de abajo cambia con la sección: "Agendar cita" o "Registrar pedido".
+ * Citas y pedidos se ven juntos, porque la pregunta es "¿cuánto trabajo tengo?" y no "¿cuántas
+ * citas?". Abajo hay un botón por cada tipo de agenda que tenga el negocio.
  */
 @Composable
 fun AgendaScreen(
@@ -400,6 +401,10 @@ private fun VistaAgenda.labelRes(): Int = when (this) {
     VistaAgenda.Mes -> R.string.agenda_vista_mes
 }
 
+/**
+ * HU-27. Un día de la agenda: primero las entregas, que no tienen hora, y después las citas en
+ * orden. Un día sin nada dice "Libre", para que se vea dónde cabe algo más.
+ */
 @Composable
 private fun Dia(
     dia: LocalDate,

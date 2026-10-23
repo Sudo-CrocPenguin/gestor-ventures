@@ -42,6 +42,10 @@ import java.util.Locale
 
 private val LocaleColombia = Locale.forLanguageTag("es-CO")
 
+/**
+ * HU-27. El periodo que se está mirando, con flechas para ir al anterior o al siguiente y un
+ * atajo para volver a hoy.
+ */
 @Composable
 fun EncabezadoDePeriodo(
     vista: VistaAgenda,
@@ -85,12 +89,17 @@ fun EncabezadoDePeriodo(
     }
 }
 
+/** "viernes 24 de octubre", "19 oct – 25 oct" u "Octubre 2026", según la vista. */
 private fun tituloDe(vista: VistaAgenda, rango: RangoFechas): String = when (vista) {
     VistaAgenda.Dia -> formatLongDate(rango.desde)
     VistaAgenda.Semana -> "${formatDiaCorto(rango.desde)} – ${formatDiaCorto(rango.hasta)}"
     VistaAgenda.Mes -> formatMesLargo(rango.desde)
 }
 
+/**
+ * HU-27. El mes como cuadrícula de lunes a domingo. Antes del día 1 se dejan huecos para que
+ * cada día caiga bajo su columna.
+ */
 @Composable
 fun CuadriculaDelMes(
     dias: List<LocalDate>,
@@ -135,6 +144,10 @@ fun CuadriculaDelMes(
     }
 }
 
+/**
+ * Un día del mes. Si tiene algo se pinta y lleva el número de citas y entregas; hoy lleva el
+ * borde de acento.
+ */
 @Composable
 private fun CeldaDia(dia: LocalDate, esHoy: Boolean, cuantos: Int, onClick: () -> Unit) {
     val forma = RoundedCornerShape(10.dp)
