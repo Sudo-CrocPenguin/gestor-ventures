@@ -64,6 +64,10 @@ fun AsistenteRoute(viewModel: AsistenteViewModel = hiltViewModel()) {
     )
 }
 
+/**
+ * HU-34. El chat con el asistente: las preguntas a la derecha, las respuestas a la izquierda y
+ * el campo para escribir abajo. Sin conversación, muestra preguntas de ejemplo.
+ */
 @Composable
 fun AsistenteScreen(
     uiState: AsistenteUiState,
@@ -73,6 +77,7 @@ fun AsistenteScreen(
     onNuevaConversacion: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Cada mensaje nuevo baja la lista hasta el final, como en cualquier chat.
     val lista = rememberLazyListState()
     val cantidad = uiState.mensajes.size * 2 + if (uiState.enviando) 2 else 0
     LaunchedEffect(cantidad) {
@@ -234,6 +239,10 @@ private fun Pensando(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Gemini escribe con formato de Markdown: **negritas** y viñetas con asterisco. Acá se
+ * convierten en negritas de verdad y en "•", para que no se vean los asteriscos.
+ */
 private fun conNegritas(texto: String): AnnotatedString = buildAnnotatedString {
     texto.replace(Regex("(?m)^\\s*[*-]\\s+"), "• ")
         .split("**")

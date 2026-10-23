@@ -6,9 +6,11 @@ import com.gestor_ventures.back.model.ErrorAsistente
 import com.gestor_ventures.back.model.MaxCaracteresPregunta
 import com.gestor_ventures.back.model.MensajeAsistente
 
+/** HU-34. Estado de la pestaña Asistente. */
 data class AsistenteUiState(
     val mensajes: List<MensajeAsistente> = emptyList(),
     val pregunta: String = "",
+    /** La pregunta que ya se mandó y espera respuesta. Se muestra en el chat mientras tanto. */
     val preguntaEnCurso: String? = null,
     val error: ErrorAsistente? = null,
     val sinNegocio: Boolean = false,
@@ -21,6 +23,7 @@ data class AsistenteUiState(
         get() = !enviando && !sinNegocio && pregunta.isNotBlank() && pregunta.length <= MaxCaracteresPregunta
 }
 
+/** Ejemplos para la primera pregunta: muestran qué se le puede preguntar. */
 val preguntasSugeridas = listOf(
     R.string.asistente_sugerencia_semana,
     R.string.asistente_sugerencia_mes,
@@ -28,6 +31,7 @@ val preguntasSugeridas = listOf(
     R.string.asistente_sugerencia_producto,
 )
 
+/** Texto que ve el usuario para cada error del asistente. */
 @StringRes
 fun ErrorAsistente.mensajeRes(): Int = when (this) {
     ErrorAsistente.PreguntaVacia -> R.string.asistente_error_vacia

@@ -25,12 +25,24 @@ import kotlin.math.roundToLong
 
 private val LocaleColombia: Locale = Locale.forLanguageTag("es-CO")
 
+/** Un mes de ventas día por día: alcanza para "¿qué día vendo más?" sin mandar de más. */
 private const val DiasDeDetalle = 31L
 
+/** Dos meses por semanas: lo justo para comparar esta semana con las anteriores. */
 private const val SemanasDeDetalle = 8L
 
 private const val ProductosDestacados = 5
 
+/**
+ * HU-34. Le pregunta al asistente por las ventas del negocio, con sus números reales.
+ *
+ * Vive en `usecase` porque cruza varios repositorios: arma el contexto con el resumen de HU-16
+ * y el detalle de ventas, y se lo pasa a [AsistenteRepository].
+ *
+ * El periodo no se elige en pantalla: se le mandan al asistente varios cortes (este mes, el
+ * anterior, las últimas semanas y los últimos días) y él responde con el que corresponda a la
+ * pregunta. Así el usuario pregunta como hablaría: "¿cómo me fue la semana pasada?".
+ */
 class ConsultarAsistente @Inject constructor(
     private val asistenteRepository: AsistenteRepository,
     private val negocioRepository: NegocioRepository,
@@ -52,6 +64,12 @@ class ConsultarAsistente @Inject constructor(
         )
     }
 
+    /**
+     * Las reglas del asistente y los datos del negocio, en texto.
+     *
+     * Las reglas importan tanto como los datos: responder solo con lo que está acá, no inventar
+     * cifras y decir cuándo un periodo no está, en vez de adivinarlo.
+     */
     private suspend fun instruccionesPara(negocioId: Long): String {
         val hoy = reloj.ahora().toLocalDate()
         val negocio = negocioRepository.observarNegocio(negocioId).first()
@@ -141,6 +159,10 @@ class ConsultarAsistente @Inject constructor(
             dia to (delDia.sumOf { it.monto } to delDia.size)
         }
 
+    /**
+     * Lo que más plata dejó en el último mes. "Torta" y "torta" son el mismo producto, así que
+     * se agrupa sin importar mayúsculas.
+     */
     private fun productosDestacados(ventas: List<Venta>, hoy: LocalDate): List<Pair<String, Pair<Double, Int>>> {
         val desde = hoy.minusDays(DiasDeDetalle - 1)
         return ventas
@@ -152,6 +174,7 @@ class ConsultarAsistente @Inject constructor(
             .take(ProductosDestacados)
     }
 
+    /** "$ 1.240.000", como lo escribiría el emprendedor. */
     private fun pesos(monto: Double): String {
         val simbolos = DecimalFormatSymbols(LocaleColombia).apply { groupingSeparator = '.' }
         return "$ " + DecimalFormat("#,##0", simbolos).format(monto.roundToLong())

@@ -21,6 +21,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * HU-34. La conversación con el asistente.
+ *
+ * El chat escucha la conversación guardada, así que cada respuesta aparece sola apenas se
+ * guarda, y cambiar de negocio en el menú cambia de conversación.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class AsistenteViewModel @Inject constructor(
@@ -32,6 +38,7 @@ class AsistenteViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AsistenteUiState())
     val uiState: StateFlow<AsistenteUiState> = _uiState.asStateFlow()
 
+    /** Cada vez que se abre la pestaña empieza una conversación nueva. */
     private val sesion = MutableStateFlow(asistenteRepository.nuevaSesion())
 
     init {
@@ -56,11 +63,16 @@ class AsistenteViewModel @Inject constructor(
         _uiState.update { it.copy(pregunta = texto.take(MaxCaracteresPregunta), error = null) }
     }
 
+    /** Tocar una pregunta sugerida la manda de una vez. */
     fun usarSugerencia(texto: String) {
         _uiState.update { it.copy(pregunta = texto, error = null) }
         enviar()
     }
 
+    /**
+     * Manda la pregunta. El campo se vacía de una vez, para que se sienta enviada; si algo
+     * falla, la pregunta vuelve al campo para reenviarla sin escribirla otra vez.
+     */
     fun enviar() {
         val estado = _uiState.value
         if (!estado.puedeEnviar) return
@@ -82,6 +94,7 @@ class AsistenteViewModel @Inject constructor(
         }
     }
 
+    /** Empieza de cero. La conversación anterior queda guardada para el historial (HU-39). */
     fun nuevaConversacion() {
         if (_uiState.value.enviando) return
         sesion.value = asistenteRepository.nuevaSesion()

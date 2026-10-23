@@ -253,6 +253,7 @@ fun AppNavHost(
             AgendaRoute()
         }
 
+        // HU-34. Preguntarle al asistente por las ventas del negocio.
         composable(TopLevelDestination.Asistente.route) {
             AsistenteRoute()
         }
