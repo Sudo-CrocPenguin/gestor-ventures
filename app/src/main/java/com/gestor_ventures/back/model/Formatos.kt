@@ -67,6 +67,7 @@ fun enlaceDeWhatsApp(telefono: String?, mensaje: String? = null): String? {
 private fun codificarParaUrl(texto: String): String =
     java.net.URLEncoder.encode(texto, "UTF-8").replace("+", "%20")
 
+/** "$ 1.240.000". Para los textos que arma `back/` (alertas y asistente), que no ven `front/util`. */
 fun pesosEnTexto(monto: Double): String {
     val simbolos = DecimalFormatSymbols(Locale.forLanguageTag("es-CO")).apply { groupingSeparator = '.' }
     return "$ " + DecimalFormat("#,##0", simbolos).format(round(monto))

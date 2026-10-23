@@ -6,6 +6,7 @@ import com.gestor_ventures.R
 import com.gestor_ventures.back.model.Alerta
 import com.gestor_ventures.back.model.TipoAlerta
 
+/** HU-38. Estado de la pantalla Notificaciones: por ahora, las alertas del negocio. */
 data class NotificacionesUiState(
     val alertas: List<Alerta> = emptyList(),
     val cargando: Boolean = true,
@@ -15,6 +16,7 @@ data class NotificacionesUiState(
     val hayNoLeidas: Boolean get() = alertas.any { !it.leida }
 }
 
+/** El título de cada tipo de alerta. Lo usan la pantalla y la notificación. */
 @StringRes
 fun TipoAlerta.tituloRes(): Int = when (this) {
     TipoAlerta.CaidaVentas -> R.string.alerta_caida_ventas

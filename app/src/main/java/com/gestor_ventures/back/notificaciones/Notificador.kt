@@ -24,6 +24,7 @@ object Notificador {
 
     const val CanalAgenda = "agenda"
 
+    /** HU-38. Un canal aparte para que las alertas se puedan apagar sin apagar los recordatorios. */
     const val CanalAlertas = "alertas"
 
     /** Desde Android 8 una notificación necesita un canal. Se crea al abrir la app. */

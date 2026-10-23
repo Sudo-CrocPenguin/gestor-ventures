@@ -13,6 +13,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import com.gestor_ventures.db.enums.TipoAlerta as TipoAlertaDb
 
+/** HU-38. Guarda las alertas y lleva cuáles ya se leyeron. */
 @Singleton
 class AlertaRepository @Inject constructor(
     private val alertaDao: AlertaDao,

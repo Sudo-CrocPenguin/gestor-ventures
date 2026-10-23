@@ -50,6 +50,10 @@ fun NotificacionesRoute(onBack: () -> Unit, viewModel: NotificacionesViewModel =
     )
 }
 
+/**
+ * HU-38. Las alertas, de la más nueva a la más vieja. Las que no se han leído llevan un punto
+ * rojo y el botón para marcarlas.
+ */
 @Composable
 fun NotificacionesScreen(
     uiState: NotificacionesUiState,

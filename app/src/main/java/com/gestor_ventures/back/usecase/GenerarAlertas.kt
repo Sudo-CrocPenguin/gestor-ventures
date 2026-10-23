@@ -15,14 +15,26 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
+/** Una semana que vende 30 % menos que la anterior ya no es un bache normal. */
 private const val CaidaMinima = 0.30
 
+/** Una categoría que gasta la mitad más que el mes pasado merece una mirada. */
 private const val SubidaMinima = 50.0
 
+/** Cuánto puede ir el avance de la meta por detrás del tiempo antes de avisar. */
 private const val AtrasoMaximoDeLaMeta = 0.20
 
+/** Antes de un cuarto del plazo es muy pronto para decir que la meta va mal. */
 private const val TiempoMinimoDeLaMeta = 0.25
 
+/**
+ * HU-38. Revisa el negocio y genera las alertas que hagan falta: ventas que caen, un gasto
+ * que se dispara o una meta de ahorro que se atrasa.
+ *
+ * Las calcula la app y no Gemini: son reglas fijas con cifras exactas, funcionan sin internet
+ * y no gastan del límite gratuito. El texto de cada alerta trae los números, para que se
+ * entienda sin abrir otra pantalla.
+ */
 class GenerarAlertas @Inject constructor(
     private val alertaRepository: AlertaRepository,
     private val ventaRepository: VentaRepository,
@@ -32,6 +44,11 @@ class GenerarAlertas @Inject constructor(
     private val reloj: Reloj,
 ) {
 
+    /**
+     * Revisa un negocio y guarda las alertas nuevas. Cada tipo se avisa a lo sumo una vez por
+     * periodo —la caída de ventas una vez por semana, el gasto y la meta una vez por mes—
+     * para que la misma situación no llegue repetida todos los días.
+     */
     suspend operator fun invoke(negocioId: Long): List<AlertaNueva> {
         val hoy = reloj.ahora().toLocalDate()
         val nuevas = listOfNotNull(
@@ -43,12 +60,17 @@ class GenerarAlertas @Inject constructor(
         return nuevas
     }
 
+    /** La revisión diaria: todos los negocios, no solo el que esté activo en el menú. */
     suspend fun paraTodosLosNegocios(): List<AlertaNueva> =
         alertaRepository.negocios().flatMap { invoke(it) }
 
     private suspend fun yaAvisada(negocioId: Long, tipo: TipoAlerta, desde: LocalDate): Boolean =
         alertaRepository.huboDesde(negocioId, tipo, desde.atStartOfDay())
 
+    /**
+     * Los últimos 7 días contra los 7 anteriores. Sin ventas la semana anterior no hay contra
+     * qué comparar, así que no se avisa.
+     */
     private suspend fun caidaDeVentas(negocioId: Long, hoy: LocalDate): AlertaNueva? {
         val semana = ventaRepository.totalEntre(negocioId, hoy.minusDays(6), hoy).first()
         val anterior = ventaRepository.totalEntre(negocioId, hoy.minusDays(13), hoy.minusDays(7)).first()
@@ -63,6 +85,10 @@ class GenerarAlertas @Inject constructor(
         )
     }
 
+    /**
+     * Usa la misma comparación por categoría de HU-37 y avisa de la que más subió, si subió
+     * 50 % o más. Una categoría nueva no cuenta: de cero a algo no hay porcentaje.
+     */
     private suspend fun gastoElevado(negocioId: Long, hoy: LocalDate): AlertaNueva? {
         val variacion = compararGastosPorCategoria(negocioId, hoy).variaciones
             .filter { (it.porcentaje ?: 0.0) >= SubidaMinima }
@@ -77,6 +103,10 @@ class GenerarAlertas @Inject constructor(
         )
     }
 
+    /**
+     * La meta va en riesgo si la fecha ya pasó sin cumplirla, o si el avance va bastante por
+     * detrás del tiempo: con la mitad del plazo encima y solo un 20 % ahorrado, no se llega.
+     */
     private suspend fun metaEnRiesgo(negocioId: Long, hoy: LocalDate): AlertaNueva? {
         val meta = baseFinancieraRepository.metaActiva(negocioId).first() ?: return null
         val progreso = calcularResumenFinanciero.progresoDeLaMeta(negocioId).first() ?: return null

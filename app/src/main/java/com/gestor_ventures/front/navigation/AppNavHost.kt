@@ -49,6 +49,7 @@ object Rutas {
     /** HU-04. Editar el perfil de quien tiene la sesión abierta, desde el menú lateral. */
     const val Perfil = "perfil"
 
+    /** HU-38. Las alertas del negocio, desde el menú lateral. */
     const val Notificaciones = "notificaciones"
 
     /** HU-35. Ideas de promociones del asistente. */

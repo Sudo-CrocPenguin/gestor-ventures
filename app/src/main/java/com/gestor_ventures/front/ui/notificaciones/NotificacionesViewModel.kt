@@ -18,6 +18,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * HU-38. Las alertas del negocio activo.
+ *
+ * Al abrir la pantalla se corre la revisión en el momento, para no tener que esperar a la
+ * revisión diaria: lo que pasó hoy ya aparece.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class NotificacionesViewModel @Inject constructor(

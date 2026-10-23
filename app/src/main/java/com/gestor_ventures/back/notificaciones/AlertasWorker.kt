@@ -15,6 +15,13 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import java.util.concurrent.TimeUnit
 
+/**
+ * HU-38. La revisión diaria del negocio, aunque la app esté cerrada. Cada alerta nueva llega
+ * como notificación por el canal de alertas.
+ *
+ * Igual que [RecordatorioWorker], pide sus dependencias a Hilt con un `EntryPoint` porque
+ * WorkManager construye la clase por su cuenta.
+ */
 class AlertasWorker(
     context: Context,
     parametros: WorkerParameters,
@@ -52,6 +59,10 @@ class AlertasWorker(
     companion object {
         private const val NombreTarea = "alertas_diarias"
 
+        /**
+         * Deja programada la revisión una vez al día. Con KEEP, abrir la app de nuevo no la
+         * reinicia: sigue el horario que ya tenía.
+         */
         fun programar(context: Context) {
             val tarea = PeriodicWorkRequestBuilder<AlertasWorker>(1, TimeUnit.DAYS).build()
             WorkManager.getInstance(context)
