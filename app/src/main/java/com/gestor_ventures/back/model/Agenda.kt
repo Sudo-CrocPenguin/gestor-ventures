@@ -64,4 +64,6 @@ enum class ErrorAgenda {
     EntregaEnElPasado,
     PedidoNoExiste,
     PedidoCancelado,
+    CitaNoExiste,
+    CitaCancelada,
 }

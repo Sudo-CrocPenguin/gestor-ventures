@@ -71,7 +71,9 @@ fun PedidoSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = stringResource(R.string.agenda_pedido_titulo),
+                text = stringResource(
+                    if (formulario.esEdicion) R.string.agenda_pedido_titulo_editar else R.string.agenda_pedido_titulo,
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -136,7 +138,9 @@ fun PedidoSheet(
             }
 
             GvPrimaryButton(
-                text = stringResource(R.string.agenda_pedido_guardar),
+                text = stringResource(
+                    if (formulario.esEdicion) R.string.agenda_guardar_cambios else R.string.agenda_pedido_guardar,
+                ),
                 onClick = onGuardar,
                 enabled = formulario.puedeGuardar,
             )

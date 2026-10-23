@@ -571,4 +571,24 @@
     <string name="agenda_error_entrega_pasado">La fecha de entrega no puede ser anterior a hoy.</string>
     <string name="agenda_error_pedido_no_existe">Ese pedido ya no existe.</string>
     <string name="agenda_error_pedido_cancelado">Un pedido cancelado ya no cambia de estado.</string>
+    <string name="agenda_error_cita_no_existe">Esa cita ya no existe.</string>
+    <string name="agenda_error_cita_cancelada">Una cita cancelada ya no se puede cambiar.</string>
+    <string name="agenda_editar">Editar</string>
+    <string name="agenda_cancelar_cita">Cancelar cita</string>
+    <string name="agenda_cancelar_pedido">Cancelar pedido</string>
+    <string name="agenda_cita_titulo_editar">Editar cita</string>
+    <string name="agenda_pedido_titulo_editar">Editar pedido</string>
+    <string name="agenda_guardar_cambios">Guardar cambios</string>
+    <string name="agenda_cancelar_cita_titulo">¿Cancelar la cita de %1$s?</string>
+    <string name="agenda_cancelar_pedido_titulo">¿Cancelar el pedido de %1$s?</string>
+    <string name="agenda_cancelar_ayuda">Queda en la agenda como cancelado y ya no se puede cambiar.</string>
+    <string name="agenda_cancelar_confirmar">Sí, cancelar</string>
+    <string name="agenda_cancelar_volver">No, dejarlo</string>
+    <string name="agenda_aviso_titulo">¿Le avisas a %1$s?</string>
+    <string name="agenda_aviso_abrir">Abrir WhatsApp</string>
+    <string name="agenda_aviso_ahora_no">Ahora no</string>
+    <string name="agenda_aviso_cita_cambiada">Hola %1$s, te escribo para avisarte que tu cita quedó para el %2$s a las %3$s.</string>
+    <string name="agenda_aviso_cita_cancelada">Hola %1$s, te escribo para avisarte que tu cita del %2$s a las %3$s quedó cancelada.</string>
+    <string name="agenda_aviso_pedido_cambiado">Hola %1$s, te escribo para avisarte que tu pedido ahora se entrega el %2$s.</string>
+    <string name="agenda_aviso_pedido_cancelado">Hola %1$s, te escribo para avisarte que tu pedido para el %2$s quedó cancelado.</string>
 </resources>

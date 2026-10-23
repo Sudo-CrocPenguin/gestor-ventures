@@ -115,6 +115,63 @@ class AgendaRepository @Inject constructor(
     }
 
     /** El día de hoy según el reloj de la app, para saber desde cuándo mostrar la agenda. */
+    suspend fun editarCita(
+        citaId: Long,
+        clienteId: Long,
+        fecha: LocalDate,
+        hora: LocalTime,
+        descripcion: String?,
+    ): ErrorAgenda? {
+        val actual = citaDao.obtener(citaId) ?: return ErrorAgenda.CitaNoExiste
+        if (actual.estadoCita == EstadoCitaDb.CANCELADA) return ErrorAgenda.CitaCancelada
+
+        val descripcionLimpia = descripcion?.trim()?.takeIf { it.isNotEmpty() }
+        validarCita(actual.negocioId, clienteId, fecha, hora, descripcionLimpia, exceptoId = citaId)
+            ?.let { return it }
+
+        citaDao.actualizar(
+            actual.copy(
+                clienteId = clienteId,
+                fecha = fecha,
+                hora = hora.withSecond(0).withNano(0),
+                descripcion = descripcionLimpia,
+            ),
+        )
+        return null
+    }
+
+    suspend fun cancelarCita(citaId: Long): ErrorAgenda? {
+        val actual = citaDao.obtener(citaId) ?: return ErrorAgenda.CitaNoExiste
+        if (actual.estadoCita == EstadoCitaDb.CANCELADA) return ErrorAgenda.CitaCancelada
+
+        citaDao.actualizar(actual.copy(estadoCita = EstadoCitaDb.CANCELADA))
+        return null
+    }
+
+    suspend fun editarPedido(
+        pedidoId: Long,
+        clienteId: Long,
+        fechaEntrega: LocalDate,
+        productos: List<ProductoPedido>,
+    ): ErrorAgenda? {
+        val actual = pedidoDao.obtener(pedidoId) ?: return ErrorAgenda.PedidoNoExiste
+        if (actual.estadoPedido == EstadoPedidoDb.CANCELADO) return ErrorAgenda.PedidoCancelado
+
+        val productosLimpios = productos.map { it.copy(nombre = it.nombre.trim()) }
+        validarPedido(actual.negocioId, clienteId, fechaEntrega, productosLimpios)?.let { return it }
+
+        pedidoDao.actualizarConDetalle(
+            pedido = actual.copy(clienteId = clienteId, fechaEntrega = fechaEntrega),
+            detalle = productosLimpios.map {
+                DetallePedidoEntity(pedidoId = pedidoId, productoServicio = it.nombre, cantidad = it.cantidad)
+            },
+        )
+        return null
+    }
+
+    suspend fun cancelarPedido(pedidoId: Long): ErrorAgenda? =
+        cambiarEstadoPedido(pedidoId, EstadoPedido.CANCELADO)
+
     fun hoy(): LocalDate = reloj.ahora().toLocalDate()
 
     /**

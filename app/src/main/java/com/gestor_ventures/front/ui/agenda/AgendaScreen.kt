@@ -1,5 +1,6 @@
 package com.gestor_ventures.front.ui.agenda
 
+import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
@@ -10,14 +11,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
@@ -28,6 +35,7 @@ import com.gestor_ventures.back.model.EstadoPedido
 import com.gestor_ventures.back.model.Pedido
 import com.gestor_ventures.back.model.ProductoPedido
 import com.gestor_ventures.back.model.TipoActividad
+import com.gestor_ventures.back.model.enlaceDeWhatsApp
 import com.gestor_ventures.front.components.AccionSheet
 import com.gestor_ventures.front.components.GvAccionesSheet
 import com.gestor_ventures.front.components.GvCard
@@ -45,6 +53,7 @@ import java.time.LocalTime
 @Composable
 fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val contexto = LocalContext.current
 
     AgendaScreen(
         uiState = uiState,
@@ -66,6 +75,18 @@ fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
         onQuitarProducto = viewModel::quitarProducto,
         onGuardarPedido = viewModel::guardarPedido,
         onCerrarFormulario = viewModel::cerrarFormulario,
+        onAbrirCita = { viewModel.abrirCita(it.id) },
+        onCerrarCita = viewModel::cerrarCita,
+        onEditarCita = viewModel::editarCitaElegida,
+        onEditarPedido = viewModel::editarPedidoElegido,
+        onPedirCancelar = viewModel::pedirConfirmacionDeCancelar,
+        onConfirmarCancelar = viewModel::confirmarCancelacion,
+        onDescartarCancelar = viewModel::descartarCancelacion,
+        onAbrirWhatsApp = { enlace ->
+            viewModel.cerrarAviso()
+            contexto.startActivity(Intent(Intent.ACTION_VIEW, enlace.toUri()))
+        },
+        onCerrarAviso = viewModel::cerrarAviso,
     )
 }
 
@@ -95,6 +116,15 @@ fun AgendaScreen(
     onQuitarProducto: (Int) -> Unit,
     onGuardarPedido: () -> Unit,
     onCerrarFormulario: () -> Unit,
+    onAbrirCita: (Cita) -> Unit,
+    onCerrarCita: () -> Unit,
+    onEditarCita: () -> Unit,
+    onEditarPedido: () -> Unit,
+    onPedirCancelar: () -> Unit,
+    onConfirmarCancelar: () -> Unit,
+    onDescartarCancelar: () -> Unit,
+    onAbrirWhatsApp: (String) -> Unit,
+    onCerrarAviso: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val seccion = uiState.seccionVisible
@@ -130,7 +160,9 @@ fun AgendaScreen(
             }
 
             when (seccion) {
-                SeccionAgenda.Citas -> uiState.citas.forEach { FilaCita(it) }
+                SeccionAgenda.Citas -> uiState.citas.forEach { cita ->
+                    FilaCita(cita, onClick = { onAbrirCita(cita) })
+                }
                 SeccionAgenda.Pedidos -> uiState.pedidos.forEach { pedido ->
                     FilaPedido(pedido, onClick = { onAbrirPedido(pedido) })
                 }
@@ -184,19 +216,135 @@ fun AgendaScreen(
     }
 
     uiState.pedidoElegido?.let { pedido ->
+        val abierto = pedido.estado != EstadoPedido.CANCELADO
         GvAccionesSheet(
             titulo = pedido.nombreCliente,
             acciones = EstadosQueSeEligen.map { estado ->
                 AccionSheet(
                     texto = stringResource(estado.labelRes()),
                     iconRes = R.drawable.ic_check,
-                    habilitada = pedido.estado != estado && pedido.estado != EstadoPedido.CANCELADO,
+                    habilitada = pedido.estado != estado && abierto,
                     onClick = { onCambiarEstadoPedido(estado) },
                 )
-            },
+            } + listOf(
+                AccionSheet(
+                    texto = stringResource(R.string.agenda_editar),
+                    iconRes = R.drawable.ic_pencil,
+                    habilitada = abierto,
+                    onClick = onEditarPedido,
+                ),
+                AccionSheet(
+                    texto = stringResource(R.string.agenda_cancelar_pedido),
+                    iconRes = R.drawable.ic_trash,
+                    destructiva = true,
+                    habilitada = abierto,
+                    onClick = onPedirCancelar,
+                ),
+            ),
             onCerrar = onCerrarPedido,
         )
     }
+
+    uiState.citaElegida?.let { cita ->
+        val abierta = cita.estado != EstadoCita.CANCELADA
+        GvAccionesSheet(
+            titulo = cita.nombreCliente,
+            acciones = listOf(
+                AccionSheet(
+                    texto = stringResource(R.string.agenda_editar),
+                    iconRes = R.drawable.ic_pencil,
+                    habilitada = abierta,
+                    onClick = onEditarCita,
+                ),
+                AccionSheet(
+                    texto = stringResource(R.string.agenda_cancelar_cita),
+                    iconRes = R.drawable.ic_trash,
+                    destructiva = true,
+                    habilitada = abierta,
+                    onClick = onPedirCancelar,
+                ),
+            ),
+            onCerrar = onCerrarCita,
+        )
+    }
+
+    uiState.porCancelar?.let { elegido ->
+        ConfirmarCancelacion(
+            elegido = elegido,
+            onConfirmar = onConfirmarCancelar,
+            onDescartar = onDescartarCancelar,
+        )
+    }
+
+    uiState.aviso?.let { aviso ->
+        AvisarAlCliente(aviso = aviso, onAbrirWhatsApp = onAbrirWhatsApp, onCerrar = onCerrarAviso)
+    }
+}
+
+@Composable
+private fun ConfirmarCancelacion(
+    elegido: PorCancelar,
+    onConfirmar: () -> Unit,
+    onDescartar: () -> Unit,
+) {
+    val titulo = when (elegido) {
+        is PorCancelar.DeCita ->
+            stringResource(R.string.agenda_cancelar_cita_titulo, elegido.cita.nombreCliente)
+        is PorCancelar.DePedido ->
+            stringResource(R.string.agenda_cancelar_pedido_titulo, elegido.pedido.nombreCliente)
+    }
+    AlertDialog(
+        onDismissRequest = onDescartar,
+        title = { Text(titulo) },
+        text = { Text(stringResource(R.string.agenda_cancelar_ayuda)) },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirmar,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+            ) {
+                Text(stringResource(R.string.agenda_cancelar_confirmar))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDescartar) {
+                Text(stringResource(R.string.agenda_cancelar_volver))
+            }
+        },
+    )
+}
+
+@Composable
+private fun AvisarAlCliente(
+    aviso: AvisoAlCliente,
+    onAbrirWhatsApp: (String) -> Unit,
+    onCerrar: () -> Unit,
+) {
+    val nombre = aviso.nombreCliente.trim().substringBefore(' ')
+    val fecha = formatLongDate(aviso.fecha).replaceFirstChar { it.lowercase() }
+    val hora = aviso.hora?.let(::formatHour).orEmpty()
+    val mensaje = when (aviso.tipo) {
+        TipoAviso.CitaCambiada -> stringResource(R.string.agenda_aviso_cita_cambiada, nombre, fecha, hora)
+        TipoAviso.CitaCancelada -> stringResource(R.string.agenda_aviso_cita_cancelada, nombre, fecha, hora)
+        TipoAviso.PedidoCambiado -> stringResource(R.string.agenda_aviso_pedido_cambiado, nombre, fecha)
+        TipoAviso.PedidoCancelado -> stringResource(R.string.agenda_aviso_pedido_cancelado, nombre, fecha)
+    }
+    val enlace = enlaceDeWhatsApp(aviso.telefono, mensaje) ?: return
+
+    AlertDialog(
+        onDismissRequest = onCerrar,
+        title = { Text(stringResource(R.string.agenda_aviso_titulo, aviso.nombreCliente)) },
+        text = { Text(mensaje) },
+        confirmButton = {
+            TextButton(onClick = { onAbrirWhatsApp(enlace) }) {
+                Text(stringResource(R.string.agenda_aviso_abrir))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCerrar) {
+                Text(stringResource(R.string.agenda_aviso_ahora_no))
+            }
+        },
+    )
 }
 
 /** Los estados a los que se pasa un pedido a mano. Cancelar es otra acción (HU-28). */
@@ -213,8 +361,8 @@ private fun SeccionAgenda.labelRes(): Int = when (this) {
 
 /** Una cita: a quién, cuándo, para qué y en qué estado está. */
 @Composable
-private fun FilaCita(cita: Cita, modifier: Modifier = Modifier) {
-    GvCard(modifier) {
+private fun FilaCita(cita: Cita, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    GvCard(modifier.clickable(onClick = onClick)) {
         ListRow(
             title = cita.nombreCliente,
             subtitle = listOfNotNull(
@@ -306,6 +454,15 @@ private fun VistaPrevia(uiState: AgendaUiState) {
                 onQuitarProducto = {},
                 onGuardarPedido = {},
                 onCerrarFormulario = {},
+                onAbrirCita = {},
+                onCerrarCita = {},
+                onEditarCita = {},
+                onEditarPedido = {},
+                onPedirCancelar = {},
+                onConfirmarCancelar = {},
+                onDescartarCancelar = {},
+                onAbrirWhatsApp = {},
+                onCerrarAviso = {},
             )
         }
     }

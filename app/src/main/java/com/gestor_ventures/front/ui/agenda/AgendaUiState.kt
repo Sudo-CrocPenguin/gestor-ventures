@@ -28,6 +28,9 @@ data class AgendaUiState(
     val formularioPedido: FormularioPedido? = null,
     /** El pedido que el usuario tocó, mientras elige a qué estado pasarlo. */
     val pedidoElegido: Pedido? = null,
+    val citaElegida: Cita? = null,
+    val porCancelar: PorCancelar? = null,
+    val aviso: AvisoAlCliente? = null,
     val error: ErrorAgenda? = null,
 ) {
     /** HU-05. Servicios ve citas, productos ve pedidos y un negocio mixto ve las dos. */
@@ -59,12 +62,15 @@ data class AgendaUiState(
 
 /** HU-24. La cita mientras se escribe. Los campos son opcionales porque al principio están vacíos. */
 data class FormularioCita(
+    val citaId: Long? = null,
     val clienteId: Long? = null,
     val fecha: LocalDate? = null,
     val hora: LocalTime? = null,
     val descripcion: String = "",
 ) {
     val puedeGuardar: Boolean get() = clienteId != null && fecha != null && hora != null
+
+    val esEdicion: Boolean get() = citaId != null
 }
 
 /** Una fila de producto del pedido. La cantidad es texto porque así se escribe en el campo. */
@@ -75,6 +81,7 @@ data class FormularioProducto(
 
 /** HU-25. El pedido mientras se escribe. Arranca con una fila de producto vacía. */
 data class FormularioPedido(
+    val pedidoId: Long? = null,
     val clienteId: Long? = null,
     val fechaEntrega: LocalDate? = null,
     val productos: List<FormularioProducto> = listOf(FormularioProducto()),
@@ -82,7 +89,24 @@ data class FormularioPedido(
     val puedeGuardar: Boolean
         get() = clienteId != null && fechaEntrega != null &&
             productos.any { it.nombre.isNotBlank() }
+
+    val esEdicion: Boolean get() = pedidoId != null
 }
+
+sealed interface PorCancelar {
+    data class DeCita(val cita: Cita) : PorCancelar
+    data class DePedido(val pedido: Pedido) : PorCancelar
+}
+
+enum class TipoAviso { CitaCambiada, CitaCancelada, PedidoCambiado, PedidoCancelado }
+
+data class AvisoAlCliente(
+    val tipo: TipoAviso,
+    val nombreCliente: String,
+    val telefono: String,
+    val fecha: LocalDate,
+    val hora: LocalTime? = null,
+)
 
 /** Texto que ve el usuario para cada regla de la agenda. */
 @StringRes
@@ -99,6 +123,8 @@ fun ErrorAgenda.mensajeRes(): Int = when (this) {
     ErrorAgenda.EntregaEnElPasado -> R.string.agenda_error_entrega_pasado
     ErrorAgenda.PedidoNoExiste -> R.string.agenda_error_pedido_no_existe
     ErrorAgenda.PedidoCancelado -> R.string.agenda_error_pedido_cancelado
+    ErrorAgenda.CitaNoExiste -> R.string.agenda_error_cita_no_existe
+    ErrorAgenda.CitaCancelada -> R.string.agenda_error_cita_cancelada
 }
 
 @StringRes

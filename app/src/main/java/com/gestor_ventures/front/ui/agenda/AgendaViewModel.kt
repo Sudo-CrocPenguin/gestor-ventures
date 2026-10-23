@@ -175,15 +175,30 @@ class AgendaViewModel @Inject constructor(
         val hora = formulario.hora ?: return
 
         viewModelScope.launch {
-            val negocioId = negocioActivoRepository.negocioActivoId.first() ?: return@launch
-            val error = agendaRepository.agendarCita(
-                negocioId = negocioId,
-                clienteId = clienteId,
-                fecha = fecha,
-                hora = hora,
-                descripcion = formulario.descripcion,
-            )
-            if (error == null) cerrarFormulario() else _uiState.update { it.copy(error = error) }
+            val error = if (formulario.citaId == null) {
+                val negocioId = negocioActivoRepository.negocioActivoId.first() ?: return@launch
+                agendaRepository.agendarCita(
+                    negocioId = negocioId,
+                    clienteId = clienteId,
+                    fecha = fecha,
+                    hora = hora,
+                    descripcion = formulario.descripcion,
+                )
+            } else {
+                agendaRepository.editarCita(
+                    citaId = formulario.citaId,
+                    clienteId = clienteId,
+                    fecha = fecha,
+                    hora = hora,
+                    descripcion = formulario.descripcion,
+                )
+            }
+            if (error != null) {
+                _uiState.update { it.copy(error = error) }
+                return@launch
+            }
+            cerrarFormulario()
+            if (formulario.esEdicion) avisar(TipoAviso.CitaCambiada, clienteId, fecha, hora)
         }
     }
 
@@ -201,14 +216,126 @@ class AgendaViewModel @Inject constructor(
             .map { ProductoPedido(nombre = it.nombre, cantidad = it.cantidad.toIntOrNull() ?: 0) }
 
         viewModelScope.launch {
-            val negocioId = negocioActivoRepository.negocioActivoId.first() ?: return@launch
-            val error = agendaRepository.registrarPedido(
-                negocioId = negocioId,
-                clienteId = clienteId,
-                fechaEntrega = fechaEntrega,
-                productos = productos,
+            val error = if (formulario.pedidoId == null) {
+                val negocioId = negocioActivoRepository.negocioActivoId.first() ?: return@launch
+                agendaRepository.registrarPedido(
+                    negocioId = negocioId,
+                    clienteId = clienteId,
+                    fechaEntrega = fechaEntrega,
+                    productos = productos,
+                )
+            } else {
+                agendaRepository.editarPedido(
+                    pedidoId = formulario.pedidoId,
+                    clienteId = clienteId,
+                    fechaEntrega = fechaEntrega,
+                    productos = productos,
+                )
+            }
+            if (error != null) {
+                _uiState.update { it.copy(error = error) }
+                return@launch
+            }
+            cerrarFormulario()
+            if (formulario.esEdicion) avisar(TipoAviso.PedidoCambiado, clienteId, fechaEntrega)
+        }
+    }
+
+    fun abrirCita(citaId: Long) {
+        _uiState.update { estado -> estado.copy(citaElegida = estado.citas.firstOrNull { it.id == citaId }) }
+    }
+
+    fun cerrarCita() {
+        _uiState.update { it.copy(citaElegida = null) }
+    }
+
+    fun editarCitaElegida() {
+        val cita = _uiState.value.citaElegida ?: return
+        _uiState.update {
+            it.copy(
+                citaElegida = null,
+                error = null,
+                formularioCita = FormularioCita(
+                    citaId = cita.id,
+                    clienteId = cita.clienteId,
+                    fecha = cita.fecha,
+                    hora = cita.hora,
+                    descripcion = cita.descripcion.orEmpty(),
+                ),
             )
-            if (error == null) cerrarFormulario() else _uiState.update { it.copy(error = error) }
+        }
+    }
+
+    fun editarPedidoElegido() {
+        val pedido = _uiState.value.pedidoElegido ?: return
+        _uiState.update {
+            it.copy(
+                pedidoElegido = null,
+                error = null,
+                formularioPedido = FormularioPedido(
+                    pedidoId = pedido.id,
+                    clienteId = pedido.clienteId,
+                    fechaEntrega = pedido.fechaEntrega,
+                    productos = pedido.productos.map { producto ->
+                        FormularioProducto(nombre = producto.nombre, cantidad = producto.cantidad.toString())
+                    },
+                ),
+            )
+        }
+    }
+
+    fun pedirConfirmacionDeCancelar() {
+        _uiState.update { estado ->
+            val elegido = estado.citaElegida?.let(PorCancelar::DeCita)
+                ?: estado.pedidoElegido?.let(PorCancelar::DePedido)
+                ?: return@update estado
+            estado.copy(citaElegida = null, pedidoElegido = null, porCancelar = elegido)
+        }
+    }
+
+    fun descartarCancelacion() {
+        _uiState.update { it.copy(porCancelar = null) }
+    }
+
+    fun confirmarCancelacion() {
+        val elegido = _uiState.value.porCancelar ?: return
+        _uiState.update { it.copy(porCancelar = null) }
+
+        viewModelScope.launch {
+            when (elegido) {
+                is PorCancelar.DeCita -> {
+                    val cita = elegido.cita
+                    if (agendaRepository.cancelarCita(cita.id) == null) {
+                        avisar(TipoAviso.CitaCancelada, cita.clienteId, cita.fecha, cita.hora)
+                    }
+                }
+                is PorCancelar.DePedido -> {
+                    val pedido = elegido.pedido
+                    if (agendaRepository.cancelarPedido(pedido.id) == null) {
+                        avisar(TipoAviso.PedidoCancelado, pedido.clienteId, pedido.fechaEntrega)
+                    }
+                }
+            }
+        }
+    }
+
+    fun cerrarAviso() {
+        _uiState.update { it.copy(aviso = null) }
+    }
+
+    private fun avisar(tipo: TipoAviso, clienteId: Long, fecha: LocalDate, hora: LocalTime? = null) {
+        val cliente = _uiState.value.clientes.firstOrNull { it.id == clienteId } ?: return
+        val telefono = cliente.telefono ?: return
+        _uiState.update {
+            it.copy(
+                aviso = AvisoAlCliente(
+                    tipo = tipo,
+                    nombreCliente = cliente.nombre,
+                    telefono = telefono,
+                    fecha = fecha,
+                    hora = hora,
+                ),
+            )
         }
     }
 

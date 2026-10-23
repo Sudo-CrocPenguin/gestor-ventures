@@ -62,7 +62,9 @@ fun CitaSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = stringResource(R.string.agenda_cita_titulo),
+                text = stringResource(
+                    if (formulario.esEdicion) R.string.agenda_cita_titulo_editar else R.string.agenda_cita_titulo,
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -103,7 +105,9 @@ fun CitaSheet(
             }
 
             GvPrimaryButton(
-                text = stringResource(R.string.agenda_cita_guardar),
+                text = stringResource(
+                    if (formulario.esEdicion) R.string.agenda_guardar_cambios else R.string.agenda_cita_guardar,
+                ),
                 onClick = onGuardar,
                 enabled = formulario.puedeGuardar,
             )
