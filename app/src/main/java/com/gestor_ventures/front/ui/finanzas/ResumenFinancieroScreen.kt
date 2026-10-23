@@ -27,22 +27,26 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.PeriodoPredefinido
 import com.gestor_ventures.back.model.ProgresoMeta
+import com.gestor_ventures.back.model.RangoFechas
 import com.gestor_ventures.back.model.ResumenFinanciero
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvCardHeader
+import com.gestor_ventures.front.components.GvChipsDePeriodo
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvProgressBar
+import com.gestor_ventures.front.components.GvRangoSheet
 import com.gestor_ventures.front.components.GvTextLink
 import com.gestor_ventures.front.components.MoneyText
 import com.gestor_ventures.front.components.StatusPill
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.theme.NumericTextStyle
+import com.gestor_ventures.front.util.formatDiaCorto
 import com.gestor_ventures.front.util.formatMesLargo
 import com.gestor_ventures.front.util.formatMesYAnio
 import com.gestor_ventures.front.util.formatPesos
 import java.time.LocalDate
-import java.time.YearMonth
 import kotlin.math.roundToInt
 
 @Composable
@@ -57,6 +61,12 @@ fun ResumenFinancieroRoute(
         uiState = uiState,
         onVerHistorial = onVerHistorial,
         onVerGraficos = onVerGraficos,
+        onPeriodoChange = viewModel::onPeriodoChange,
+        onPersonalizar = viewModel::abrirRango,
+        onDesdeChange = viewModel::onDesdeChange,
+        onHastaChange = viewModel::onHastaChange,
+        onAplicarRango = viewModel::aplicarRango,
+        onCerrarRango = viewModel::cerrarRango,
     )
 }
 
@@ -71,9 +81,25 @@ fun ResumenFinancieroScreen(
     uiState: ResumenFinancieroUiState,
     onVerHistorial: () -> Unit,
     onVerGraficos: () -> Unit,
+    onPeriodoChange: (PeriodoPredefinido) -> Unit,
+    onPersonalizar: () -> Unit,
+    onDesdeChange: (LocalDate) -> Unit,
+    onHastaChange: (LocalDate) -> Unit,
+    onAplicarRango: () -> Unit,
+    onCerrarRango: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val resumen = uiState.resumen ?: return
+
+    uiState.rango?.let { formulario ->
+        GvRangoSheet(
+            formulario = formulario,
+            onDesdeChange = onDesdeChange,
+            onHastaChange = onHastaChange,
+            onAplicar = onAplicarRango,
+            onCerrar = onCerrarRango,
+        )
+    }
 
     Column(
         modifier = modifier
@@ -83,6 +109,12 @@ fun ResumenFinancieroScreen(
             .padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        GvChipsDePeriodo(
+            seleccion = uiState.seleccion,
+            onRapido = onPeriodoChange,
+            onPersonalizar = onPersonalizar,
+        )
+
         // Un mes sin un solo movimiento se dice con una frase; un tablero de ceros no dice nada.
         if (resumen.sinMovimientos) {
             GvInfoNote(stringResource(R.string.resumen_vacio))
@@ -117,7 +149,7 @@ private fun MovimientosCard(
             GvTextLink(text = stringResource(R.string.historial_ver), onClick = onVerHistorial)
         }
         StatusPill(
-            text = formatMesLargo(resumen.mes.atDay(1)),
+            text = etiquetaDe(resumen.rango),
             modifier = Modifier.padding(bottom = 12.dp),
         )
 
@@ -383,6 +415,14 @@ private fun Separador() {
     )
 }
 
+private fun etiquetaDe(rango: RangoFechas): String = when {
+    rango.desde.dayOfMonth == 1 &&
+        rango.hasta == rango.desde.withDayOfMonth(rango.desde.lengthOfMonth()) ->
+        formatMesLargo(rango.desde)
+    rango.esUnSoloDia -> formatDiaCorto(rango.desde)
+    else -> "${formatDiaCorto(rango.desde)} – ${formatDiaCorto(rango.hasta)}"
+}
+
 /** Un mes en pérdida se lee en rojo: es la única forma de que no pase desapercibido. */
 @Composable
 private fun colorDeSaldo(monto: Double): Color = when {
@@ -402,7 +442,7 @@ private fun colorDeSaldo(monto: Double): Color = when {
 private fun ResumenFinancieroPreview() {
     VistaPreviaResumen(
         ResumenFinanciero(
-            mes = YearMonth.of(2026, 9),
+            rango = RangoFechas(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30)),
             ingresos = 6_135_000.0,
             gastos = 1_860_000.0,
             costos = 1_240_000.0,
@@ -424,7 +464,7 @@ private fun ResumenFinancieroPreview() {
 private fun ResumenEnPerdidaPreview() {
     VistaPreviaResumen(
         ResumenFinanciero(
-            mes = YearMonth.of(2026, 9),
+            rango = RangoFechas(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30)),
             ingresos = 800_000.0,
             gastos = 600_000.0,
             costos = 400_000.0,
@@ -441,6 +481,12 @@ private fun VistaPreviaResumen(resumen: ResumenFinanciero) {
                 uiState = ResumenFinancieroUiState(resumen = resumen, cargando = false),
                 onVerHistorial = {},
                 onVerGraficos = {},
+                onPeriodoChange = {},
+                onPersonalizar = {},
+                onDesdeChange = {},
+                onHastaChange = {},
+                onAplicarRango = {},
+                onCerrarRango = {},
             )
         }
     }

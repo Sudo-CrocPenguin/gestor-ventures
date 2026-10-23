@@ -3,9 +3,13 @@ package com.gestor_ventures.back.usecase
 import com.gestor_ventures.back.model.DiasPorMes
 import com.gestor_ventures.back.model.libreParaAhorrarDe
 import com.gestor_ventures.back.model.MetaAhorro
+import com.gestor_ventures.back.model.PeriodoPredefinido
 import com.gestor_ventures.back.model.ProgresoMeta
+import com.gestor_ventures.back.model.RangoFechas
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.ResumenFinanciero
+import com.gestor_ventures.back.model.SeleccionDePeriodo
+import com.gestor_ventures.back.model.rango
 import com.gestor_ventures.back.repository.BaseFinancieraRepository
 import com.gestor_ventures.back.repository.CostoRepository
 import com.gestor_ventures.back.repository.GastoRepository
@@ -51,31 +55,56 @@ class CalcularResumenFinanciero @Inject constructor(
 
     operator fun invoke(
         negocioId: Long,
-        mes: YearMonth = YearMonth.from(reloj.ahora()),
-    ): Flow<ResumenFinanciero> = combine(
-        movimientosDel(negocioId, mes),
-        compromisosDe(negocioId),
-        progresoDeLaMeta(negocioId),
-        negocioRepository.observarNegocio(negocioId),
-    ) { movimientos, compromisos, progreso, negocio ->
-        ResumenFinanciero(
-            mes = mes,
-            ingresos = movimientos.ingresos,
-            gastos = movimientos.gastos,
-            costos = movimientos.costos,
-            gastosFijos = compromisos.gastosFijos,
-            obligacionesPendientes = compromisos.obligaciones,
-            apartadoParaMeta = apartadoDe(compromisos.meta),
-            porcentajeReinversion = negocio?.porcentajeReinversion ?: 0.0,
-            progresoMeta = progreso,
-        )
+        seleccion: SeleccionDePeriodo = SeleccionDePeriodo.Rapido(PeriodoPredefinido.Mes),
+    ): Flow<ResumenFinanciero> {
+        val rango = rangoDe(seleccion)
+        val meses = mesesEn(rango)
+
+        return combine(
+            movimientosEntre(negocioId, rango),
+            compromisosDe(negocioId),
+            progresoDeLaMeta(negocioId),
+            negocioRepository.observarNegocio(negocioId),
+        ) { movimientos, compromisos, progreso, negocio ->
+            ResumenFinanciero(
+                rango = rango,
+                ingresos = movimientos.ingresos,
+                gastos = movimientos.gastos,
+                costos = movimientos.costos,
+                gastosFijos = compromisos.gastosFijos * meses,
+                obligacionesPendientes = compromisos.obligaciones,
+                apartadoParaMeta = apartadoDe(compromisos.meta) * meses,
+                porcentajeReinversion = negocio?.porcentajeReinversion ?: 0.0,
+                progresoMeta = progreso,
+            )
+        }
     }
 
-    /** Lo que de verdad pasó en el mes: entró, salió y costó producir. */
-    private fun movimientosDel(negocioId: Long, mes: YearMonth): Flow<Movimientos> = combine(
-        ventaRepository.totalDelMes(negocioId, mes),
-        gastoRepository.totalDelMes(negocioId, mes),
-        costoRepository.totalDelMes(negocioId, mes),
+    private fun rangoDe(seleccion: SeleccionDePeriodo): RangoFechas {
+        val hoy = reloj.ahora().toLocalDate()
+        if (seleccion == SeleccionDePeriodo.Rapido(PeriodoPredefinido.Mes)) {
+            val mes = YearMonth.from(hoy)
+            return RangoFechas(mes.atDay(1), mes.atEndOfMonth())
+        }
+        return seleccion.rango(hoy)
+    }
+
+    private fun mesesEn(rango: RangoFechas): Double {
+        var meses = 0.0
+        var mes = YearMonth.from(rango.desde)
+        while (!mes.isAfter(YearMonth.from(rango.hasta))) {
+            val desde = maxOf(rango.desde, mes.atDay(1))
+            val hasta = minOf(rango.hasta, mes.atEndOfMonth())
+            meses += (ChronoUnit.DAYS.between(desde, hasta) + 1).toDouble() / mes.lengthOfMonth()
+            mes = mes.plusMonths(1)
+        }
+        return meses
+    }
+
+    private fun movimientosEntre(negocioId: Long, rango: RangoFechas): Flow<Movimientos> = combine(
+        ventaRepository.totalEntre(negocioId, rango.desde, rango.hasta),
+        gastoRepository.totalEntre(negocioId, rango.desde, rango.hasta),
+        costoRepository.totalEntre(negocioId, rango.desde, rango.hasta),
     ) { ingresos, gastos, costos -> Movimientos(ingresos, gastos, costos) }
 
     /** Lo que el usuario dejó configurado y la app tiene que respetar. */

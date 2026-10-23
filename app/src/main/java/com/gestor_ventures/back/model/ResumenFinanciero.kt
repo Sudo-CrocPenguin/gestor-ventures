@@ -1,7 +1,6 @@
 package com.gestor_ventures.back.model
 
 import java.time.LocalDate
-import java.time.YearMonth
 
 /**
  * HU-16. Cómo le fue al negocio en el mes y cuánto de eso se puede sacar hoy.
@@ -14,7 +13,7 @@ import java.time.YearMonth
  * para funcionar, después lo que ya está comprometido, y lo que sobra es lo disponible.
  */
 data class ResumenFinanciero(
-    val mes: YearMonth,
+    val rango: RangoFechas,
     /** HU-11/HU-12. Lo que entró por ventas. */
     val ingresos: Double = 0.0,
     /** HU-14. Lo que se gastó en hacer funcionar el negocio. */
