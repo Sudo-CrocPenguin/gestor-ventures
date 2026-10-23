@@ -2,6 +2,7 @@ package com.gestor_ventures.front.ui.agenda
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gestor_ventures.back.model.AnticipacionRecordatorio
 import com.gestor_ventures.back.model.Cita
 import com.gestor_ventures.back.model.Cliente
 import com.gestor_ventures.back.model.EstadoPedido
@@ -160,6 +161,15 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    fun onAnticipacionChange(anticipacion: AnticipacionRecordatorio?) {
+        _uiState.update {
+            it.copy(
+                formularioCita = it.formularioCita?.copy(anticipacion = anticipacion),
+                formularioPedido = it.formularioPedido?.copy(anticipacion = anticipacion),
+            )
+        }
+    }
+
     fun onFechaEntregaChange(fecha: LocalDate) {
         _uiState.update {
             it.copy(formularioPedido = it.formularioPedido?.copy(fechaEntrega = fecha), error = null)
@@ -229,6 +239,7 @@ class AgendaViewModel @Inject constructor(
                     fecha = fecha,
                     hora = hora,
                     descripcion = formulario.descripcion,
+                    anticipacion = formulario.anticipacion,
                 )
             } else {
                 agendaRepository.editarCita(
@@ -237,6 +248,7 @@ class AgendaViewModel @Inject constructor(
                     fecha = fecha,
                     hora = hora,
                     descripcion = formulario.descripcion,
+                    anticipacion = formulario.anticipacion,
                 )
             }
             if (error != null) {
@@ -272,6 +284,7 @@ class AgendaViewModel @Inject constructor(
                     clienteId = clienteId,
                     fechaEntrega = fechaEntrega,
                     productos = productos,
+                    anticipacion = formulario.anticipacion,
                 )
             } else {
                 agendaRepository.editarPedido(
@@ -279,6 +292,7 @@ class AgendaViewModel @Inject constructor(
                     clienteId = clienteId,
                     fechaEntrega = fechaEntrega,
                     productos = productos,
+                    anticipacion = formulario.anticipacion,
                 )
             }
             if (error != null) {
@@ -315,6 +329,16 @@ class AgendaViewModel @Inject constructor(
                 ),
             )
         }
+        viewModelScope.launch {
+            val anticipacion = agendaRepository.anticipacionDeCita(cita.id)
+            _uiState.update {
+                it.copy(
+                    formularioCita = it.formularioCita
+                        ?.takeIf { formulario -> formulario.citaId == cita.id }
+                        ?.copy(anticipacion = anticipacion),
+                )
+            }
+        }
     }
 
     /** HU-28. Abre la hoja del pedido ya llena, con sus productos. */
@@ -333,6 +357,16 @@ class AgendaViewModel @Inject constructor(
                     },
                 ),
             )
+        }
+        viewModelScope.launch {
+            val anticipacion = agendaRepository.anticipacionDePedido(pedido.id)
+            _uiState.update {
+                it.copy(
+                    formularioPedido = it.formularioPedido
+                        ?.takeIf { formulario -> formulario.pedidoId == pedido.id }
+                        ?.copy(anticipacion = anticipacion),
+                )
+            }
         }
     }
 

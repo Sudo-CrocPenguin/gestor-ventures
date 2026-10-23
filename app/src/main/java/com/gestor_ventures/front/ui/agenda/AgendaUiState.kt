@@ -2,6 +2,7 @@ package com.gestor_ventures.front.ui.agenda
 
 import androidx.annotation.StringRes
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.AnticipacionRecordatorio
 import com.gestor_ventures.back.model.Cita
 import com.gestor_ventures.back.model.Cliente
 import com.gestor_ventures.back.model.ErrorAgenda
@@ -105,6 +106,7 @@ data class FormularioCita(
     val fecha: LocalDate? = null,
     val hora: LocalTime? = null,
     val descripcion: String = "",
+    val anticipacion: AnticipacionRecordatorio? = null,
 ) {
     val puedeGuardar: Boolean get() = clienteId != null && fecha != null && hora != null
 
@@ -124,6 +126,7 @@ data class FormularioPedido(
     val clienteId: Long? = null,
     val fechaEntrega: LocalDate? = null,
     val productos: List<FormularioProducto> = listOf(FormularioProducto()),
+    val anticipacion: AnticipacionRecordatorio? = null,
 ) {
     val puedeGuardar: Boolean
         get() = clienteId != null && fechaEntrega != null &&
@@ -172,6 +175,15 @@ fun ErrorAgenda.mensajeRes(): Int = when (this) {
     ErrorAgenda.PedidoCancelado -> R.string.agenda_error_pedido_cancelado
     ErrorAgenda.CitaNoExiste -> R.string.agenda_error_cita_no_existe
     ErrorAgenda.CitaCancelada -> R.string.agenda_error_cita_cancelada
+}
+
+@StringRes
+fun AnticipacionRecordatorio?.labelRes(): Int = when (this) {
+    null -> R.string.recordatorio_ninguno
+    AnticipacionRecordatorio.QuinceMinutos -> R.string.recordatorio_15_min
+    AnticipacionRecordatorio.MediaHora -> R.string.recordatorio_30_min
+    AnticipacionRecordatorio.UnaHora -> R.string.recordatorio_1_hora
+    AnticipacionRecordatorio.UnDia -> R.string.recordatorio_1_dia
 }
 
 @StringRes

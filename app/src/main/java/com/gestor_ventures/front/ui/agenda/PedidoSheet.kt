@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.AnticipacionRecordatorio
 import com.gestor_ventures.back.model.Cliente
 import com.gestor_ventures.back.model.ErrorAgenda
 import com.gestor_ventures.front.components.GvDateField
@@ -46,6 +47,8 @@ fun PedidoSheet(
     formulario: FormularioPedido,
     clientes: List<Cliente>,
     error: ErrorAgenda?,
+    notificacionesPermitidas: Boolean,
+    onAnticipacionChange: (AnticipacionRecordatorio?) -> Unit,
     onClienteChange: (Long) -> Unit,
     onFechaEntregaChange: (LocalDate) -> Unit,
     onProductoNombreChange: (Int, String) -> Unit,
@@ -89,6 +92,13 @@ fun PedidoSheet(
                 fecha = formulario.fechaEntrega,
                 onFechaChange = onFechaEntregaChange,
                 placeholder = stringResource(R.string.periodo_fecha_placeholder),
+            )
+
+            SelectorDeRecordatorio(
+                anticipacion = formulario.anticipacion,
+                notificacionesPermitidas = notificacionesPermitidas,
+                ayuda = stringResource(R.string.recordatorio_ayuda_pedido),
+                onAnticipacionChange = onAnticipacionChange,
             )
 
             formulario.productos.forEachIndexed { indice, producto ->

@@ -1,5 +1,6 @@
 package com.gestor_ventures.back.repository
 
+import com.gestor_ventures.back.model.AnticipacionRecordatorio
 import com.gestor_ventures.back.model.Cita
 import com.gestor_ventures.back.model.ErrorAgenda
 import com.gestor_ventures.back.model.EstadoCita
@@ -40,6 +41,7 @@ class AgendaRepository @Inject constructor(
     private val pedidoDao: PedidoDao,
     private val clienteDao: ClienteDao,
     private val negocioDao: NegocioDao,
+    private val recordatorioRepository: RecordatorioRepository,
     private val reloj: Reloj,
 ) {
 
@@ -63,11 +65,12 @@ class AgendaRepository @Inject constructor(
         fecha: LocalDate,
         hora: LocalTime,
         descripcion: String?,
+        anticipacion: AnticipacionRecordatorio? = null,
     ): ErrorAgenda? {
         val descripcionLimpia = descripcion?.trim()?.takeIf { it.isNotEmpty() }
         validarCita(negocioId, clienteId, fecha, hora, descripcionLimpia)?.let { return it }
 
-        citaDao.insertar(
+        val citaId = citaDao.insertar(
             CitaEntity(
                 negocioId = negocioId,
                 clienteId = clienteId,
@@ -76,6 +79,7 @@ class AgendaRepository @Inject constructor(
                 descripcion = descripcionLimpia,
             ),
         )
+        recordatorioRepository.recordarCita(citaId, anticipacion)
         return null
     }
 
@@ -85,11 +89,12 @@ class AgendaRepository @Inject constructor(
         clienteId: Long,
         fechaEntrega: LocalDate,
         productos: List<ProductoPedido>,
+        anticipacion: AnticipacionRecordatorio? = null,
     ): ErrorAgenda? {
         val productosLimpios = productos.map { it.copy(nombre = it.nombre.trim()) }
         validarPedido(negocioId, clienteId, fechaEntrega, productosLimpios)?.let { return it }
 
-        pedidoDao.insertarConDetalle(
+        val pedidoId = pedidoDao.insertarConDetalle(
             pedido = PedidoEntity(
                 negocioId = negocioId,
                 clienteId = clienteId,
@@ -99,6 +104,7 @@ class AgendaRepository @Inject constructor(
                 DetallePedidoEntity(pedidoId = 0, productoServicio = it.nombre, cantidad = it.cantidad)
             },
         )
+        recordatorioRepository.recordarPedido(pedidoId, anticipacion)
         return null
     }
 
@@ -111,6 +117,9 @@ class AgendaRepository @Inject constructor(
         if (actual.estadoPedido == EstadoPedidoDb.CANCELADO) return ErrorAgenda.PedidoCancelado
 
         pedidoDao.actualizarEstado(pedidoId, estado.aDb())
+        if (estado == EstadoPedido.ENTREGADO || estado == EstadoPedido.CANCELADO) {
+            recordatorioRepository.quitarDePedido(pedidoId)
+        }
         return null
     }
 
@@ -125,6 +134,7 @@ class AgendaRepository @Inject constructor(
         fecha: LocalDate,
         hora: LocalTime,
         descripcion: String?,
+        anticipacion: AnticipacionRecordatorio?,
     ): ErrorAgenda? {
         val actual = citaDao.obtener(citaId) ?: return ErrorAgenda.CitaNoExiste
         if (actual.estadoCita == EstadoCitaDb.CANCELADA) return ErrorAgenda.CitaCancelada
@@ -141,6 +151,7 @@ class AgendaRepository @Inject constructor(
                 descripcion = descripcionLimpia,
             ),
         )
+        recordatorioRepository.recordarCita(citaId, anticipacion)
         return null
     }
 
@@ -153,6 +164,7 @@ class AgendaRepository @Inject constructor(
         if (actual.estadoCita == EstadoCitaDb.CANCELADA) return ErrorAgenda.CitaCancelada
 
         citaDao.actualizar(actual.copy(estadoCita = EstadoCitaDb.CANCELADA))
+        recordatorioRepository.quitarDeCita(citaId)
         return null
     }
 
@@ -166,6 +178,7 @@ class AgendaRepository @Inject constructor(
         clienteId: Long,
         fechaEntrega: LocalDate,
         productos: List<ProductoPedido>,
+        anticipacion: AnticipacionRecordatorio?,
     ): ErrorAgenda? {
         val actual = pedidoDao.obtener(pedidoId) ?: return ErrorAgenda.PedidoNoExiste
         if (actual.estadoPedido == EstadoPedidoDb.CANCELADO) return ErrorAgenda.PedidoCancelado
@@ -179,12 +192,19 @@ class AgendaRepository @Inject constructor(
                 DetallePedidoEntity(pedidoId = pedidoId, productoServicio = it.nombre, cantidad = it.cantidad)
             },
         )
+        recordatorioRepository.recordarPedido(pedidoId, anticipacion)
         return null
     }
 
     /** HU-28. Cancela el pedido. Como la cita, no se borra: queda como cancelado. */
     suspend fun cancelarPedido(pedidoId: Long): ErrorAgenda? =
         cambiarEstadoPedido(pedidoId, EstadoPedido.CANCELADO)
+
+    suspend fun anticipacionDeCita(citaId: Long): AnticipacionRecordatorio? =
+        recordatorioRepository.anticipacionDeCita(citaId)
+
+    suspend fun anticipacionDePedido(pedidoId: Long): AnticipacionRecordatorio? =
+        recordatorioRepository.anticipacionDePedido(pedidoId)
 
     fun hoy(): LocalDate = reloj.ahora().toLocalDate()
 

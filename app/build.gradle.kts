@@ -69,6 +69,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.work.runtime.ktx)
     // Room lee los esquemas con kotlinx-serialization en las pruebas de migración, y AGP
     // obliga a que las pruebas usen la misma versión que la app. Sin esta línea la app se
     // queda en la versión vieja que arrastra lifecycle, y el helper de migraciones falla.

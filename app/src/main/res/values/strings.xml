@@ -594,4 +594,19 @@
     <string name="agenda_aviso_cita_cancelada">Hola %1$s, te escribo para avisarte que tu cita del %2$s a las %3$s quedó cancelada.</string>
     <string name="agenda_aviso_pedido_cambiado">Hola %1$s, te escribo para avisarte que tu pedido ahora se entrega el %2$s.</string>
     <string name="agenda_aviso_pedido_cancelado">Hola %1$s, te escribo para avisarte que tu pedido para el %2$s quedó cancelado.</string>
+    <string name="notificacion_canal_agenda">Agenda</string>
+    <string name="notificacion_canal_agenda_desc">Recordatorios de citas y entregas</string>
+    <string name="notificacion_cita_titulo">Tienes una cita pronto</string>
+    <string name="notificacion_cita_texto">Cita con %1$s el %2$s a las %3$s.</string>
+    <string name="notificacion_pedido_titulo">Tienes una entrega</string>
+    <string name="notificacion_pedido_texto">El pedido de %1$s se entrega el %2$s.</string>
+    <string name="recordatorio_titulo">Recordarme</string>
+    <string name="recordatorio_ninguno">No</string>
+    <string name="recordatorio_15_min">15 min antes</string>
+    <string name="recordatorio_30_min">30 min antes</string>
+    <string name="recordatorio_1_hora">1 hora antes</string>
+    <string name="recordatorio_1_dia">1 día antes</string>
+    <string name="recordatorio_ayuda_cita">Te llega una notificación antes de la hora de la cita.</string>
+    <string name="recordatorio_ayuda_pedido">Se cuenta desde las 8:00 a. m. del día de entrega.</string>
+    <string name="recordatorio_sin_permiso">Las notificaciones están apagadas: el recordatorio se guarda, pero no te va a llegar. Actívalas en los ajustes del teléfono.</string>
 </resources>

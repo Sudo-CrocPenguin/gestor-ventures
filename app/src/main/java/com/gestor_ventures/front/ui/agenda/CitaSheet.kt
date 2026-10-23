@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.AnticipacionRecordatorio
 import com.gestor_ventures.back.model.Cliente
 import com.gestor_ventures.back.model.ErrorAgenda
 import com.gestor_ventures.front.components.GvDateField
@@ -39,6 +40,8 @@ fun CitaSheet(
     formulario: FormularioCita,
     clientes: List<Cliente>,
     error: ErrorAgenda?,
+    notificacionesPermitidas: Boolean,
+    onAnticipacionChange: (AnticipacionRecordatorio?) -> Unit,
     onClienteChange: (Long) -> Unit,
     onFechaChange: (LocalDate) -> Unit,
     onHoraChange: (LocalTime) -> Unit,
@@ -87,6 +90,13 @@ fun CitaSheet(
                 hora = formulario.hora,
                 onHoraChange = onHoraChange,
                 placeholder = stringResource(R.string.periodo_fecha_placeholder),
+            )
+
+            SelectorDeRecordatorio(
+                anticipacion = formulario.anticipacion,
+                notificacionesPermitidas = notificacionesPermitidas,
+                ayuda = stringResource(R.string.recordatorio_ayuda_cita),
+                onAnticipacionChange = onAnticipacionChange,
             )
 
             GvTextField(

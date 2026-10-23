@@ -1,7 +1,11 @@
 package com.gestor_ventures.front.ui.agenda
 
+import android.Manifest
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -29,6 +36,7 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.AnticipacionRecordatorio
 import com.gestor_ventures.back.model.Cita
 import com.gestor_ventures.back.model.Cliente
 import com.gestor_ventures.back.model.EstadoCita
@@ -37,6 +45,7 @@ import com.gestor_ventures.back.model.Pedido
 import com.gestor_ventures.back.model.ProductoPedido
 import com.gestor_ventures.back.model.TipoActividad
 import com.gestor_ventures.back.model.enlaceDeWhatsApp
+import com.gestor_ventures.back.notificaciones.Notificador
 import com.gestor_ventures.front.components.AccionSheet
 import com.gestor_ventures.front.components.GvAccionesSheet
 import com.gestor_ventures.front.components.GvCard
@@ -55,9 +64,22 @@ import java.time.LocalTime
 fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
+    var notificacionesPermitidas by remember { mutableStateOf(Notificador.puedeNotificar(contexto)) }
+    val pedirPermiso = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { concedido -> notificacionesPermitidas = concedido }
 
     AgendaScreen(
         uiState = uiState,
+        notificacionesPermitidas = notificacionesPermitidas,
+        onAnticipacionChange = { anticipacion ->
+            viewModel.onAnticipacionChange(anticipacion)
+            if (anticipacion != null && !notificacionesPermitidas &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+            ) {
+                pedirPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        },
         onVistaChange = viewModel::onVistaChange,
         onAnterior = viewModel::anterior,
         onSiguiente = viewModel::siguiente,
@@ -104,6 +126,8 @@ fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
 @Composable
 fun AgendaScreen(
     uiState: AgendaUiState,
+    notificacionesPermitidas: Boolean,
+    onAnticipacionChange: (AnticipacionRecordatorio?) -> Unit,
     onVistaChange: (VistaAgenda) -> Unit,
     onAnterior: () -> Unit,
     onSiguiente: () -> Unit,
@@ -223,6 +247,8 @@ fun AgendaScreen(
             formulario = formulario,
             clientes = uiState.clientes,
             error = uiState.error,
+            notificacionesPermitidas = notificacionesPermitidas,
+            onAnticipacionChange = onAnticipacionChange,
             onClienteChange = onClienteChange,
             onFechaChange = onFechaCitaChange,
             onHoraChange = onHoraCitaChange,
@@ -237,6 +263,8 @@ fun AgendaScreen(
             formulario = formulario,
             clientes = uiState.clientes,
             error = uiState.error,
+            notificacionesPermitidas = notificacionesPermitidas,
+            onAnticipacionChange = onAnticipacionChange,
             onClienteChange = onClienteChange,
             onFechaEntregaChange = onFechaEntregaChange,
             onProductoNombreChange = onProductoNombreChange,
@@ -516,6 +544,8 @@ private fun VistaPrevia(uiState: AgendaUiState) {
         Surface(color = MaterialTheme.colorScheme.background) {
             AgendaScreen(
                 uiState = uiState,
+                notificacionesPermitidas = true,
+                onAnticipacionChange = {},
                 onVistaChange = {},
                 onAnterior = {},
                 onSiguiente = {},
