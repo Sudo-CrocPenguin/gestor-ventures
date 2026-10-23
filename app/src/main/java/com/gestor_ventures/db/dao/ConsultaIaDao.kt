@@ -8,6 +8,7 @@ import com.gestor_ventures.db.entity.ConsultaIaEntity
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
+/** HU-39. Una conversación vista desde afuera: con qué empezó, cuándo fue lo último y cuántas preguntas tiene. */
 data class ResumenSesionIa(
     @ColumnInfo(name = "sesion_id") val sesionId: Long,
     @ColumnInfo(name = "primera_pregunta") val primeraPregunta: String,
@@ -16,7 +17,7 @@ data class ResumenSesionIa(
 )
 
 /**
- * HU-34 y HU-39. Las preguntas al asistente con su respuesta.
+ * HU-34 y HU-39. Las preguntas al asistente con su respuesta, y su historial.
  *
  * Cada fila es una pregunta y su respuesta. Las de una misma conversación comparten `sesion_id`,
  * que es lo que permite mostrarlas juntas y mandarle a Gemini lo que ya se habló.
@@ -50,6 +51,10 @@ interface ConsultaIaDao {
     )
     suspend fun deSesion(negocioId: Long, sesionId: Long): List<ConsultaIaEntity>
 
+    /**
+     * HU-39. Las conversaciones del negocio, de la más reciente a la más vieja. La primera
+     * pregunta sirve de título: es lo que la persona quería saber cuando la empezó.
+     */
     @Query(
         """
         SELECT c.sesion_id,
@@ -66,6 +71,7 @@ interface ConsultaIaDao {
     )
     fun observarSesiones(negocioId: Long): Flow<List<ResumenSesionIa>>
 
+    /** HU-39. Borra la conversación entera, con todas sus preguntas y respuestas. */
     @Query("DELETE FROM consultas_ia WHERE negocio_id = :negocioId AND sesion_id = :sesionId")
     suspend fun eliminarSesion(negocioId: Long, sesionId: Long)
 }

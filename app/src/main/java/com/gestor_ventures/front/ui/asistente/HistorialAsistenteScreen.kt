@@ -57,6 +57,10 @@ fun HistorialAsistenteRoute(
     )
 }
 
+/**
+ * HU-39. Conversaciones anteriores con el asistente, por fecha. Tocar una la vuelve a abrir
+ * en el chat, donde se puede seguir; la basura la elimina.
+ */
 @Composable
 fun HistorialAsistenteScreen(
     uiState: HistorialAsistenteUiState,

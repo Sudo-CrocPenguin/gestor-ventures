@@ -38,7 +38,7 @@ class AsistenteViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AsistenteUiState())
     val uiState: StateFlow<AsistenteUiState> = _uiState.asStateFlow()
 
-    /** Cada vez que se abre la pestaña empieza una conversación nueva. */
+    /** Cada vez que se abre la pestaña empieza una conversación nueva, salvo que se elija una del historial. */
     private val sesion = MutableStateFlow(asistenteRepository.nuevaSesion())
 
     init {
@@ -95,6 +95,7 @@ class AsistenteViewModel @Inject constructor(
     }
 
     /** Empieza de cero. La conversación anterior queda guardada para el historial (HU-39). */
+    /** HU-39. Vuelve a abrir una conversación del historial, para revisarla o seguirla. */
     fun abrirConversacion(sesionId: Long) {
         if (_uiState.value.enviando) return
         sesion.value = sesionId

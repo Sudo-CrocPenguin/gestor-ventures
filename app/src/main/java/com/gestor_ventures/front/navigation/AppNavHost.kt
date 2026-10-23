@@ -51,6 +51,7 @@ object Rutas {
     /** HU-35. Ideas de promociones del asistente. */
     const val Promociones = "promociones"
 
+    /** HU-39. Las conversaciones anteriores con el asistente. */
     const val HistorialAsistente = "historial_asistente"
 
     /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
@@ -90,6 +91,10 @@ object Rutas {
 /** Nombre del id de negocio dentro de la ruta. */
 const val ArgumentoNegocioId = "negocioId"
 
+/**
+ * HU-39. Cómo el historial le dice al chat qué conversación abrir: deja el id en la entrada de
+ * la pestaña Asistente antes de volver, y el chat lo lee y lo borra para no abrirla dos veces.
+ */
 private const val ClaveConversacionElegida = "conversacion_elegida"
 
 /** Nombre del id de cliente dentro de la ruta. */

@@ -17,6 +17,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * HU-39. Las conversaciones anteriores del negocio activo. Borrar no tiene vuelta atrás, así
+ * que siempre pasa por una confirmación.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HistorialAsistenteViewModel @Inject constructor(

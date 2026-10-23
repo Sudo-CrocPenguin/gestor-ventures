@@ -49,6 +49,7 @@ class AsistenteRepository @Inject constructor(
     fun mensajesDeSesion(negocioId: Long, sesionId: Long): Flow<List<MensajeAsistente>> =
         consultaIaDao.observarDeSesion(negocioId, sesionId).map { filas -> filas.map(::aMensaje) }
 
+    /** HU-39. El historial de conversaciones. Se actualiza solo con cada pregunta nueva o al eliminar. */
     fun conversaciones(negocioId: Long): Flow<List<ConversacionAsistente>> =
         consultaIaDao.observarSesiones(negocioId).map { filas ->
             filas.map {
@@ -61,6 +62,7 @@ class AsistenteRepository @Inject constructor(
             }
         }
 
+    /** HU-39. Borra una conversación completa; no se puede deshacer. */
     suspend fun eliminarConversacion(negocioId: Long, sesionId: Long) {
         consultaIaDao.eliminarSesion(negocioId, sesionId)
     }
