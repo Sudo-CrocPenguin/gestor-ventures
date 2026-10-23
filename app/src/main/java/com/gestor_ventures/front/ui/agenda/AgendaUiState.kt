@@ -28,8 +28,11 @@ data class AgendaUiState(
     val formularioPedido: FormularioPedido? = null,
     /** El pedido que el usuario tocó, mientras elige a qué estado pasarlo. */
     val pedidoElegido: Pedido? = null,
+    /** HU-28. La cita que el usuario tocó, mientras elige si editarla o cancelarla. */
     val citaElegida: Cita? = null,
+    /** HU-28. Lo que está a punto de cancelarse, esperando confirmación. */
     val porCancelar: PorCancelar? = null,
+    /** HU-28. El aviso para mandarle al cliente después de un cambio, si tiene teléfono. */
     val aviso: AvisoAlCliente? = null,
     val error: ErrorAgenda? = null,
 ) {
@@ -62,6 +65,7 @@ data class AgendaUiState(
 
 /** HU-24. La cita mientras se escribe. Los campos son opcionales porque al principio están vacíos. */
 data class FormularioCita(
+    /** HU-28. La cita que se está editando; null si es una nueva. */
     val citaId: Long? = null,
     val clienteId: Long? = null,
     val fecha: LocalDate? = null,
@@ -81,6 +85,7 @@ data class FormularioProducto(
 
 /** HU-25. El pedido mientras se escribe. Arranca con una fila de producto vacía. */
 data class FormularioPedido(
+    /** HU-28. El pedido que se está editando; null si es uno nuevo. */
     val pedidoId: Long? = null,
     val clienteId: Long? = null,
     val fechaEntrega: LocalDate? = null,
@@ -93,13 +98,21 @@ data class FormularioPedido(
     val esEdicion: Boolean get() = pedidoId != null
 }
 
+/** HU-28. Lo que se va a cancelar: una cita o un pedido. */
 sealed interface PorCancelar {
     data class DeCita(val cita: Cita) : PorCancelar
     data class DePedido(val pedido: Pedido) : PorCancelar
 }
 
+/** HU-28. Qué le pasó a la cita o al pedido, para escribirle al cliente el mensaje correcto. */
 enum class TipoAviso { CitaCambiada, CitaCancelada, PedidoCambiado, PedidoCancelado }
 
+/**
+ * HU-28. Lo que hace falta para avisarle al cliente de un cambio por WhatsApp.
+ *
+ * Guarda los datos y no el mensaje ya escrito: el texto lo arma la pantalla con los recursos de
+ * `strings.xml`, que el ViewModel no tiene.
+ */
 data class AvisoAlCliente(
     val tipo: TipoAviso,
     val nombreCliente: String,

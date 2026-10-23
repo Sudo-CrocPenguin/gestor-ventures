@@ -65,5 +65,6 @@ enum class ErrorAgenda {
     PedidoNoExiste,
     PedidoCancelado,
     CitaNoExiste,
+    /** HU-28. Una cita cancelada ya no se edita ni se vuelve a cancelar. */
     CitaCancelada,
 }

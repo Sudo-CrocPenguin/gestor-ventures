@@ -281,6 +281,7 @@ fun AgendaScreen(
     }
 }
 
+/** HU-28. Pregunta antes de cancelar una cita o un pedido. */
 @Composable
 private fun ConfirmarCancelacion(
     elegido: PorCancelar,
@@ -313,6 +314,13 @@ private fun ConfirmarCancelacion(
     )
 }
 
+/**
+ * HU-28. Ofrece avisarle al cliente del cambio por WhatsApp, con el mensaje ya escrito.
+ *
+ * La app no manda nada por su cuenta: abre el chat con el texto y el usuario decide si lo
+ * envía, igual que en HU-31 y HU-32. Al cliente se le saluda por su primer nombre, como se
+ * le escribiría de verdad.
+ */
 @Composable
 private fun AvisarAlCliente(
     aviso: AvisoAlCliente,
@@ -347,7 +355,7 @@ private fun AvisarAlCliente(
     )
 }
 
-/** Los estados a los que se pasa un pedido a mano. Cancelar es otra acción (HU-28). */
+/** Los estados a los que se pasa un pedido a mano. Cancelar es otra acción, con confirmación (HU-28). */
 private val EstadosQueSeEligen = listOf(
     EstadoPedido.PENDIENTE,
     EstadoPedido.EN_PROCESO,

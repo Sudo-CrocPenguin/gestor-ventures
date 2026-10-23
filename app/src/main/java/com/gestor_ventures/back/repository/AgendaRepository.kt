@@ -115,6 +115,10 @@ class AgendaRepository @Inject constructor(
     }
 
     /** El día de hoy según el reloj de la app, para saber desde cuándo mostrar la agenda. */
+    /**
+     * HU-28. Cambia una cita con las mismas reglas que al agendarla. Al revisar el horario se
+     * deja por fuera a la misma cita: moverla diez minutos no choca consigo misma.
+     */
     suspend fun editarCita(
         citaId: Long,
         clienteId: Long,
@@ -140,6 +144,10 @@ class AgendaRepository @Inject constructor(
         return null
     }
 
+    /**
+     * HU-28. Cancela la cita. No se borra: queda en la agenda como cancelada, y su horario
+     * vuelve a quedar libre para otra.
+     */
     suspend fun cancelarCita(citaId: Long): ErrorAgenda? {
         val actual = citaDao.obtener(citaId) ?: return ErrorAgenda.CitaNoExiste
         if (actual.estadoCita == EstadoCitaDb.CANCELADA) return ErrorAgenda.CitaCancelada
@@ -148,6 +156,11 @@ class AgendaRepository @Inject constructor(
         return null
     }
 
+    /**
+     * HU-28. Cambia el cliente, la fecha de entrega o los productos de un pedido, con las
+     * mismas reglas que al registrarlo. El estado no cambia acá: para eso está
+     * [cambiarEstadoPedido].
+     */
     suspend fun editarPedido(
         pedidoId: Long,
         clienteId: Long,
@@ -169,6 +182,7 @@ class AgendaRepository @Inject constructor(
         return null
     }
 
+    /** HU-28. Cancela el pedido. Como la cita, no se borra: queda como cancelado. */
     suspend fun cancelarPedido(pedidoId: Long): ErrorAgenda? =
         cambiarEstadoPedido(pedidoId, EstadoPedido.CANCELADO)
 

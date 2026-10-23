@@ -167,7 +167,12 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
-    /** Si el repositorio rechaza la cita, la hoja se queda abierta con el aviso. */
+    /**
+     * Agenda la cita, o guarda los cambios si se estaba editando. Después de editar se ofrece
+     * avisarle al cliente (HU-28); al agendar una nueva no, porque el cliente ya la pidió.
+     *
+     * Si el repositorio rechaza la cita, la hoja se queda abierta con el aviso.
+     */
     fun guardarCita() {
         val formulario = _uiState.value.formularioCita ?: return
         val clienteId = formulario.clienteId ?: return
@@ -203,6 +208,9 @@ class AgendaViewModel @Inject constructor(
     }
 
     /**
+     * Registra el pedido, o guarda los cambios si se estaba editando; después de editar se
+     * ofrece avisarle al cliente (HU-28).
+     *
      * Las filas sin nombre se descartan antes de guardar: es la fila vacía que quedó al tocar
      * "Agregar otro producto" de más, no un producto. Si la cantidad no es un número válido se
      * manda 0 y el repositorio la rechaza con su aviso.
@@ -241,6 +249,7 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /** HU-28. Tocar una cita abre el menú para editarla o cancelarla. */
     fun abrirCita(citaId: Long) {
         _uiState.update { estado -> estado.copy(citaElegida = estado.citas.firstOrNull { it.id == citaId }) }
     }
@@ -249,6 +258,7 @@ class AgendaViewModel @Inject constructor(
         _uiState.update { it.copy(citaElegida = null) }
     }
 
+    /** HU-28. Abre la hoja de la cita ya llena con lo que tiene guardado. */
     fun editarCitaElegida() {
         val cita = _uiState.value.citaElegida ?: return
         _uiState.update {
@@ -266,6 +276,7 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /** HU-28. Abre la hoja del pedido ya llena, con sus productos. */
     fun editarPedidoElegido() {
         val pedido = _uiState.value.pedidoElegido ?: return
         _uiState.update {
@@ -284,6 +295,7 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /** HU-28. Cancelar no tiene vuelta atrás, así que del menú se pasa a una confirmación. */
     fun pedirConfirmacionDeCancelar() {
         _uiState.update { estado ->
             val elegido = estado.citaElegida?.let(PorCancelar::DeCita)
@@ -297,6 +309,7 @@ class AgendaViewModel @Inject constructor(
         _uiState.update { it.copy(porCancelar = null) }
     }
 
+    /** HU-28. Cancela lo elegido y, si salió bien, ofrece avisarle al cliente. */
     fun confirmarCancelacion() {
         val elegido = _uiState.value.porCancelar ?: return
         _uiState.update { it.copy(porCancelar = null) }
@@ -323,6 +336,10 @@ class AgendaViewModel @Inject constructor(
         _uiState.update { it.copy(aviso = null) }
     }
 
+    /**
+     * HU-28. Prepara el aviso al cliente. Si no tiene teléfono no hay a quién escribirle por
+     * WhatsApp, así que no se muestra nada.
+     */
     private fun avisar(tipo: TipoAviso, clienteId: Long, fecha: LocalDate, hora: LocalTime? = null) {
         val cliente = _uiState.value.clientes.firstOrNull { it.id == clienteId } ?: return
         val telefono = cliente.telefono ?: return
