@@ -7,6 +7,7 @@ import com.gestor_ventures.db.GestorVenturesDatabase
 import com.gestor_ventures.db.MIGRACIONES
 import com.gestor_ventures.db.dao.CajaDao
 import com.gestor_ventures.db.dao.CategoriaDao
+import com.gestor_ventures.db.dao.CitaDao
 import com.gestor_ventures.db.dao.ClienteDao
 import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.dao.GastoDao
@@ -14,6 +15,7 @@ import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
 import com.gestor_ventures.db.dao.NegocioDao
 import com.gestor_ventures.db.dao.ObligacionDao
+import com.gestor_ventures.db.dao.PedidoDao
 import com.gestor_ventures.db.dao.RecordatorioClienteDao
 import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.dao.VentaDao
@@ -75,6 +77,12 @@ object DatabaseModule {
     @Provides
     fun proveerRecordatorioClienteDao(db: GestorVenturesDatabase): RecordatorioClienteDao =
         db.recordatorioClienteDao()
+
+    @Provides
+    fun proveerCitaDao(db: GestorVenturesDatabase): CitaDao = db.citaDao()
+
+    @Provides
+    fun proveerPedidoDao(db: GestorVenturesDatabase): PedidoDao = db.pedidoDao()
 
     @Provides
     @Singleton
