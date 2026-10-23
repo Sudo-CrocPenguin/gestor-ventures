@@ -35,8 +35,8 @@ private const val SemanasDeDetalle = 8L
 private const val ProductosDestacados = 5
 
 /**
- * HU-34 y HU-36. Le pregunta al asistente por las ventas del negocio y por cuánto puede
- * reinvertir, con sus números reales.
+ * HU-34, HU-36 y HU-37. Le pregunta al asistente por las ventas del negocio, por cuánto puede
+ * reinvertir y por en qué está gastando de más, con sus números reales.
  *
  * Vive en `usecase` porque cruza varios repositorios: arma el contexto con el resumen de HU-16
  * y el detalle de ventas, y se lo pasa a [AsistenteRepository].
@@ -76,6 +76,10 @@ class ConsultarAsistente @Inject constructor(
      * HU-36. El monto para reinvertir no lo calcula el asistente: se lo da ya hecho
      * [ResumenFinanciero], con la misma regla de HU-09 que usa el resumen de Finanzas. Así la
      * cifra del chat y la de la pantalla son siempre la misma.
+     *
+     * HU-37. Igual con los gastos: la comparación por categoría llega hecha desde
+     * [CompararGastosPorCategoria], ordenada de lo que más subió a lo que más bajó, para que el
+     * asistente nombre primero lo que más pesa.
      */
     private suspend fun instruccionesPara(negocioId: Long): String {
         val hoy = reloj.ahora().toLocalDate()
