@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -27,6 +29,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val propiedadesLocales = Properties().apply {
+            rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(::load)
+        }
+        buildConfigField(
+            "String",
+            "GEMINI_API_KEY",
+            "\"${propiedadesLocales.getProperty("GEMINI_API_KEY", "")}\"",
+        )
     }
 
     buildTypes {
@@ -43,6 +54,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -69,6 +81,9 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
     // Room lee los esquemas con kotlinx-serialization en las pruebas de migración, y AGP
     // obliga a que las pruebas usen la misma versión que la app. Sin esta línea la app se
     // queda en la versión vieja que arrastra lifecycle, y el helper de migraciones falla.

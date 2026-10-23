@@ -6,6 +6,8 @@ import com.gestor_ventures.front.util.aIniciales
 data class UsuarioUi(
     val nombre: String,
     val correo: String,
+    /** HU-04. Dirección de la foto de perfil; null muestra las iniciales. */
+    val fotoPerfil: String? = null,
 ) {
     /** "Sebastián Orrego" → "SO". */
     val iniciales: String get() = nombre.aIniciales()

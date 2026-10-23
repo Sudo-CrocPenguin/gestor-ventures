@@ -27,22 +27,26 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
+import com.gestor_ventures.back.model.PeriodoPredefinido
 import com.gestor_ventures.back.model.ProgresoMeta
+import com.gestor_ventures.back.model.RangoFechas
 import com.gestor_ventures.back.model.ResumenFinanciero
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvCardHeader
+import com.gestor_ventures.front.components.GvChipsDePeriodo
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvProgressBar
+import com.gestor_ventures.front.components.GvRangoSheet
 import com.gestor_ventures.front.components.GvTextLink
 import com.gestor_ventures.front.components.MoneyText
 import com.gestor_ventures.front.components.StatusPill
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.theme.NumericTextStyle
+import com.gestor_ventures.front.util.formatDiaCorto
 import com.gestor_ventures.front.util.formatMesLargo
 import com.gestor_ventures.front.util.formatMesYAnio
 import com.gestor_ventures.front.util.formatPesos
 import java.time.LocalDate
-import java.time.YearMonth
 import kotlin.math.roundToInt
 
 @Composable
@@ -57,23 +61,48 @@ fun ResumenFinancieroRoute(
         uiState = uiState,
         onVerHistorial = onVerHistorial,
         onVerGraficos = onVerGraficos,
+        onPeriodoChange = viewModel::onPeriodoChange,
+        onPersonalizar = viewModel::abrirRango,
+        onDesdeChange = viewModel::onDesdeChange,
+        onHastaChange = viewModel::onHastaChange,
+        onAplicarRango = viewModel::aplicarRango,
+        onCerrarRango = viewModel::cerrarRango,
     )
 }
 
 /**
- * HU-16. Cómo le fue al negocio este mes y cuánto de eso se puede sacar hoy.
+ * HU-16. Cómo le fue al negocio en el periodo elegido y cuánto de eso se puede sacar hoy.
  *
  * El orden responde a tres preguntas seguidas: qué pasó (ingresos y egresos), qué quedó
  * (la ganancia) y de eso qué es mío (lo disponible, después de descontar lo comprometido).
+ *
+ * Arriba van los mismos chips de periodo del historial, para que la pregunta "¿de cuándo?" se
+ * responda igual en toda la app.
  */
 @Composable
 fun ResumenFinancieroScreen(
     uiState: ResumenFinancieroUiState,
     onVerHistorial: () -> Unit,
     onVerGraficos: () -> Unit,
+    onPeriodoChange: (PeriodoPredefinido) -> Unit,
+    onPersonalizar: () -> Unit,
+    onDesdeChange: (LocalDate) -> Unit,
+    onHastaChange: (LocalDate) -> Unit,
+    onAplicarRango: () -> Unit,
+    onCerrarRango: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val resumen = uiState.resumen ?: return
+
+    uiState.rango?.let { formulario ->
+        GvRangoSheet(
+            formulario = formulario,
+            onDesdeChange = onDesdeChange,
+            onHastaChange = onHastaChange,
+            onAplicar = onAplicarRango,
+            onCerrar = onCerrarRango,
+        )
+    }
 
     Column(
         modifier = modifier
@@ -83,7 +112,14 @@ fun ResumenFinancieroScreen(
             .padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // Un mes sin un solo movimiento se dice con una frase; un tablero de ceros no dice nada.
+        GvChipsDePeriodo(
+            seleccion = uiState.seleccion,
+            onRapido = onPeriodoChange,
+            onPersonalizar = onPersonalizar,
+        )
+
+        // Un periodo sin un solo movimiento se dice con una frase; un tablero de ceros no dice nada.
+        // Los chips quedan arriba igual, para poder cambiar a un periodo que sí tenga.
         if (resumen.sinMovimientos) {
             GvInfoNote(stringResource(R.string.resumen_vacio))
         } else {
@@ -112,12 +148,12 @@ private fun MovimientosCard(
     modifier: Modifier = Modifier,
 ) {
     GvCard(modifier) {
-        // El total del mes invita a la pregunta siguiente: "¿de qué está hecho?".
+        // El total del periodo invita a la pregunta siguiente: "¿de qué está hecho?".
         GvCardHeader(title = stringResource(R.string.resumen_movimientos)) {
             GvTextLink(text = stringResource(R.string.historial_ver), onClick = onVerHistorial)
         }
         StatusPill(
-            text = formatMesLargo(resumen.mes.atDay(1)),
+            text = etiquetaDe(resumen.rango),
             modifier = Modifier.padding(bottom = 12.dp),
         )
 
@@ -383,6 +419,18 @@ private fun Separador() {
     )
 }
 
+/**
+ * Cómo se nombra el periodo en la etiqueta: "Octubre 2026" si es un mes completo, "16 oct" si
+ * es un solo día y "1 oct – 15 oct" en cualquier otro caso.
+ */
+private fun etiquetaDe(rango: RangoFechas): String = when {
+    rango.desde.dayOfMonth == 1 &&
+        rango.hasta == rango.desde.withDayOfMonth(rango.desde.lengthOfMonth()) ->
+        formatMesLargo(rango.desde)
+    rango.esUnSoloDia -> formatDiaCorto(rango.desde)
+    else -> "${formatDiaCorto(rango.desde)} – ${formatDiaCorto(rango.hasta)}"
+}
+
 /** Un mes en pérdida se lee en rojo: es la única forma de que no pase desapercibido. */
 @Composable
 private fun colorDeSaldo(monto: Double): Color = when {
@@ -402,7 +450,7 @@ private fun colorDeSaldo(monto: Double): Color = when {
 private fun ResumenFinancieroPreview() {
     VistaPreviaResumen(
         ResumenFinanciero(
-            mes = YearMonth.of(2026, 9),
+            rango = RangoFechas(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30)),
             ingresos = 6_135_000.0,
             gastos = 1_860_000.0,
             costos = 1_240_000.0,
@@ -424,7 +472,7 @@ private fun ResumenFinancieroPreview() {
 private fun ResumenEnPerdidaPreview() {
     VistaPreviaResumen(
         ResumenFinanciero(
-            mes = YearMonth.of(2026, 9),
+            rango = RangoFechas(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30)),
             ingresos = 800_000.0,
             gastos = 600_000.0,
             costos = 400_000.0,
@@ -441,6 +489,12 @@ private fun VistaPreviaResumen(resumen: ResumenFinanciero) {
                 uiState = ResumenFinancieroUiState(resumen = resumen, cargando = false),
                 onVerHistorial = {},
                 onVerGraficos = {},
+                onPeriodoChange = {},
+                onPersonalizar = {},
+                onDesdeChange = {},
+                onHastaChange = {},
+                onAplicarRango = {},
+                onCerrarRango = {},
             )
         }
     }

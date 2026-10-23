@@ -1,6 +1,9 @@
 package com.gestor_ventures.front.ui.finanzas
 
+import com.gestor_ventures.back.model.PeriodoPredefinido
 import com.gestor_ventures.back.model.ResumenFinanciero
+import com.gestor_ventures.back.model.SeleccionDePeriodo
+import com.gestor_ventures.front.model.FormularioRango
 
 /**
  * HU-16. Estado de la sección "Resumen" de Finanzas.
@@ -12,6 +15,10 @@ import com.gestor_ventures.back.model.ResumenFinanciero
 data class ResumenFinancieroUiState(
     val resumen: ResumenFinanciero? = null,
     val cargando: Boolean = true,
+    /** El periodo que se está mirando. Arranca en el mes en curso. */
+    val seleccion: SeleccionDePeriodo = SeleccionDePeriodo.Rapido(PeriodoPredefinido.Mes),
+    /** Las fechas del rango a mano mientras se eligen; null cuando la hoja está cerrada. */
+    val rango: FormularioRango? = null,
 ) {
     /** Sin negocio activo no hay nada que resumir; pasa apenas se abre la app por primera vez. */
     val sinNegocio: Boolean get() = !cargando && resumen == null

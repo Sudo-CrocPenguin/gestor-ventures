@@ -81,4 +81,4 @@ private fun aNegocioUi(negocio: Negocio) = NegocioUi(
     colorMarca = negocio.colorMarca,
 )
 
-private fun Usuario.aUsuarioUi() = UsuarioUi(nombre = nombre, correo = correo)
+private fun Usuario.aUsuarioUi() = UsuarioUi(nombre = nombre, correo = correo, fotoPerfil = fotoPerfilUrl)

@@ -32,6 +32,7 @@ fun CabeceraUsuario(usuario: UsuarioUi, modifier: Modifier = Modifier) {
             iniciales = usuario.iniciales,
             size = 50.dp,
             shape = RoundedCornerShape(14.dp),
+            foto = usuario.fotoPerfil,
         )
         Column {
             Text(

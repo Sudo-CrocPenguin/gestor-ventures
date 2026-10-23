@@ -3,16 +3,22 @@ package com.gestor_ventures.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.gestor_ventures.db.dao.AlertaDao
 import com.gestor_ventures.db.dao.CajaDao
 import com.gestor_ventures.db.dao.CategoriaDao
+import com.gestor_ventures.db.dao.CitaDao
 import com.gestor_ventures.db.dao.ClienteDao
+import com.gestor_ventures.db.dao.ConsultaIaDao
 import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
 import com.gestor_ventures.db.dao.NegocioDao
 import com.gestor_ventures.db.dao.ObligacionDao
+import com.gestor_ventures.db.dao.PedidoDao
 import com.gestor_ventures.db.dao.RecordatorioClienteDao
+import com.gestor_ventures.db.dao.RecordatorioDao
+import com.gestor_ventures.db.dao.SugerenciaDao
 import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.dao.VentaDao
 import com.gestor_ventures.db.entity.AlertaEntity
@@ -99,4 +105,22 @@ abstract class GestorVenturesDatabase : RoomDatabase() {
     abstract fun cajaDao(): CajaDao
 
     abstract fun recordatorioClienteDao(): RecordatorioClienteDao
+
+    /** HU-24. */
+    abstract fun citaDao(): CitaDao
+
+    /** HU-25. */
+    abstract fun pedidoDao(): PedidoDao
+
+    /** HU-26. */
+    abstract fun recordatorioDao(): RecordatorioDao
+
+    /** HU-34. */
+    abstract fun consultaIaDao(): ConsultaIaDao
+
+    /** HU-35. */
+    abstract fun sugerenciaDao(): SugerenciaDao
+
+    /** HU-38. */
+    abstract fun alertaDao(): AlertaDao
 }

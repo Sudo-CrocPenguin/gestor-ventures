@@ -1,5 +1,10 @@
 package com.gestor_ventures.back.model
 
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
+import kotlin.math.round
+
 /**
  * Formatos que valen en toda la app, en un solo sitio.
  *
@@ -61,3 +66,9 @@ fun enlaceDeWhatsApp(telefono: String?, mensaje: String? = null): String? {
  */
 private fun codificarParaUrl(texto: String): String =
     java.net.URLEncoder.encode(texto, "UTF-8").replace("+", "%20")
+
+/** "$ 1.240.000". Para los textos que arma `back/` (alertas y asistente), que no ven `front/util`. */
+fun pesosEnTexto(monto: Double): String {
+    val simbolos = DecimalFormatSymbols(Locale.forLanguageTag("es-CO")).apply { groupingSeparator = '.' }
+    return "$ " + DecimalFormat("#,##0", simbolos).format(round(monto))
+}
