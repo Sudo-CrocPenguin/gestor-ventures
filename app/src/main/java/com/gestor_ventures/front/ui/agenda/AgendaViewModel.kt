@@ -26,9 +26,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 
-/** Hasta dónde se mira la agenda: un año desde hoy alcanza para cualquier compromiso real. */
-private const val MesesHaciaAdelante = 12L
-
 /** Una cantidad de más de 4 dígitos es un error de tipeo, no un pedido. */
 private const val MaxDigitosCantidad = 4
 
@@ -46,20 +43,25 @@ class AgendaViewModel @Inject constructor(
     clienteRepository: ClienteRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AgendaUiState(hoy = agendaRepository.hoy()))
+    private val _uiState = MutableStateFlow(
+        AgendaUiState(hoy = agendaRepository.hoy(), fecha = agendaRepository.hoy()),
+    )
     val uiState: StateFlow<AgendaUiState> = _uiState.asStateFlow()
+
+    private val periodo = MutableStateFlow(VistaAgenda.Semana to agendaRepository.hoy())
 
     init {
         viewModelScope.launch {
-            negocioActivoRepository.negocioActivo.flatMapLatest { negocio ->
+            combine(negocioActivoRepository.negocioActivo, periodo) { negocio, elegido ->
+                negocio to elegido
+            }.flatMapLatest { (negocio, elegido) ->
                 if (negocio == null) {
                     flowOf(null)
                 } else {
-                    val hoy = agendaRepository.hoy()
-                    val hasta = hoy.plusMonths(MesesHaciaAdelante)
+                    val rango = elegido.first.rango(elegido.second)
                     combine(
-                        agendaRepository.citasEntre(negocio.id, hoy, hasta),
-                        agendaRepository.pedidosEntre(negocio.id, hoy, hasta),
+                        agendaRepository.citasEntre(negocio.id, rango.desde, rango.hasta),
+                        agendaRepository.pedidosEntre(negocio.id, rango.desde, rango.hasta),
                         clienteRepository.clientesDeNegocio(negocio.id),
                     ) { citas, pedidos, clientes -> Datos(negocio.tipoActividad, citas, pedidos, clientes) }
                 }
@@ -78,16 +80,46 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
-    fun onSeccionChange(seccion: SeccionAgenda) {
-        _uiState.update { it.copy(seccion = seccion) }
+    fun onVistaChange(vista: VistaAgenda) {
+        cambiarPeriodo(vista, _uiState.value.fecha)
+    }
+
+    fun anterior() {
+        val estado = _uiState.value
+        cambiarPeriodo(estado.vista, estado.vista.mover(estado.fecha, -1))
+    }
+
+    fun siguiente() {
+        val estado = _uiState.value
+        cambiarPeriodo(estado.vista, estado.vista.mover(estado.fecha, 1))
+    }
+
+    fun irAHoy() {
+        cambiarPeriodo(_uiState.value.vista, agendaRepository.hoy())
+    }
+
+    fun abrirDia(dia: LocalDate) {
+        cambiarPeriodo(VistaAgenda.Dia, dia)
+    }
+
+    private fun cambiarPeriodo(vista: VistaAgenda, fecha: LocalDate) {
+        periodo.value = vista to fecha
+        _uiState.update { it.copy(vista = vista, fecha = fecha) }
     }
 
     fun abrirFormularioCita() {
-        _uiState.update { it.copy(formularioCita = FormularioCita(), error = null) }
+        val fecha = fechaSugerida()
+        _uiState.update { it.copy(formularioCita = FormularioCita(fecha = fecha), error = null) }
     }
 
     fun abrirFormularioPedido() {
-        _uiState.update { it.copy(formularioPedido = FormularioPedido(), error = null) }
+        val fecha = fechaSugerida()
+        _uiState.update { it.copy(formularioPedido = FormularioPedido(fechaEntrega = fecha), error = null) }
+    }
+
+    private fun fechaSugerida(): LocalDate? {
+        val estado = _uiState.value
+        return estado.fecha.takeIf { estado.vista == VistaAgenda.Dia && !it.isBefore(estado.hoy) }
     }
 
     fun cerrarFormulario() {

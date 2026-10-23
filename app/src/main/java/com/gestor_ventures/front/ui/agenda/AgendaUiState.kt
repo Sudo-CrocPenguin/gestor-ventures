@@ -8,17 +8,31 @@ import com.gestor_ventures.back.model.ErrorAgenda
 import com.gestor_ventures.back.model.EstadoCita
 import com.gestor_ventures.back.model.EstadoPedido
 import com.gestor_ventures.back.model.Pedido
+import com.gestor_ventures.back.model.RangoFechas
 import com.gestor_ventures.back.model.TipoActividad
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 
-/** Las dos partes de la agenda. Cuál se ve depende del tipo de negocio. */
-enum class SeccionAgenda { Citas, Pedidos }
+enum class VistaAgenda { Dia, Semana, Mes }
+
+fun VistaAgenda.rango(fecha: LocalDate): RangoFechas = when (this) {
+    VistaAgenda.Dia -> RangoFechas(fecha, fecha)
+    VistaAgenda.Semana -> fecha.with(DayOfWeek.MONDAY).let { RangoFechas(it, it.plusDays(6)) }
+    VistaAgenda.Mes -> RangoFechas(fecha.withDayOfMonth(1), fecha.withDayOfMonth(fecha.lengthOfMonth()))
+}
+
+fun VistaAgenda.mover(fecha: LocalDate, pasos: Long): LocalDate = when (this) {
+    VistaAgenda.Dia -> fecha.plusDays(pasos)
+    VistaAgenda.Semana -> fecha.plusWeeks(pasos)
+    VistaAgenda.Mes -> fecha.plusMonths(pasos)
+}
 
 /** HU-24 y HU-25. Estado de la pestaña Agenda. */
 data class AgendaUiState(
     val tipoActividad: TipoActividad? = null,
-    val seccion: SeccionAgenda = SeccionAgenda.Citas,
+    val vista: VistaAgenda = VistaAgenda.Semana,
+    val fecha: LocalDate = LocalDate.now(),
     val citas: List<Cita> = emptyList(),
     val pedidos: List<Pedido> = emptyList(),
     val clientes: List<Cliente> = emptyList(),
@@ -37,30 +51,33 @@ data class AgendaUiState(
     val error: ErrorAgenda? = null,
 ) {
     /** HU-05. Servicios ve citas, productos ve pedidos y un negocio mixto ve las dos. */
-    val secciones: List<SeccionAgenda>
-        get() = when (tipoActividad) {
-            TipoActividad.SERVICIOS -> listOf(SeccionAgenda.Citas)
-            TipoActividad.PRODUCTOS -> listOf(SeccionAgenda.Pedidos)
-            TipoActividad.MIXTO -> SeccionAgenda.entries
-            null -> emptyList()
-        }
+    val ofreceCitas: Boolean
+        get() = tipoActividad == TipoActividad.SERVICIOS || tipoActividad == TipoActividad.MIXTO
 
-    /**
-     * La sección que se muestra. Si la elegida ya no aplica —porque el usuario cambió el tipo
-     * de negocio o de negocio activo— se muestra la primera que sí aplique.
-     */
-    val seccionVisible: SeccionAgenda?
-        get() = seccion.takeIf { it in secciones } ?: secciones.firstOrNull()
+    val ofrecePedidos: Boolean
+        get() = tipoActividad == TipoActividad.PRODUCTOS || tipoActividad == TipoActividad.MIXTO
+
+    val rango: RangoFechas get() = vista.rango(fecha)
+
+    val dias: List<LocalDate>
+        get() = generateSequence(rango.desde) { it.plusDays(1) }
+            .takeWhile { !it.isAfter(rango.hasta) }
+            .toList()
+
+    val incluyeHoy: Boolean get() = !hoy.isBefore(rango.desde) && !hoy.isAfter(rango.hasta)
+
+    fun citasDe(dia: LocalDate): List<Cita> = citas.filter { it.fecha == dia }
+
+    fun pedidosDe(dia: LocalDate): List<Pedido> = pedidos.filter { it.fechaEntrega == dia }
+
+    fun cuantosEn(dia: LocalDate): Int =
+        citas.count { it.fecha == dia && it.estado != EstadoCita.CANCELADA } +
+            pedidos.count { it.fechaEntrega == dia && it.estado != EstadoPedido.CANCELADO }
 
     /** Sin clientes no hay a quién agendarle: se avisa y el botón queda apagado. */
     val sinClientes: Boolean get() = !cargando && clientes.isEmpty()
 
-    val vacio: Boolean
-        get() = !cargando && when (seccionVisible) {
-            SeccionAgenda.Citas -> citas.isEmpty()
-            SeccionAgenda.Pedidos -> pedidos.isEmpty()
-            null -> true
-        }
+    val vacio: Boolean get() = !cargando && citas.isEmpty() && pedidos.isEmpty()
 }
 
 /** HU-24. La cita mientras se escribe. Los campos son opcionales porque al principio están vacíos. */

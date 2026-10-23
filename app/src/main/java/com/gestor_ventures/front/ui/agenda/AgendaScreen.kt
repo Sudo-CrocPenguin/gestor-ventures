@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -57,7 +58,11 @@ fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
 
     AgendaScreen(
         uiState = uiState,
-        onSeccionChange = viewModel::onSeccionChange,
+        onVistaChange = viewModel::onVistaChange,
+        onAnterior = viewModel::anterior,
+        onSiguiente = viewModel::siguiente,
+        onHoy = viewModel::irAHoy,
+        onAbrirDia = viewModel::abrirDia,
         onAgendarCita = viewModel::abrirFormularioCita,
         onRegistrarPedido = viewModel::abrirFormularioPedido,
         onAbrirPedido = { viewModel.abrirPedido(it.id) },
@@ -98,7 +103,11 @@ fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
 @Composable
 fun AgendaScreen(
     uiState: AgendaUiState,
-    onSeccionChange: (SeccionAgenda) -> Unit,
+    onVistaChange: (VistaAgenda) -> Unit,
+    onAnterior: () -> Unit,
+    onSiguiente: () -> Unit,
+    onHoy: () -> Unit,
+    onAbrirDia: (LocalDate) -> Unit,
     onAgendarCita: () -> Unit,
     onRegistrarPedido: () -> Unit,
     onAbrirPedido: (Pedido) -> Unit,
@@ -127,8 +136,6 @@ fun AgendaScreen(
     onCerrarAviso: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val seccion = uiState.seccionVisible
-
     Column(modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -137,50 +144,75 @@ fun AgendaScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            if (uiState.secciones.size > 1 && seccion != null) {
-                GvSegmentedToggle(
-                    opciones = uiState.secciones,
-                    seleccionada = seccion,
-                    etiqueta = { stringResource(it.labelRes()) },
-                    onSeleccionar = onSeccionChange,
-                )
-            }
+            GvSegmentedToggle(
+                opciones = VistaAgenda.entries,
+                seleccionada = uiState.vista,
+                etiqueta = { stringResource(it.labelRes()) },
+                onSeleccionar = onVistaChange,
+            )
+
+            EncabezadoDePeriodo(
+                vista = uiState.vista,
+                rango = uiState.rango,
+                incluyeHoy = uiState.incluyeHoy,
+                onAnterior = onAnterior,
+                onSiguiente = onSiguiente,
+                onHoy = onHoy,
+            )
 
             AnimatedVisibility(visible = uiState.sinClientes) {
                 GvInfoNote(stringResource(R.string.agenda_sin_clientes))
             }
 
             AnimatedVisibility(visible = uiState.vacio && !uiState.sinClientes) {
-                GvInfoNote(
-                    stringResource(
-                        if (seccion == SeccionAgenda.Pedidos) R.string.agenda_pedidos_vacio
-                        else R.string.agenda_citas_vacio,
-                    ),
-                )
+                GvInfoNote(stringResource(R.string.agenda_periodo_vacio))
             }
 
-            when (seccion) {
-                SeccionAgenda.Citas -> uiState.citas.forEach { cita ->
-                    FilaCita(cita, onClick = { onAbrirCita(cita) })
+            when (uiState.vista) {
+                VistaAgenda.Mes -> CuadriculaDelMes(
+                    dias = uiState.dias,
+                    hoy = uiState.hoy,
+                    cuantosEn = uiState::cuantosEn,
+                    onDiaClick = onAbrirDia,
+                )
+                VistaAgenda.Dia, VistaAgenda.Semana -> if (!uiState.vacio) {
+                    uiState.dias.forEach { dia ->
+                        Dia(
+                            dia = dia,
+                            citas = uiState.citasDe(dia),
+                            pedidos = uiState.pedidosDe(dia),
+                            mostrarTitulo = uiState.vista == VistaAgenda.Semana,
+                            onAbrirCita = onAbrirCita,
+                            onAbrirPedido = onAbrirPedido,
+                        )
+                    }
                 }
-                SeccionAgenda.Pedidos -> uiState.pedidos.forEach { pedido ->
-                    FilaPedido(pedido, onClick = { onAbrirPedido(pedido) })
-                }
-                null -> Unit
             }
         }
 
-        if (seccion != null) {
+        if (uiState.ofreceCitas || uiState.ofrecePedidos) {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxWidth()) {
-                GvPrimaryButton(
-                    text = stringResource(
-                        if (seccion == SeccionAgenda.Pedidos) R.string.agenda_registrar_pedido
-                        else R.string.agenda_agendar_cita,
-                    ),
-                    onClick = if (seccion == SeccionAgenda.Pedidos) onRegistrarPedido else onAgendarCita,
-                    enabled = !uiState.sinClientes,
+                Row(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (uiState.ofreceCitas) {
+                        GvPrimaryButton(
+                            text = stringResource(R.string.agenda_agendar_cita),
+                            onClick = onAgendarCita,
+                            enabled = !uiState.sinClientes,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    if (uiState.ofrecePedidos) {
+                        GvPrimaryButton(
+                            text = stringResource(R.string.agenda_registrar_pedido),
+                            onClick = onRegistrarPedido,
+                            enabled = !uiState.sinClientes,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
             }
         }
     }
@@ -362,9 +394,41 @@ private val EstadosQueSeEligen = listOf(
     EstadoPedido.ENTREGADO,
 )
 
-private fun SeccionAgenda.labelRes(): Int = when (this) {
-    SeccionAgenda.Citas -> R.string.agenda_citas
-    SeccionAgenda.Pedidos -> R.string.agenda_pedidos
+private fun VistaAgenda.labelRes(): Int = when (this) {
+    VistaAgenda.Dia -> R.string.agenda_vista_dia
+    VistaAgenda.Semana -> R.string.agenda_vista_semana
+    VistaAgenda.Mes -> R.string.agenda_vista_mes
+}
+
+@Composable
+private fun Dia(
+    dia: LocalDate,
+    citas: List<Cita>,
+    pedidos: List<Pedido>,
+    mostrarTitulo: Boolean,
+    onAbrirCita: (Cita) -> Unit,
+    onAbrirPedido: (Pedido) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (mostrarTitulo) {
+            Text(
+                text = formatLongDate(dia),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+        }
+        if (citas.isEmpty() && pedidos.isEmpty()) {
+            Text(
+                text = stringResource(R.string.agenda_dia_libre),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        pedidos.forEach { pedido -> FilaPedido(pedido, onClick = { onAbrirPedido(pedido) }) }
+        citas.sortedBy { it.hora }.forEach { cita -> FilaCita(cita, onClick = { onAbrirCita(cita) }) }
+    }
 }
 
 /** Una cita: a quién, cuándo, para qué y en qué estado está. */
@@ -374,7 +438,7 @@ private fun FilaCita(cita: Cita, onClick: () -> Unit, modifier: Modifier = Modif
         ListRow(
             title = cita.nombreCliente,
             subtitle = listOfNotNull(
-                "${formatLongDate(cita.fecha)} · ${formatHour(cita.hora)}",
+                formatHour(cita.hora),
                 cita.descripcion,
             ).joinToString("\n"),
             subtitleMaxLines = 2,
@@ -391,7 +455,7 @@ private fun FilaPedido(pedido: Pedido, onClick: () -> Unit, modifier: Modifier =
         ListRow(
             title = pedido.nombreCliente,
             subtitle = listOf(
-                stringResource(R.string.agenda_entrega_el, formatLongDate(pedido.fechaEntrega)),
+                stringResource(R.string.agenda_entrega),
                 pedido.productos.joinToString(", ") { "${it.cantidad} × ${it.nombre}" },
             ).joinToString("\n"),
             subtitleMaxLines = 2,
@@ -408,6 +472,8 @@ private fun AgendaCitasPreview() {
     VistaPrevia(
         AgendaUiState(
             tipoActividad = TipoActividad.MIXTO,
+            fecha = LocalDate.of(2026, 10, 24),
+            hoy = LocalDate.of(2026, 10, 22),
             cargando = false,
             clientes = listOf(Cliente(id = 1, nombre = "Laura Gómez")),
             citas = listOf(
@@ -424,7 +490,8 @@ private fun AgendaPedidosPreview() {
     VistaPrevia(
         AgendaUiState(
             tipoActividad = TipoActividad.PRODUCTOS,
-            seccion = SeccionAgenda.Pedidos,
+            vista = VistaAgenda.Dia,
+            fecha = LocalDate.of(2026, 10, 26),
             cargando = false,
             clientes = listOf(Cliente(id = 1, nombre = "Laura Gómez")),
             pedidos = listOf(
@@ -444,7 +511,11 @@ private fun VistaPrevia(uiState: AgendaUiState) {
         Surface(color = MaterialTheme.colorScheme.background) {
             AgendaScreen(
                 uiState = uiState,
-                onSeccionChange = {},
+                onVistaChange = {},
+                onAnterior = {},
+                onSiguiente = {},
+                onHoy = {},
+                onAbrirDia = {},
                 onAgendarCita = {},
                 onRegistrarPedido = {},
                 onAbrirPedido = {},
