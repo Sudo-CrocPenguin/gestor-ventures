@@ -101,6 +101,13 @@ class ConsultarAsistente @Inject constructor(
                     "emprendedor debería saber (un día muy flojo, un producto que jala las ventas), " +
                     "menciónalo en una frase.",
             )
+            appendLine(
+                "Si te preguntan cuánto pueden reinvertir, usa el monto de reinversión del mes en " +
+                    "curso: es el porcentaje de reinversión que el emprendedor configuró aplicado a " +
+                    "la ganancia estimada. Explica la cuenta en una línea. Si la ganancia es cero o " +
+                    "negativa, di que este mes no hay qué reinvertir y por qué. Si el porcentaje es " +
+                    "0 %, dile que lo puede configurar en Meta y reinversión, en el menú.",
+            )
             appendLine()
             appendLine("Hoy es ${fechaLarga(hoy)}.")
             negocio?.let { appendLine("Negocio: ${it.nombre} (${it.categoria}).") }
@@ -139,6 +146,10 @@ class ConsultarAsistente @Inject constructor(
         appendLine("- Gastos fijos del periodo: ${pesos(resumen.gastosFijos)}")
         appendLine("- Ganancia estimada: ${pesos(resumen.ganancia)}")
         resumen.margen?.let { appendLine("- Margen: ${(it * 100).roundToLong()} %") }
+        appendLine("- Porcentaje de reinversión configurado: ${resumen.porcentajeReinversion.roundToLong()} %")
+        appendLine("- Monto para reinvertir: ${pesos(resumen.reinversion)}")
+        appendLine("- Obligaciones pendientes: ${pesos(resumen.obligacionesPendientes)}")
+        appendLine("- Apartado para la meta de ahorro: ${pesos(resumen.apartadoParaMeta)}")
         appendLine("- Dinero disponible: ${pesos(resumen.disponible)}")
     }
 

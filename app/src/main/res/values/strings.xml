@@ -614,6 +614,7 @@
     <string name="asistente_sin_negocio">Registra tu negocio para que el asistente tenga datos con qué responderte.</string>
     <string name="asistente_sugerencia_semana">¿Cómo me fue esta semana?</string>
     <string name="asistente_sugerencia_mes">¿Cómo voy este mes comparado con el anterior?</string>
+    <string name="asistente_sugerencia_reinversion">¿Cuánto puedo reinvertir este mes?</string>
     <string name="asistente_sugerencia_dia">¿Qué día de la semana vendo más?</string>
     <string name="asistente_sugerencia_producto">¿Cuál es mi producto más vendido?</string>
     <string name="asistente_pregunta">Tu pregunta</string>
