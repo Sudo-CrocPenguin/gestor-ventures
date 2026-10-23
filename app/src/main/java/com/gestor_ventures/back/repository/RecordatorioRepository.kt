@@ -24,6 +24,13 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * HU-26. Guarda los recordatorios de citas y pedidos y programa su aviso.
+ *
+ * El aviso lo programa WorkManager, de Android, y no la app: así suena aunque la app esté
+ * cerrada y aunque el teléfono se haya reiniciado. Cada recordatorio es una tarea con nombre
+ * propio, para poder cancelarla o reemplazarla cuando la cita o el pedido cambian.
+ */
 @Singleton
 class RecordatorioRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -34,12 +41,18 @@ class RecordatorioRepository @Inject constructor(
     private val reloj: Reloj,
 ) {
 
+    /** Cuánto antes avisa la cita, para mostrarlo al editarla. */
     suspend fun anticipacionDeCita(citaId: Long): AnticipacionRecordatorio? =
         AnticipacionRecordatorio.deMinutos(recordatorioDao.obtenerDeCita(citaId)?.tiempoAnticipacion)
 
     suspend fun anticipacionDePedido(pedidoId: Long): AnticipacionRecordatorio? =
         AnticipacionRecordatorio.deMinutos(recordatorioDao.obtenerDePedido(pedidoId)?.tiempoAnticipacion)
 
+    /**
+     * Deja la cita con el recordatorio indicado, o sin ninguno si es null. Siempre quita el
+     * anterior primero: así, al mover la cita, el aviso se mueve con ella. Una cita cancelada
+     * no lleva recordatorio.
+     */
     suspend fun recordarCita(citaId: Long, anticipacion: AnticipacionRecordatorio?) {
         quitar(recordatorioDao.obtenerDeCita(citaId))
         val cita = citaDao.obtener(citaId) ?: return
@@ -51,6 +64,7 @@ class RecordatorioRepository @Inject constructor(
         programar(id, cita.fecha.atTime(cita.hora).minusMinutes(anticipacion.minutos.toLong()))
     }
 
+    /** Igual que [recordarCita], contando desde las 8:00 del día de entrega. */
     suspend fun recordarPedido(pedidoId: Long, anticipacion: AnticipacionRecordatorio?) {
         quitar(recordatorioDao.obtenerDePedido(pedidoId))
         val pedido = pedidoDao.obtener(pedidoId) ?: return
@@ -71,6 +85,11 @@ class RecordatorioRepository @Inject constructor(
         quitar(recordatorioDao.obtenerDePedido(pedidoId))
     }
 
+    /**
+     * Lo que dice el aviso, o null si ya no hay que avisar: ya se mandó, la cita no está
+     * programada, o el pedido se canceló o ya se entregó. Se revisa justo antes de sonar,
+     * porque entre que se programó y que suena pudo pasar cualquier cosa.
+     */
     suspend fun contenidoDe(recordatorioId: Long): ContenidoRecordatorio? {
         val recordatorio = recordatorioDao.obtener(recordatorioId) ?: return null
         if (recordatorio.enviado) return null
@@ -96,6 +115,10 @@ class RecordatorioRepository @Inject constructor(
         recordatorioDao.marcarEnviado(recordatorioId)
     }
 
+    /**
+     * Programa el aviso para [momento]. Si ese momento ya pasó —"1 día antes" de una cita que
+     * es en dos horas— suena enseguida: avisar tarde es mejor que no avisar.
+     */
     private fun programar(recordatorioId: Long, momento: LocalDateTime) {
         val espera = Duration.between(reloj.ahora(), momento).toMillis().coerceAtLeast(0)
         val tarea = OneTimeWorkRequestBuilder<RecordatorioWorker>()
@@ -106,6 +129,7 @@ class RecordatorioRepository @Inject constructor(
             .enqueueUniqueWork(nombreDeTarea(recordatorioId), ExistingWorkPolicy.REPLACE, tarea)
     }
 
+    /** Cancela el aviso programado y borra el recordatorio. */
     private suspend fun quitar(recordatorio: RecordatorioEntity?) {
         recordatorio ?: return
         WorkManager.getInstance(context).cancelUniqueWork(nombreDeTarea(recordatorio.recordatorioId))

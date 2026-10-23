@@ -161,6 +161,7 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /** HU-26. El recordatorio se elige igual en la cita y en el pedido. */
     fun onAnticipacionChange(anticipacion: AnticipacionRecordatorio?) {
         _uiState.update {
             it.copy(
@@ -329,6 +330,8 @@ class AgendaViewModel @Inject constructor(
                 ),
             )
         }
+        // HU-26. El recordatorio se lee aparte porque vive en otra tabla. Solo se aplica si la
+        // hoja sigue abierta sobre esta misma cita.
         viewModelScope.launch {
             val anticipacion = agendaRepository.anticipacionDeCita(cita.id)
             _uiState.update {

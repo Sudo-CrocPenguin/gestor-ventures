@@ -8,6 +8,7 @@ import dagger.hilt.android.HiltAndroidApp
 @HiltAndroidApp
 class GestorVenturesApp : Application() {
 
+    /** HU-26. Los canales de notificación tienen que existir antes del primer aviso. */
     override fun onCreate() {
         super.onCreate()
         Notificador.crearCanales(this)

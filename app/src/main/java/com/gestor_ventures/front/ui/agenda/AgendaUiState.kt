@@ -106,6 +106,7 @@ data class FormularioCita(
     val fecha: LocalDate? = null,
     val hora: LocalTime? = null,
     val descripcion: String = "",
+    /** HU-26. Cuánto antes avisar; null es sin recordatorio. */
     val anticipacion: AnticipacionRecordatorio? = null,
 ) {
     val puedeGuardar: Boolean get() = clienteId != null && fecha != null && hora != null
@@ -126,6 +127,7 @@ data class FormularioPedido(
     val clienteId: Long? = null,
     val fechaEntrega: LocalDate? = null,
     val productos: List<FormularioProducto> = listOf(FormularioProducto()),
+    /** HU-26. Cuánto antes avisar, contando desde las 8:00 del día de entrega. */
     val anticipacion: AnticipacionRecordatorio? = null,
 ) {
     val puedeGuardar: Boolean
@@ -177,6 +179,7 @@ fun ErrorAgenda.mensajeRes(): Int = when (this) {
     ErrorAgenda.CitaCancelada -> R.string.agenda_error_cita_cancelada
 }
 
+/** HU-26. Cómo se llama cada opción del recordatorio en pantalla. */
 @StringRes
 fun AnticipacionRecordatorio?.labelRes(): Int = when (this) {
     null -> R.string.recordatorio_ninguno

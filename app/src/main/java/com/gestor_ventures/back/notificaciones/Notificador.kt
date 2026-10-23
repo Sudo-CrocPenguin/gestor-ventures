@@ -14,10 +14,17 @@ import androidx.core.content.ContextCompat
 import com.gestor_ventures.MainActivity
 import com.gestor_ventures.R
 
+/**
+ * HU-26. Muestra las notificaciones de la app.
+ *
+ * HU-41 va a agregar más tipos (alertas del asistente, por ejemplo); cada uno tendrá su canal,
+ * que es lo que deja al usuario apagar unos y dejar otros desde los ajustes del teléfono.
+ */
 object Notificador {
 
     const val CanalAgenda = "agenda"
 
+    /** Desde Android 8 una notificación necesita un canal. Se crea al abrir la app. */
     fun crearCanales(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val canal = NotificationChannel(
@@ -28,11 +35,16 @@ object Notificador {
         context.getSystemService(NotificationManager::class.java).createNotificationChannel(canal)
     }
 
+    /** Desde Android 13 el usuario tiene que dar permiso; antes, siempre se puede. */
     fun puedeNotificar(context: Context): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
 
+    /**
+     * Muestra la notificación. Tocarla abre la app. Sin permiso no hace nada: el recordatorio
+     * queda guardado, pero no hay cómo avisar.
+     */
     fun mostrar(context: Context, id: Int, canal: String, titulo: String, texto: String) {
         if (!puedeNotificar(context)) return
 

@@ -64,6 +64,8 @@ import java.time.LocalTime
 fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
+    // HU-26. El permiso se pide solo cuando hace falta: al elegir un recordatorio, y no al abrir
+    // la agenda. Pedirlo sin contexto es la forma más segura de que lo nieguen.
     var notificacionesPermitidas by remember { mutableStateOf(Notificador.puedeNotificar(contexto)) }
     val pedirPermiso = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),

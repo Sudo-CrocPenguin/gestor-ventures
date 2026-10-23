@@ -14,6 +14,14 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/**
+ * HU-26. La tarea que WorkManager corre a la hora del recordatorio: arma el texto y muestra la
+ * notificación.
+ *
+ * WorkManager crea esta clase por su cuenta, así que Hilt no le puede pasar el repositorio por
+ * el constructor. Lo pide con [Dependencias], que es la forma de Hilt de entregar algo a una
+ * clase que no construye él.
+ */
 class RecordatorioWorker(
     context: Context,
     parametros: WorkerParameters,
@@ -55,6 +63,7 @@ class RecordatorioWorker(
         return Result.success()
     }
 
+    /** "viernes 24 de octubre". */
     private fun formatoDia(fecha: LocalDate): String =
         fecha.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM", Locale.forLanguageTag("es-CO")))
 

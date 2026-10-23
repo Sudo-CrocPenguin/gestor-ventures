@@ -19,8 +19,15 @@ import com.gestor_ventures.back.model.AnticipacionRecordatorio
 import com.gestor_ventures.front.components.GvChip
 import com.gestor_ventures.front.components.GvInfoNote
 
+/** "No" primero, y después de menos a más anticipación. */
 private val Opciones: List<AnticipacionRecordatorio?> = listOf(null) + AnticipacionRecordatorio.entries
 
+/**
+ * HU-26. Campo "Recordarme" de la cita y del pedido.
+ *
+ * Si se elige un recordatorio y las notificaciones están apagadas, se dice ahí mismo: el
+ * recordatorio se guarda igual, pero no va a llegar, y el usuario tiene que saberlo.
+ */
 @Composable
 fun SelectorDeRecordatorio(
     anticipacion: AnticipacionRecordatorio?,

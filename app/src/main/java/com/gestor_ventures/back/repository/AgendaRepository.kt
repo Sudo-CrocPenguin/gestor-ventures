@@ -34,6 +34,9 @@ import com.gestor_ventures.db.enums.EstadoPedido as EstadoPedidoDb
  *
  * Acá viven las reglas. La pantalla avisa lo que puede, pero ninguna ruta de la app puede
  * guardar una cita o un pedido que no las cumpla.
+ *
+ * HU-26. Agendar, registrar y editar dejan programado su recordatorio; cancelar, o marcar un
+ * pedido como entregado, lo quita.
  */
 @Singleton
 class AgendaRepository @Inject constructor(
@@ -200,9 +203,11 @@ class AgendaRepository @Inject constructor(
     suspend fun cancelarPedido(pedidoId: Long): ErrorAgenda? =
         cambiarEstadoPedido(pedidoId, EstadoPedido.CANCELADO)
 
+    /** HU-26. El recordatorio que tiene la cita, para mostrarlo al editarla. */
     suspend fun anticipacionDeCita(citaId: Long): AnticipacionRecordatorio? =
         recordatorioRepository.anticipacionDeCita(citaId)
 
+    /** HU-26. El recordatorio que tiene el pedido. */
     suspend fun anticipacionDePedido(pedidoId: Long): AnticipacionRecordatorio? =
         recordatorioRepository.anticipacionDePedido(pedidoId)
 
