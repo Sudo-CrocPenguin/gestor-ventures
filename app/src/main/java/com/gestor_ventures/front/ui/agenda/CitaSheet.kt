@@ -29,6 +29,10 @@ import com.gestor_ventures.front.components.GvTimeField
 import java.time.LocalDate
 import java.time.LocalTime
 
+/**
+ * HU-24. Hoja para agendar una cita: cliente, fecha, hora y, si se quiere, una descripción.
+ * El aviso de error va dentro de la hoja, porque detrás no se vería.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CitaSheet(

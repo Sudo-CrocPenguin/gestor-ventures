@@ -253,6 +253,7 @@ fun AppNavHost(
         }
 
         // Pestañas cuya pantalla aún no existe: se reemplazan a medida que se construyen.
+        // HU-24 y HU-25. Las citas y los pedidos que vienen.
         composable(TopLevelDestination.Agenda.route) {
             AgendaRoute()
         }

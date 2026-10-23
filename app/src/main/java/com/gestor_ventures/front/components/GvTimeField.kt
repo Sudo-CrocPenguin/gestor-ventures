@@ -37,6 +37,10 @@ import java.time.LocalTime
 
 private val FieldShape = RoundedCornerShape(13.dp)
 
+/**
+ * Campo de hora: se ve igual que [GvDateField] y al tocarlo abre el reloj de Material. Lo usa
+ * la agenda (HU-24) para la hora de la cita.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GvTimeField(

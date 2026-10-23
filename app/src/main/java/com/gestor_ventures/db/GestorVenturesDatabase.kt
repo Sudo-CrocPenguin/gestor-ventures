@@ -102,7 +102,9 @@ abstract class GestorVenturesDatabase : RoomDatabase() {
 
     abstract fun recordatorioClienteDao(): RecordatorioClienteDao
 
+    /** HU-24. */
     abstract fun citaDao(): CitaDao
 
+    /** HU-25. */
     abstract fun pedidoDao(): PedidoDao
 }

@@ -69,6 +69,11 @@ fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
     )
 }
 
+/**
+ * HU-24 y HU-25. La pestaña Agenda: lo que viene por delante y el botón para agregar más.
+ *
+ * El botón de abajo cambia con la sección: "Agendar cita" o "Registrar pedido".
+ */
 @Composable
 fun AgendaScreen(
     uiState: AgendaUiState,
@@ -194,6 +199,7 @@ fun AgendaScreen(
     }
 }
 
+/** Los estados a los que se pasa un pedido a mano. Cancelar es otra acción (HU-28). */
 private val EstadosQueSeEligen = listOf(
     EstadoPedido.PENDIENTE,
     EstadoPedido.EN_PROCESO,
@@ -205,6 +211,7 @@ private fun SeccionAgenda.labelRes(): Int = when (this) {
     SeccionAgenda.Pedidos -> R.string.agenda_pedidos
 }
 
+/** Una cita: a quién, cuándo, para qué y en qué estado está. */
 @Composable
 private fun FilaCita(cita: Cita, modifier: Modifier = Modifier) {
     GvCard(modifier) {
@@ -221,6 +228,7 @@ private fun FilaCita(cita: Cita, modifier: Modifier = Modifier) {
     }
 }
 
+/** Un pedido: de quién, cuándo se entrega, qué lleva y en qué va. */
 @Composable
 private fun FilaPedido(pedido: Pedido, onClick: () -> Unit, modifier: Modifier = Modifier) {
     GvCard(modifier.clickable(onClick = onClick)) {

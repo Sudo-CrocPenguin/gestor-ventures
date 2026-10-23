@@ -28,6 +28,12 @@ import javax.inject.Singleton
 import com.gestor_ventures.db.enums.EstadoCita as EstadoCitaDb
 import com.gestor_ventures.db.enums.EstadoPedido as EstadoPedidoDb
 
+/**
+ * HU-24 y HU-25. Única puerta de entrada a la agenda: citas y pedidos.
+ *
+ * Acá viven las reglas. La pantalla avisa lo que puede, pero ninguna ruta de la app puede
+ * guardar una cita o un pedido que no las cumpla.
+ */
 @Singleton
 class AgendaRepository @Inject constructor(
     private val citaDao: CitaDao,
@@ -37,12 +43,20 @@ class AgendaRepository @Inject constructor(
     private val reloj: Reloj,
 ) {
 
+    /** Las citas de un rango de días. También las usará el calendario (HU-27). */
     fun citasEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Cita>> =
         citaDao.observarEntre(negocioId, desde, hasta).map { filas -> filas.map(::aCita) }
 
+    /** Los pedidos que se entregan en un rango de días. */
     fun pedidosEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Pedido>> =
         pedidoDao.observarEntre(negocioId, desde, hasta).map { filas -> filas.map(::aPedido) }
 
+    /**
+     * HU-24. Agenda una cita si cumple las reglas, o devuelve qué regla no cumple.
+     *
+     * La hora se guarda sin segundos: "las 3:00" es la misma cita aunque el reloj marque
+     * 3:00:27, y así la revisión de horario ocupado compara lo que el usuario ve.
+     */
     suspend fun agendarCita(
         negocioId: Long,
         clienteId: Long,
@@ -65,6 +79,7 @@ class AgendaRepository @Inject constructor(
         return null
     }
 
+    /** HU-25. Registra un pedido con sus productos si cumple las reglas. */
     suspend fun registrarPedido(
         negocioId: Long,
         clienteId: Long,
@@ -87,6 +102,10 @@ class AgendaRepository @Inject constructor(
         return null
     }
 
+    /**
+     * HU-25. Pasa un pedido a pendiente, en proceso o entregado. Un pedido cancelado ya no
+     * cambia: si se quiere de nuevo, es un pedido nuevo.
+     */
     suspend fun cambiarEstadoPedido(pedidoId: Long, estado: EstadoPedido): ErrorAgenda? {
         val actual = pedidoDao.obtener(pedidoId) ?: return ErrorAgenda.PedidoNoExiste
         if (actual.estadoPedido == EstadoPedidoDb.CANCELADO) return ErrorAgenda.PedidoCancelado
@@ -95,8 +114,17 @@ class AgendaRepository @Inject constructor(
         return null
     }
 
+    /** El día de hoy según el reloj de la app, para saber desde cuándo mostrar la agenda. */
     fun hoy(): LocalDate = reloj.ahora().toLocalDate()
 
+    /**
+     * Las reglas de una cita: el cliente es del negocio, el negocio da servicios, la fecha y
+     * hora todavía no pasaron, la descripción no pasa de 200 caracteres y nadie más tiene ese
+     * horario.
+     *
+     * "Mismo horario" es el mismo día a la misma hora exacta: la tabla no guarda cuánto dura
+     * cada cita, así que no hay forma de saber si dos se pisan a medias.
+     */
     private suspend fun validarCita(
         negocioId: Long,
         clienteId: Long,
@@ -118,6 +146,10 @@ class AgendaRepository @Inject constructor(
         }
     }
 
+    /**
+     * Las reglas de un pedido: el cliente es del negocio, el negocio vende productos, la entrega
+     * es hoy o después, y lleva al menos un producto, cada uno con nombre y cantidad mayor que 0.
+     */
     private suspend fun validarPedido(
         negocioId: Long,
         clienteId: Long,
@@ -134,9 +166,11 @@ class AgendaRepository @Inject constructor(
         else -> null
     }
 
+    /** Un cliente de otro negocio no se puede agendar acá, aunque el id exista. */
     private suspend fun clienteEsDelNegocio(negocioId: Long, clienteId: Long): Boolean =
         clienteDao.obtener(clienteId)?.negocioId == negocioId
 
+    /** Si el negocio hace ese tipo de trabajo. Un negocio mixto hace los dos. */
     private suspend fun ofrece(negocioId: Long, tipo: TipoActividad): Boolean {
         val actividad = negocioDao.obtener(negocioId)?.tipoActividad ?: return false
         return actividad == tipo || actividad == TipoActividad.MIXTO

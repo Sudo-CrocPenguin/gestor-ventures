@@ -26,10 +26,18 @@ import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 
+/** Hasta dónde se mira la agenda: un año desde hoy alcanza para cualquier compromiso real. */
 private const val MesesHaciaAdelante = 12L
 
+/** Una cantidad de más de 4 dígitos es un error de tipeo, no un pedido. */
 private const val MaxDigitosCantidad = 4
 
+/**
+ * HU-24 y HU-25. La agenda del negocio activo: lo que viene, desde hoy.
+ *
+ * Escucha las citas, los pedidos y los clientes al mismo tiempo, así que la lista cambia sola
+ * al agendar algo, al cambiar un estado o al cambiar de negocio en el menú.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class AgendaViewModel @Inject constructor(
@@ -86,6 +94,7 @@ class AgendaViewModel @Inject constructor(
         _uiState.update { it.copy(formularioCita = null, formularioPedido = null, error = null) }
     }
 
+    /** El cliente se elige igual en la cita y en el pedido; solo uno de los dos está abierto. */
     fun onClienteChange(clienteId: Long) {
         _uiState.update {
             it.copy(
@@ -120,6 +129,7 @@ class AgendaViewModel @Inject constructor(
         actualizarProducto(indice) { it.copy(nombre = texto) }
     }
 
+    /** Solo deja escribir números. */
     fun onProductoCantidadChange(indice: Int, texto: String) {
         actualizarProducto(indice) { it.copy(cantidad = texto.filter(Char::isDigit).take(MaxDigitosCantidad)) }
     }
@@ -131,6 +141,7 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /** Siempre queda al menos una fila: un pedido sin productos no se puede registrar. */
     fun quitarProducto(indice: Int) {
         _uiState.update { estado ->
             val formulario = estado.formularioPedido ?: return@update estado
@@ -156,6 +167,7 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /** Si el repositorio rechaza la cita, la hoja se queda abierta con el aviso. */
     fun guardarCita() {
         val formulario = _uiState.value.formularioCita ?: return
         val clienteId = formulario.clienteId ?: return
@@ -175,6 +187,11 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Las filas sin nombre se descartan antes de guardar: es la fila vacía que quedó al tocar
+     * "Agregar otro producto" de más, no un producto. Si la cantidad no es un número válido se
+     * manda 0 y el repositorio la rechaza con su aviso.
+     */
     fun guardarPedido() {
         val formulario = _uiState.value.formularioPedido ?: return
         val clienteId = formulario.clienteId ?: return
@@ -195,6 +212,7 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /** Tocar un pedido abre el menú para cambiar su estado. */
     fun abrirPedido(pedidoId: Long) {
         _uiState.update { estado -> estado.copy(pedidoElegido = estado.pedidos.firstOrNull { it.id == pedidoId }) }
     }

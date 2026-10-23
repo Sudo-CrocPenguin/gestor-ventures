@@ -12,8 +12,10 @@ import com.gestor_ventures.back.model.TipoActividad
 import java.time.LocalDate
 import java.time.LocalTime
 
+/** Las dos partes de la agenda. Cuál se ve depende del tipo de negocio. */
 enum class SeccionAgenda { Citas, Pedidos }
 
+/** HU-24 y HU-25. Estado de la pestaña Agenda. */
 data class AgendaUiState(
     val tipoActividad: TipoActividad? = null,
     val seccion: SeccionAgenda = SeccionAgenda.Citas,
@@ -24,9 +26,11 @@ data class AgendaUiState(
     val cargando: Boolean = true,
     val formularioCita: FormularioCita? = null,
     val formularioPedido: FormularioPedido? = null,
+    /** El pedido que el usuario tocó, mientras elige a qué estado pasarlo. */
     val pedidoElegido: Pedido? = null,
     val error: ErrorAgenda? = null,
 ) {
+    /** HU-05. Servicios ve citas, productos ve pedidos y un negocio mixto ve las dos. */
     val secciones: List<SeccionAgenda>
         get() = when (tipoActividad) {
             TipoActividad.SERVICIOS -> listOf(SeccionAgenda.Citas)
@@ -35,9 +39,14 @@ data class AgendaUiState(
             null -> emptyList()
         }
 
+    /**
+     * La sección que se muestra. Si la elegida ya no aplica —porque el usuario cambió el tipo
+     * de negocio o de negocio activo— se muestra la primera que sí aplique.
+     */
     val seccionVisible: SeccionAgenda?
         get() = seccion.takeIf { it in secciones } ?: secciones.firstOrNull()
 
+    /** Sin clientes no hay a quién agendarle: se avisa y el botón queda apagado. */
     val sinClientes: Boolean get() = !cargando && clientes.isEmpty()
 
     val vacio: Boolean
@@ -48,6 +57,7 @@ data class AgendaUiState(
         }
 }
 
+/** HU-24. La cita mientras se escribe. Los campos son opcionales porque al principio están vacíos. */
 data class FormularioCita(
     val clienteId: Long? = null,
     val fecha: LocalDate? = null,
@@ -57,11 +67,13 @@ data class FormularioCita(
     val puedeGuardar: Boolean get() = clienteId != null && fecha != null && hora != null
 }
 
+/** Una fila de producto del pedido. La cantidad es texto porque así se escribe en el campo. */
 data class FormularioProducto(
     val nombre: String = "",
     val cantidad: String = "1",
 )
 
+/** HU-25. El pedido mientras se escribe. Arranca con una fila de producto vacía. */
 data class FormularioPedido(
     val clienteId: Long? = null,
     val fechaEntrega: LocalDate? = null,
@@ -72,6 +84,7 @@ data class FormularioPedido(
             productos.any { it.nombre.isNotBlank() }
 }
 
+/** Texto que ve el usuario para cada regla de la agenda. */
 @StringRes
 fun ErrorAgenda.mensajeRes(): Int = when (this) {
     ErrorAgenda.ClienteNoExiste -> R.string.agenda_error_cliente

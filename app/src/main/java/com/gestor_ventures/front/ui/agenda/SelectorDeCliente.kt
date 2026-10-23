@@ -33,6 +33,10 @@ import com.gestor_ventures.back.model.Cliente
 
 private val FieldShape = RoundedCornerShape(13.dp)
 
+/**
+ * HU-24 y HU-25. Campo para elegir a qué cliente (HU-29) es la cita o el pedido. Se ve como los
+ * demás campos y al tocarlo despliega la lista de clientes del negocio.
+ */
 @Composable
 fun SelectorDeCliente(
     clientes: List<Cliente>,

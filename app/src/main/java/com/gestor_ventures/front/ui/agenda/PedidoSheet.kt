@@ -36,6 +36,10 @@ import com.gestor_ventures.front.components.GvSoftButton
 import com.gestor_ventures.front.components.GvTextField
 import java.time.LocalDate
 
+/**
+ * HU-25. Hoja para registrar un pedido: cliente, fecha de entrega y los productos, cada uno en
+ * su fila con nombre y cantidad. La basura solo aparece cuando hay más de una fila.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PedidoSheet(
