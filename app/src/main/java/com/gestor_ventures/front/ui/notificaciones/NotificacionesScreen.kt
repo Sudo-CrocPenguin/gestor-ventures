@@ -59,6 +59,8 @@ import java.time.LocalDateTime
 fun NotificacionesRoute(onBack: () -> Unit, viewModel: NotificacionesViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
+    // HU-41. El permiso del sistema manda sobre los interruptores: se vuelve a revisar al volver a
+    // la pantalla, por si el usuario lo cambió en los ajustes del teléfono.
     var permitidas by remember { mutableStateOf(Notificador.puedeNotificar(contexto)) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { permitidas = Notificador.puedeNotificar(contexto) }
     val pedirPermiso = rememberLauncherForActivityResult(
@@ -101,6 +103,10 @@ fun NotificacionesRoute(onBack: () -> Unit, viewModel: NotificacionesViewModel =
 /**
  * HU-38. Las alertas, de la más nueva a la más vieja. Las que no se han leído llevan un punto
  * rojo y el botón para marcarlas.
+ *
+ * HU-41. Arriba, qué avisos recibir. Si el teléfono tiene las notificaciones de la app apagadas,
+ * se dice ahí mismo y se ofrece ir a los ajustes: si no, el usuario encendería los interruptores
+ * y se quedaría esperando avisos que nunca llegan.
  */
 @Composable
 fun NotificacionesScreen(
@@ -182,6 +188,7 @@ fun NotificacionesScreen(
     }
 }
 
+/** Un tipo de aviso con su explicación y su interruptor. */
 @Composable
 private fun Interruptor(
     titulo: String,

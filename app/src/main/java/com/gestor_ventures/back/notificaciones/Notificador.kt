@@ -17,8 +17,8 @@ import com.gestor_ventures.R
 /**
  * HU-26. Muestra las notificaciones de la app.
  *
- * HU-41 va a agregar más tipos (alertas del asistente, por ejemplo); cada uno tendrá su canal,
- * que es lo que deja al usuario apagar unos y dejar otros desde los ajustes del teléfono.
+ * Cada tipo de aviso tiene su canal: agenda (HU-26) y alertas (HU-38). Eso deja apagarlos por
+ * separado, desde la app (HU-41) o desde los ajustes del teléfono.
  */
 object Notificador {
 
@@ -53,6 +53,9 @@ object Notificador {
     /**
      * Muestra la notificación. Tocarla abre la app. Sin permiso no hace nada: el recordatorio
      * queda guardado, pero no hay cómo avisar.
+     *
+     * HU-41. Tampoco muestra nada si el usuario apagó ese tipo de aviso. El filtro va acá, y no
+     * en cada tarea, para que ningún aviso se pueda saltar la elección del usuario.
      */
     fun mostrar(context: Context, id: Int, canal: String, titulo: String, texto: String) {
         if (!puedeNotificar(context) || !PreferenciasNotificaciones(context).permite(canal)) return

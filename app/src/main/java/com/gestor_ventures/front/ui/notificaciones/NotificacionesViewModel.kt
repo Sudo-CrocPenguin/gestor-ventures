@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * HU-38. Las alertas del negocio activo.
+ * HU-38 y HU-41. Las alertas del negocio activo y qué avisos recibir.
  *
  * Al abrir la pantalla se corre la revisión en el momento, para no tener que esperar a la
  * revisión diaria: lo que pasó hoy ya aparece.
@@ -55,10 +55,15 @@ class NotificacionesViewModel @Inject constructor(
         }
     }
 
+    /** HU-41. Encender o apagar los recordatorios de citas y entregas. */
     fun onRecordatoriosChange(activos: Boolean) {
         preferenciasNotificaciones.cambiarRecordatorios(activos)
     }
 
+    /**
+     * HU-41. Apagar las alertas solo deja de notificarlas: se siguen generando y aparecen en
+     * esta pantalla, para que no se pierda lo que pasó.
+     */
     fun onAlertasChange(activas: Boolean) {
         preferenciasNotificaciones.cambiarAlertas(activas)
     }

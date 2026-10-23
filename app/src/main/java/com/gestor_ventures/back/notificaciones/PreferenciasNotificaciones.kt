@@ -9,11 +9,19 @@ import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** HU-41. Qué avisos quiere recibir el usuario. Todo arranca encendido: es lo que se espera de una app nueva. */
 data class AjustesNotificaciones(
     val recordatorios: Boolean = true,
     val alertas: Boolean = true,
 )
 
+/**
+ * HU-41. Guarda en el teléfono qué tipos de notificación quiere recibir el usuario:
+ * recordatorios de agenda (HU-26) y alertas del negocio (HU-38).
+ *
+ * Son ajustes de este teléfono, no del negocio ni de la cuenta, así que van en
+ * `SharedPreferences` y no en la base de datos.
+ */
 @Singleton
 class PreferenciasNotificaciones @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -27,6 +35,7 @@ class PreferenciasNotificaciones @Inject constructor(
         alertas = preferencias.getBoolean(ClaveAlertas, true),
     )
 
+    /** Los ajustes, avisando cada vez que cambian: así los interruptores siempre muestran lo guardado. */
     fun observar(): Flow<AjustesNotificaciones> = callbackFlow {
         val escucha = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> trySend(actuales()) }
         val archivo = preferencias
@@ -43,6 +52,7 @@ class PreferenciasNotificaciones @Inject constructor(
         preferencias.edit().putBoolean(ClaveAlertas, activas).apply()
     }
 
+    /** Si se puede mostrar un aviso de ese canal. Lo pregunta [Notificador] antes de cada notificación. */
     fun permite(canal: String): Boolean = when (canal) {
         Notificador.CanalAgenda -> actuales().recordatorios
         Notificador.CanalAlertas -> actuales().alertas
