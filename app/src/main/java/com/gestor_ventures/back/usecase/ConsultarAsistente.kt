@@ -34,7 +34,8 @@ private const val SemanasDeDetalle = 8L
 private const val ProductosDestacados = 5
 
 /**
- * HU-34. Le pregunta al asistente por las ventas del negocio, con sus números reales.
+ * HU-34 y HU-36. Le pregunta al asistente por las ventas del negocio y por cuánto puede
+ * reinvertir, con sus números reales.
  *
  * Vive en `usecase` porque cruza varios repositorios: arma el contexto con el resumen de HU-16
  * y el detalle de ventas, y se lo pasa a [AsistenteRepository].
@@ -69,6 +70,10 @@ class ConsultarAsistente @Inject constructor(
      *
      * Las reglas importan tanto como los datos: responder solo con lo que está acá, no inventar
      * cifras y decir cuándo un periodo no está, en vez de adivinarlo.
+     *
+     * HU-36. El monto para reinvertir no lo calcula el asistente: se lo da ya hecho
+     * [ResumenFinanciero], con la misma regla de HU-09 que usa el resumen de Finanzas. Así la
+     * cifra del chat y la de la pantalla son siempre la misma.
      */
     private suspend fun instruccionesPara(negocioId: Long): String {
         val hoy = reloj.ahora().toLocalDate()
@@ -139,6 +144,11 @@ class ConsultarAsistente @Inject constructor(
         }
     }
 
+    /**
+     * El resumen de un mes en líneas cortas. Van también las obligaciones y el apartado de la
+     * meta (HU-36): sin ellos, el asistente no podría explicar por qué lo disponible es menos
+     * que la ganancia.
+     */
     private fun StringBuilder.appendResumen(resumen: ResumenFinanciero) {
         appendLine("- Ingresos por ventas: ${pesos(resumen.ingresos)}")
         appendLine("- Gastos: ${pesos(resumen.gastos)}")
