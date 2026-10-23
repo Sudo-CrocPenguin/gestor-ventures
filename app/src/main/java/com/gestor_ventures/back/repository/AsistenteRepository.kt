@@ -5,12 +5,17 @@ import com.gestor_ventures.back.model.ErrorAsistente
 import com.gestor_ventures.back.model.MensajeAsistente
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.ResultadoAsistente
+import com.gestor_ventures.back.model.ResultadoSugerencia
+import com.gestor_ventures.back.model.Sugerencia
 import com.gestor_ventures.back.network.ContenidoGemini
 import com.gestor_ventures.back.network.GeminiApi
 import com.gestor_ventures.back.network.ParteGemini
 import com.gestor_ventures.back.network.PeticionGemini
 import com.gestor_ventures.db.dao.ConsultaIaDao
+import com.gestor_ventures.db.dao.SugerenciaDao
 import com.gestor_ventures.db.entity.ConsultaIaEntity
+import com.gestor_ventures.db.entity.SugerenciaEntity
+import com.gestor_ventures.db.enums.EstadoSugerencia
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import retrofit2.HttpException
@@ -20,6 +25,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Rápido y con nivel gratuito: alcanza de sobra para resumir números. */
+private const val TipoPromocion = "promocion"
+
 private const val ModeloGemini = "gemini-2.5-flash"
 
 /**
@@ -32,6 +39,7 @@ private const val ModeloGemini = "gemini-2.5-flash"
 class AsistenteRepository @Inject constructor(
     private val geminiApi: GeminiApi,
     private val consultaIaDao: ConsultaIaDao,
+    private val sugerenciaDao: SugerenciaDao,
     private val reloj: Reloj,
 ) {
 
@@ -52,31 +60,16 @@ class AsistenteRepository @Inject constructor(
         pregunta: String,
         instrucciones: String,
     ): ResultadoAsistente {
-        val apiKey = BuildConfig.GEMINI_API_KEY
-        if (apiKey.isBlank()) return ResultadoAsistente.Fallo(ErrorAsistente.SinApiKey)
-
         val anteriores = consultaIaDao.deSesion(negocioId, sesionId).flatMap { consulta ->
             listOf(
                 ContenidoGemini(role = "user", parts = listOf(ParteGemini(consulta.pregunta))),
                 ContenidoGemini(role = "model", parts = listOf(ParteGemini(consulta.respuesta))),
             )
         }
-        val peticion = PeticionGemini(
-            systemInstruction = ContenidoGemini(parts = listOf(ParteGemini(instrucciones))),
-            contents = anteriores + ContenidoGemini(role = "user", parts = listOf(ParteGemini(pregunta))),
-        )
-
-        val texto = try {
-            geminiApi.generarContenido(ModeloGemini, apiKey, peticion)
-                .candidates?.firstOrNull()?.content?.parts
-                ?.joinToString("") { it.text }
-                ?.trim()
-        } catch (e: HttpException) {
-            return ResultadoAsistente.Fallo(errorDe(e.code()))
-        } catch (_: IOException) {
-            return ResultadoAsistente.Fallo(ErrorAsistente.SinConexion)
+        val texto = when (val generado = generar(instrucciones, anteriores + mensajeDelUsuario(pregunta))) {
+            is Generado.Texto -> generado.texto
+            is Generado.Error -> return ResultadoAsistente.Fallo(generado.error)
         }
-        if (texto.isNullOrEmpty()) return ResultadoAsistente.Fallo(ErrorAsistente.RespuestaVacia)
 
         val consulta = ConsultaIaEntity(
             negocioId = negocioId,
@@ -93,6 +86,68 @@ class AsistenteRepository @Inject constructor(
      * Qué quiere decir cada código de error de Gemini. Si la clave es inválida, responde 400
      * o 403; si se pasó el límite gratuito, 429.
      */
+    fun sugerencias(negocioId: Long): Flow<List<Sugerencia>> =
+        sugerenciaDao.observarVisibles(negocioId).map { filas -> filas.map(::aSugerencia) }
+
+    suspend fun sugerirPromocion(negocioId: Long, instrucciones: String, pedido: String): ResultadoSugerencia {
+        val texto = when (val generado = generar(instrucciones, listOf(mensajeDelUsuario(pedido)))) {
+            is Generado.Texto -> generado.texto
+            is Generado.Error -> return ResultadoSugerencia.Fallo(generado.error)
+        }
+        val sugerencia = SugerenciaEntity(
+            negocioId = negocioId,
+            tipoSugerencia = TipoPromocion,
+            contenido = texto,
+            fechaGeneracion = reloj.ahora(),
+        )
+        val id = sugerenciaDao.insertar(sugerencia)
+        return ResultadoSugerencia.Generada(aSugerencia(sugerencia.copy(sugerenciaId = id)))
+    }
+
+    suspend fun guardarSugerencia(sugerenciaId: Long) {
+        sugerenciaDao.actualizarEstado(sugerenciaId, EstadoSugerencia.GUARDADA)
+    }
+
+    suspend fun descartarSugerencia(sugerenciaId: Long) {
+        sugerenciaDao.actualizarEstado(sugerenciaId, EstadoSugerencia.DESCARTADA)
+    }
+
+    private suspend fun generar(instrucciones: String, contenidos: List<ContenidoGemini>): Generado {
+        val apiKey = BuildConfig.GEMINI_API_KEY
+        if (apiKey.isBlank()) return Generado.Error(ErrorAsistente.SinApiKey)
+
+        val peticion = PeticionGemini(
+            systemInstruction = ContenidoGemini(parts = listOf(ParteGemini(instrucciones))),
+            contents = contenidos,
+        )
+        val texto = try {
+            geminiApi.generarContenido(ModeloGemini, apiKey, peticion)
+                .candidates?.firstOrNull()?.content?.parts
+                ?.joinToString("") { it.text }
+                ?.trim()
+        } catch (e: HttpException) {
+            return Generado.Error(errorDe(e.code()))
+        } catch (_: IOException) {
+            return Generado.Error(ErrorAsistente.SinConexion)
+        }
+        return if (texto.isNullOrEmpty()) Generado.Error(ErrorAsistente.RespuestaVacia) else Generado.Texto(texto)
+    }
+
+    private fun mensajeDelUsuario(texto: String) =
+        ContenidoGemini(role = "user", parts = listOf(ParteGemini(texto)))
+
+    private sealed interface Generado {
+        data class Texto(val texto: String) : Generado
+        data class Error(val error: ErrorAsistente) : Generado
+    }
+
+    private fun aSugerencia(entidad: SugerenciaEntity) = Sugerencia(
+        id = entidad.sugerenciaId,
+        contenido = entidad.contenido,
+        guardada = entidad.estadoSugerencia == EstadoSugerencia.GUARDADA,
+        fechaGeneracion = entidad.fechaGeneracion,
+    )
+
     private fun errorDe(codigo: Int): ErrorAsistente = when (codigo) {
         400, 401, 403 -> ErrorAsistente.ApiKeyInvalida
         429 -> ErrorAsistente.LimiteAlcanzado

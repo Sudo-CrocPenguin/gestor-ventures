@@ -31,6 +31,18 @@ enum class ErrorAsistente {
 }
 
 /** La respuesta del asistente, o por qué no la hubo. */
+data class Sugerencia(
+    val id: Long,
+    val contenido: String,
+    val guardada: Boolean,
+    val fechaGeneracion: LocalDateTime,
+)
+
+sealed interface ResultadoSugerencia {
+    data class Generada(val sugerencia: Sugerencia) : ResultadoSugerencia
+    data class Fallo(val error: ErrorAsistente) : ResultadoSugerencia
+}
+
 sealed interface ResultadoAsistente {
     data class Respuesta(val mensaje: MensajeAsistente) : ResultadoAsistente
     data class Fallo(val error: ErrorAsistente) : ResultadoAsistente

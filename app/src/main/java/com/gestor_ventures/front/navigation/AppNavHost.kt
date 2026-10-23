@@ -23,6 +23,7 @@ import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.reportes.ReportesRoute
 import com.gestor_ventures.front.ui.agenda.AgendaRoute
 import com.gestor_ventures.front.ui.asistente.AsistenteRoute
+import com.gestor_ventures.front.ui.asistente.PromocionesRoute
 import com.gestor_ventures.front.ui.auth.PerfilRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
 import com.gestor_ventures.front.ui.negocio.EditarNegocioRoute
@@ -43,6 +44,8 @@ object Rutas {
 
     /** HU-04. Editar el perfil de quien tiene la sesión abierta, desde el menú lateral. */
     const val Perfil = "perfil"
+
+    const val Promociones = "promociones"
 
     /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
     const val GastosFijos = "gastos_fijos"
@@ -255,7 +258,11 @@ fun AppNavHost(
 
         // HU-34. Preguntarle al asistente por las ventas del negocio.
         composable(TopLevelDestination.Asistente.route) {
-            AsistenteRoute()
+            AsistenteRoute(onVerPromociones = { navController.navigate(Rutas.Promociones) })
+        }
+
+        composable(Rutas.Promociones) {
+            PromocionesRoute(onBack = { navController.popBackStack() })
         }
     }
 }

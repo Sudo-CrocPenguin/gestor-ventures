@@ -17,6 +17,7 @@ import com.gestor_ventures.db.dao.ObligacionDao
 import com.gestor_ventures.db.dao.PedidoDao
 import com.gestor_ventures.db.dao.RecordatorioClienteDao
 import com.gestor_ventures.db.dao.RecordatorioDao
+import com.gestor_ventures.db.dao.SugerenciaDao
 import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.dao.VentaDao
 import com.gestor_ventures.db.entity.AlertaEntity
@@ -115,4 +116,6 @@ abstract class GestorVenturesDatabase : RoomDatabase() {
 
     /** HU-34. */
     abstract fun consultaIaDao(): ConsultaIaDao
+
+    abstract fun sugerenciaDao(): SugerenciaDao
 }

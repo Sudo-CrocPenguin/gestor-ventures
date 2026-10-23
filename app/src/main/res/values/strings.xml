@@ -631,4 +631,14 @@
     <string name="asistente_error_limite">El asistente recibió demasiadas preguntas seguidas. Espera un minuto y vuelve a intentar.</string>
     <string name="asistente_error_servicio">El asistente no está disponible en este momento. Intenta de nuevo en un rato.</string>
     <string name="asistente_error_respuesta_vacia">El asistente no supo qué responder. Prueba a preguntarlo de otra forma.</string>
+    <string name="asistente_promociones">Ideas de promociones</string>
+    <string name="promociones_titulo">Ideas de promociones</string>
+    <string name="promociones_subtitulo">El asistente propone promociones a partir de lo que más vendes, tus días flojos y los clientes que dejaron de comprar.</string>
+    <string name="promociones_vacio">Todavía no tienes ideas. Pide la primera y guarda las que te sirvan.</string>
+    <string name="promociones_pensando">Pensando una promoción para tu negocio…</string>
+    <string name="promociones_sugerir">Sugerir una promoción</string>
+    <string name="promociones_guardar">Guardar</string>
+    <string name="promociones_descartar">Descartar</string>
+    <string name="promociones_quitar">Quitar</string>
+    <string name="promociones_guardadas">Guardadas</string>
 </resources>

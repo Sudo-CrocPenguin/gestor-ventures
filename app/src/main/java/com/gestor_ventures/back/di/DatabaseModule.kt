@@ -19,6 +19,7 @@ import com.gestor_ventures.db.dao.ObligacionDao
 import com.gestor_ventures.db.dao.PedidoDao
 import com.gestor_ventures.db.dao.RecordatorioClienteDao
 import com.gestor_ventures.db.dao.RecordatorioDao
+import com.gestor_ventures.db.dao.SugerenciaDao
 import com.gestor_ventures.db.dao.UsuarioDao
 import com.gestor_ventures.db.dao.VentaDao
 import dagger.Module
@@ -91,6 +92,9 @@ object DatabaseModule {
 
     @Provides
     fun proveerConsultaIaDao(db: GestorVenturesDatabase): ConsultaIaDao = db.consultaIaDao()
+
+    @Provides
+    fun proveerSugerenciaDao(db: GestorVenturesDatabase): SugerenciaDao = db.sugerenciaDao()
 
     @Provides
     @Singleton

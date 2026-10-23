@@ -52,7 +52,7 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 import java.time.LocalDateTime
 
 @Composable
-fun AsistenteRoute(viewModel: AsistenteViewModel = hiltViewModel()) {
+fun AsistenteRoute(onVerPromociones: () -> Unit, viewModel: AsistenteViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     AsistenteScreen(
@@ -61,6 +61,7 @@ fun AsistenteRoute(viewModel: AsistenteViewModel = hiltViewModel()) {
         onEnviar = viewModel::enviar,
         onSugerencia = viewModel::usarSugerencia,
         onNuevaConversacion = viewModel::nuevaConversacion,
+        onVerPromociones = onVerPromociones,
     )
 }
 
@@ -75,6 +76,7 @@ fun AsistenteScreen(
     onEnviar: () -> Unit,
     onSugerencia: (String) -> Unit,
     onNuevaConversacion: () -> Unit,
+    onVerPromociones: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // Cada mensaje nuevo baja la lista hasta el final, como en cualquier chat.
@@ -85,11 +87,14 @@ fun AsistenteScreen(
     }
 
     Column(modifier.fillMaxSize().imePadding()) {
-        if (!uiState.conversacionVacia) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.End,
-            ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            TextButton(onClick = onVerPromociones, enabled = !uiState.sinNegocio) {
+                Text(stringResource(R.string.asistente_promociones))
+            }
+            if (!uiState.conversacionVacia) {
                 TextButton(onClick = onNuevaConversacion, enabled = !uiState.enviando) {
                     Text(stringResource(R.string.asistente_nueva_conversacion))
                 }
@@ -243,7 +248,7 @@ private fun Pensando(modifier: Modifier = Modifier) {
  * Gemini escribe con formato de Markdown: **negritas** y viñetas con asterisco. Acá se
  * convierten en negritas de verdad y en "•", para que no se vean los asteriscos.
  */
-private fun conNegritas(texto: String): AnnotatedString = buildAnnotatedString {
+internal fun conNegritas(texto: String): AnnotatedString = buildAnnotatedString {
     texto.replace(Regex("(?m)^\\s*[*-]\\s+"), "• ")
         .split("**")
         .forEachIndexed { indice, trozo ->
@@ -289,6 +294,7 @@ private fun VistaPrevia(uiState: AsistenteUiState) {
                 onEnviar = {},
                 onSugerencia = {},
                 onNuevaConversacion = {},
+                onVerPromociones = {},
             )
         }
     }
