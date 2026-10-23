@@ -71,10 +71,13 @@ fun ResumenFinancieroRoute(
 }
 
 /**
- * HU-16. Cómo le fue al negocio este mes y cuánto de eso se puede sacar hoy.
+ * HU-16. Cómo le fue al negocio en el periodo elegido y cuánto de eso se puede sacar hoy.
  *
  * El orden responde a tres preguntas seguidas: qué pasó (ingresos y egresos), qué quedó
  * (la ganancia) y de eso qué es mío (lo disponible, después de descontar lo comprometido).
+ *
+ * Arriba van los mismos chips de periodo del historial, para que la pregunta "¿de cuándo?" se
+ * responda igual en toda la app.
  */
 @Composable
 fun ResumenFinancieroScreen(
@@ -115,7 +118,8 @@ fun ResumenFinancieroScreen(
             onPersonalizar = onPersonalizar,
         )
 
-        // Un mes sin un solo movimiento se dice con una frase; un tablero de ceros no dice nada.
+        // Un periodo sin un solo movimiento se dice con una frase; un tablero de ceros no dice nada.
+        // Los chips quedan arriba igual, para poder cambiar a un periodo que sí tenga.
         if (resumen.sinMovimientos) {
             GvInfoNote(stringResource(R.string.resumen_vacio))
         } else {
@@ -144,7 +148,7 @@ private fun MovimientosCard(
     modifier: Modifier = Modifier,
 ) {
     GvCard(modifier) {
-        // El total del mes invita a la pregunta siguiente: "¿de qué está hecho?".
+        // El total del periodo invita a la pregunta siguiente: "¿de qué está hecho?".
         GvCardHeader(title = stringResource(R.string.resumen_movimientos)) {
             GvTextLink(text = stringResource(R.string.historial_ver), onClick = onVerHistorial)
         }
@@ -415,6 +419,10 @@ private fun Separador() {
     )
 }
 
+/**
+ * Cómo se nombra el periodo en la etiqueta: "Octubre 2026" si es un mes completo, "16 oct" si
+ * es un solo día y "1 oct – 15 oct" en cualquier otro caso.
+ */
 private fun etiquetaDe(rango: RangoFechas): String = when {
     rango.desde.dayOfMonth == 1 &&
         rango.hasta == rango.desde.withDayOfMonth(rango.desde.lengthOfMonth()) ->

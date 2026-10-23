@@ -9,6 +9,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 
+/**
+ * HU-10. "Información del negocio" del menú lateral.
+ *
+ * No tiene pantalla propia: reusa la del registro en modo edición, para que crear y editar un
+ * negocio pidan y validen exactamente lo mismo. Igual que en el registro, la pantalla se pinta
+ * con el color que se va eligiendo.
+ */
 @Composable
 fun EditarNegocioRoute(
     onBack: () -> Unit,

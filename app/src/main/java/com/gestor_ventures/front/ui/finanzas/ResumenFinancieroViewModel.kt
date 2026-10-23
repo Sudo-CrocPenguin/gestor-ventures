@@ -22,11 +22,14 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 /**
- * HU-16. El resumen del mes del negocio activo.
+ * HU-16. El resumen del negocio activo en el periodo que elija el usuario.
  *
  * No calcula nada: todo el cruce está en [CalcularResumenFinanciero]. Acá solo se decide de qué
- * negocio se habla y se sigue escuchando, para que el resumen cambie solo cuando se registre
- * una venta o se marque una obligación como pagada.
+ * negocio y de qué periodo se habla, y se sigue escuchando, para que el resumen cambie solo
+ * cuando se registre una venta, se elija otro periodo o se marque una obligación como pagada.
+ *
+ * El periodo se elige igual que en el historial (HU-17): los chips de un toque o un rango
+ * escrito a mano.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -53,10 +56,12 @@ class ResumenFinancieroViewModel @Inject constructor(
         }
     }
 
+    /** HU-16. Cambia a uno de los periodos de un toque. */
     fun onPeriodoChange(nuevo: PeriodoPredefinido) {
         aplicar(SeleccionDePeriodo.Rapido(nuevo))
     }
 
+    /** Abre la hoja del rango con lo que ya estuviera elegido, si era personalizado. */
     fun abrirRango() {
         val actual = _uiState.value.seleccion
         _uiState.update {
@@ -81,6 +86,10 @@ class ResumenFinancieroViewModel @Inject constructor(
         _uiState.update { it.copy(rango = it.rango?.copy(hasta = fecha)) }
     }
 
+    /**
+     * Aplica el rango escrito a mano. Si `personalizado` lo rechaza —fechas al revés— no se
+     * aplica nada y la hoja se queda abierta con el aviso.
+     */
     fun aplicarRango() {
         val formulario = _uiState.value.rango ?: return
         val desde = formulario.desde ?: return

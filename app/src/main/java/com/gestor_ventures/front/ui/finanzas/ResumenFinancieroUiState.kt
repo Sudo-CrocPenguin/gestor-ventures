@@ -15,7 +15,9 @@ import com.gestor_ventures.front.model.FormularioRango
 data class ResumenFinancieroUiState(
     val resumen: ResumenFinanciero? = null,
     val cargando: Boolean = true,
+    /** El periodo que se está mirando. Arranca en el mes en curso. */
     val seleccion: SeleccionDePeriodo = SeleccionDePeriodo.Rapido(PeriodoPredefinido.Mes),
+    /** Las fechas del rango a mano mientras se eligen; null cuando la hoja está cerrada. */
     val rango: FormularioRango? = null,
 ) {
     /** Sin negocio activo no hay nada que resumir; pasa apenas se abre la app por primera vez. */

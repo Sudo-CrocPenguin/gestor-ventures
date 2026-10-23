@@ -35,11 +35,14 @@ import javax.inject.Inject
  * pieza de donde viva.
  *
  * Lo que aporta cada historia:
- * - HU-11/HU-12 los ingresos, HU-13 los costos, HU-14 los gastos del mes.
- * - HU-06 los gastos fijos, ya llevados a su equivalente mensual.
+ * - HU-11/HU-12 los ingresos, HU-13 los costos, HU-14 los gastos del periodo.
+ * - HU-06 los gastos fijos, llevados a lo que le corresponde al periodo.
  * - HU-07 lo que se debe y no se ha pagado.
- * - HU-08 cuánto apartar este mes y cómo va la meta.
+ * - HU-08 cuánto apartar en el periodo y cómo va la meta.
  * - HU-09 el porcentaje que vuelve al negocio.
+ *
+ * El periodo lo elige el usuario (HU-16): hoy, ayer, esta semana, este mes o un rango escrito
+ * a mano. Si no se dice ninguno, es el mes en curso.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class CalcularResumenFinanciero @Inject constructor(
@@ -53,6 +56,10 @@ class CalcularResumenFinanciero @Inject constructor(
     private val reloj: Reloj,
 ) {
 
+    /**
+     * El resumen del negocio en el periodo elegido. Se vuelve a calcular solo cada vez que se
+     * registra, corrige o borra algo que lo afecte.
+     */
     operator fun invoke(
         negocioId: Long,
         seleccion: SeleccionDePeriodo = SeleccionDePeriodo.Rapido(PeriodoPredefinido.Mes),
@@ -80,6 +87,13 @@ class CalcularResumenFinanciero @Inject constructor(
         }
     }
 
+    /**
+     * Las fechas del periodo elegido.
+     *
+     * "Este mes" es el mes completo, del día 1 al último, y no solo hasta hoy. Los movimientos
+     * son los mismos —no hay ventas ni gastos con fecha futura—, pero así los gastos fijos y el
+     * apartado de la meta se cobran enteros, como un mes de verdad.
+     */
     private fun rangoDe(seleccion: SeleccionDePeriodo): RangoFechas {
         val hoy = reloj.ahora().toLocalDate()
         if (seleccion == SeleccionDePeriodo.Rapido(PeriodoPredefinido.Mes)) {
@@ -89,6 +103,14 @@ class CalcularResumenFinanciero @Inject constructor(
         return seleccion.rango(hoy)
     }
 
+    /**
+     * Cuántos meses ocupa el rango, contando cada mes por los días que el rango toma de él.
+     *
+     * Los gastos fijos y el apartado de la meta son montos de un mes. Para un periodo más
+     * corto se cobra solo la parte que le toca: un mes completo cuenta 1, y del 1 al 7 de
+     * octubre cuenta 7/31. Sin esto, el resumen de un solo día descontaría un mes entero de
+     * arriendo y el dinero disponible casi siempre saldría en rojo.
+     */
     private fun mesesEn(rango: RangoFechas): Double {
         var meses = 0.0
         var mes = YearMonth.from(rango.desde)
@@ -101,6 +123,7 @@ class CalcularResumenFinanciero @Inject constructor(
         return meses
     }
 
+    /** Lo que de verdad pasó en el periodo: entró, salió y costó producir. */
     private fun movimientosEntre(negocioId: Long, rango: RangoFechas): Flow<Movimientos> = combine(
         ventaRepository.totalEntre(negocioId, rango.desde, rango.hasta),
         gastoRepository.totalEntre(negocioId, rango.desde, rango.hasta),

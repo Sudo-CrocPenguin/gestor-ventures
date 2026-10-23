@@ -20,6 +20,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * HU-10. Edita los datos del negocio activo que se pidieron al registrarlo (HU-05): nombre,
+ * categoría, tipo de actividad y color de marca.
+ *
+ * Usa el mismo estado que el registro, [RegistrarNegocioUiState], porque el formulario es el
+ * mismo. Guarda con [NegocioRepository.actualizarNegocio], que aplica las mismas reglas que al
+ * crear el negocio y anota la fecha de actualización.
+ *
+ * Lo demás de la configuración (gastos fijos, obligaciones, meta, reinversión y categorías) ya
+ * se edita en sus propias pantallas del menú.
+ */
 @HiltViewModel
 class EditarNegocioViewModel @Inject constructor(
     private val negocioRepository: NegocioRepository,
@@ -29,11 +40,14 @@ class EditarNegocioViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RegistrarNegocioUiState())
     val uiState: StateFlow<RegistrarNegocioUiState> = _uiState.asStateFlow()
 
+    /** Avisa una sola vez que los cambios quedaron guardados, para que la pantalla se cierre. */
     private val _guardado = Channel<Unit>(Channel.BUFFERED)
     val guardado: Flow<Unit> = _guardado.receiveAsFlow()
 
+    /** El negocio tal como estaba al abrir la pantalla; null mientras se carga. */
     private var negocio: Negocio? = null
 
+    /** Llena el formulario con los datos actuales del negocio activo. */
     init {
         viewModelScope.launch {
             val actual = negocioActivoRepository.negocioActivo.filterNotNull().first()
@@ -65,6 +79,12 @@ class EditarNegocioViewModel @Inject constructor(
         _uiState.update { it.copy(colorMarca = hex) }
     }
 
+    /**
+     * Guarda los cambios. El porcentaje de reinversión no está en este formulario (se edita en
+     * "Meta y reinversión"), así que se manda el que ya tenía para no perderlo.
+     *
+     * Si el repositorio rechaza algo, el formulario se queda abierto con el aviso.
+     */
     fun guardar() {
         val estado = _uiState.value
         val actual = negocio ?: return

@@ -40,6 +40,7 @@ object Rutas {
     const val RegistrarVenta = "registrar_venta"
     const val RegistrarNegocio = "registrar_negocio"
 
+    /** HU-10. Editar la información del negocio activo, desde el menú lateral. */
     const val EditarNegocio = "editar_negocio"
 
     /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */

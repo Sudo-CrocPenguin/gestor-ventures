@@ -76,6 +76,9 @@ fun RegistrarNegocioRoute(
 /**
  * HU-05. Primer paso del onboarding: nombre del negocio, a qué se dedica y tipo de actividad,
  * que es lo que define qué módulos de agenda verá después.
+ *
+ * HU-10. Con [editando] en true es la pantalla para editar el negocio: cambia la barra de pasos
+ * por una con flecha de volver, quita la bienvenida y el botón dice "Guardar cambios".
  */
 @Composable
 fun RegistrarNegocioScreen(

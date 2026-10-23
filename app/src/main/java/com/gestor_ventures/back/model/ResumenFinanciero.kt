@@ -3,7 +3,7 @@ package com.gestor_ventures.back.model
 import java.time.LocalDate
 
 /**
- * HU-16. Cómo le fue al negocio en el mes y cuánto de eso se puede sacar hoy.
+ * HU-16. Cómo le fue al negocio en un periodo y cuánto de eso se puede sacar hoy.
  *
  * El resumen no guarda ningún número calculado: recibe lo que pasó (ingresos, gastos, costos) y
  * lo que el usuario configuró (gastos fijos, obligaciones, meta, reinversión), y deriva el
@@ -13,6 +13,7 @@ import java.time.LocalDate
  * para funcionar, después lo que ya está comprometido, y lo que sobra es lo disponible.
  */
 data class ResumenFinanciero(
+    /** HU-16. El periodo que se está resumiendo, con los dos extremos incluidos. */
     val rango: RangoFechas,
     /** HU-11/HU-12. Lo que entró por ventas. */
     val ingresos: Double = 0.0,
@@ -20,11 +21,11 @@ data class ResumenFinanciero(
     val gastos: Double = 0.0,
     /** HU-13. Lo que costó producir lo que se vende. */
     val costos: Double = 0.0,
-    /** HU-06. Los gastos fijos configurados, llevados a su equivalente de un mes. */
+    /** HU-06. Los gastos fijos configurados, en la parte que le toca al periodo. */
     val gastosFijos: Double = 0.0,
     /** HU-07. Lo que se debe y todavía no se ha pagado. */
     val obligacionesPendientes: Double = 0.0,
-    /** HU-08. Lo que toca apartar este mes para llegar a la meta a tiempo. */
+    /** HU-08. Lo que toca apartar en el periodo para llegar a la meta a tiempo. */
     val apartadoParaMeta: Double = 0.0,
     /** HU-09. De cada ganancia, cuánto vuelve al negocio. De 0 a 100. */
     val porcentajeReinversion: Double = 0.0,
