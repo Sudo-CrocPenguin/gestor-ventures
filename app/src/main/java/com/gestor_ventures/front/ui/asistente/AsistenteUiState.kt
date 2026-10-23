@@ -28,6 +28,7 @@ val preguntasSugeridas = listOf(
     R.string.asistente_sugerencia_semana,
     R.string.asistente_sugerencia_mes,
     R.string.asistente_sugerencia_reinversion,
+    R.string.asistente_sugerencia_gastos,
     R.string.asistente_sugerencia_dia,
     R.string.asistente_sugerencia_producto,
 )

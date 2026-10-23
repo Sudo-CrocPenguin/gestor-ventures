@@ -7,6 +7,7 @@ import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.ResultadoAsistente
 import com.gestor_ventures.back.model.ResumenFinanciero
 import com.gestor_ventures.back.model.SeleccionDePeriodo
+import com.gestor_ventures.back.model.TipoCategoria
 import com.gestor_ventures.back.model.Venta
 import com.gestor_ventures.back.model.personalizado
 import com.gestor_ventures.back.repository.AsistenteRepository
@@ -49,6 +50,7 @@ class ConsultarAsistente @Inject constructor(
     private val negocioRepository: NegocioRepository,
     private val ventaRepository: VentaRepository,
     private val calcularResumenFinanciero: CalcularResumenFinanciero,
+    private val compararGastosPorCategoria: CompararGastosPorCategoria,
     private val reloj: Reloj,
 ) {
 
@@ -89,6 +91,7 @@ class ConsultarAsistente @Inject constructor(
 
         val desde = minOf(hoy.minusDays(DiasDeDetalle - 1), hoy.with(DayOfWeek.MONDAY).minusWeeks(SemanasDeDetalle - 1))
         val ventas = ventaRepository.ventasEntre(negocioId, desde, hoy).first()
+        val comparacion = compararGastosPorCategoria(negocioId, hoy)
 
         return buildString {
             appendLine(
@@ -113,6 +116,13 @@ class ConsultarAsistente @Inject constructor(
                     "negativa, di que este mes no hay qué reinvertir y por qué. Si el porcentaje es " +
                     "0 %, dile que lo puede configurar en Meta y reinversión, en el menú.",
             )
+            appendLine(
+                "Si te preguntan en qué están gastando demasiado, usa la comparación de gastos y " +
+                    "costos por categoría: nombra primero las categorías que más subieron, con " +
+                    "cuánto y en qué porcentaje, y sugiere en una frase qué revisar. Aclara que " +
+                    "comparas este mes hasta hoy contra los mismos días del mes anterior. Si nada " +
+                    "subió, dilo como una buena noticia.",
+            )
             appendLine()
             appendLine("Hoy es ${fechaLarga(hoy)}.")
             negocio?.let { appendLine("Negocio: ${it.nombre} (${it.categoria}).") }
@@ -133,6 +143,22 @@ class ConsultarAsistente @Inject constructor(
             appendLine("## Ventas por día (últimos $DiasDeDetalle días)")
             ventasPorDia(ventas, hoy).forEach { (dia, total) ->
                 appendLine("- ${fechaCorta(dia)} (${diaDeLaSemana(dia)}): ${pesos(total.first)} en ${total.second} ventas")
+            }
+            appendLine()
+            appendLine(
+                "## Gastos y costos por categoría: ${fechaCorta(comparacion.actual.desde)} al " +
+                    "${fechaCorta(comparacion.actual.hasta)} contra ${fechaCorta(comparacion.anterior.desde)} " +
+                    "al ${fechaCorta(comparacion.anterior.hasta)} (ordenadas de lo que más subió a lo que más bajó)",
+            )
+            if (comparacion.variaciones.isEmpty()) appendLine("- Sin gastos ni costos en los dos periodos.")
+            comparacion.variaciones.forEach { variacion ->
+                val tipo = if (variacion.tipo == TipoCategoria.GASTO) "gasto" else "costo"
+                val porcentaje = variacion.porcentaje?.let { " (${if (it >= 0) "+" else ""}${it.roundToLong()} %)" }
+                    ?: if (variacion.anterior <= 0.0 && variacion.actual > 0.0) " (nueva este mes)" else ""
+                appendLine(
+                    "- ${variacion.nombre} [$tipo]: ${pesos(variacion.actual)} ahora, " +
+                        "${pesos(variacion.anterior)} antes, diferencia ${pesos(variacion.diferencia)}$porcentaje",
+                )
             }
             appendLine()
             appendLine("## Lo más vendido (últimos $DiasDeDetalle días)")
