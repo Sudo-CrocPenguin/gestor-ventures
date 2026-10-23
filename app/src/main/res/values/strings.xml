@@ -660,4 +660,11 @@
     <string name="alertas_vacio">Todo en orden: no hay alertas. El asistente revisa tu negocio todos los días y te avisa si bajan las ventas, se dispara un gasto o se atrasa tu meta.</string>
     <string name="alertas_marcar_leida">Marcar como leída</string>
     <string name="alertas_marcar_todas">Marcar todas</string>
+    <string name="notificaciones_que_recibir">Qué quieres recibir</string>
+    <string name="notificaciones_recordatorios">Recordatorios de agenda</string>
+    <string name="notificaciones_recordatorios_detalle">Antes de cada cita o entrega que tenga recordatorio.</string>
+    <string name="notificaciones_alertas">Alertas del negocio</string>
+    <string name="notificaciones_alertas_detalle">Cuando bajan las ventas, se dispara un gasto o tu meta se atrasa.</string>
+    <string name="notificaciones_apagadas_sistema">Las notificaciones de la app están apagadas en el teléfono: aunque elijas qué recibir, no te va a llegar nada hasta que las actives.</string>
+    <string name="notificaciones_abrir_ajustes">Abrir ajustes del teléfono</string>
 </resources>

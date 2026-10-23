@@ -3,6 +3,7 @@ package com.gestor_ventures.front.ui.notificaciones
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Alerta
+import com.gestor_ventures.back.notificaciones.PreferenciasNotificaciones
 import com.gestor_ventures.back.repository.AlertaRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.usecase.GenerarAlertas
@@ -29,6 +30,7 @@ import javax.inject.Inject
 class NotificacionesViewModel @Inject constructor(
     private val alertaRepository: AlertaRepository,
     private val negocioActivoRepository: NegocioActivoRepository,
+    private val preferenciasNotificaciones: PreferenciasNotificaciones,
     generarAlertas: GenerarAlertas,
 ) : ViewModel() {
 
@@ -46,6 +48,19 @@ class NotificacionesViewModel @Inject constructor(
                 _uiState.update { it.copy(alertas = alertas, cargando = false) }
             }
         }
+        viewModelScope.launch {
+            preferenciasNotificaciones.observar().collect { ajustes ->
+                _uiState.update { it.copy(ajustes = ajustes) }
+            }
+        }
+    }
+
+    fun onRecordatoriosChange(activos: Boolean) {
+        preferenciasNotificaciones.cambiarRecordatorios(activos)
+    }
+
+    fun onAlertasChange(activas: Boolean) {
+        preferenciasNotificaciones.cambiarAlertas(activas)
     }
 
     fun marcarLeida(alerta: Alerta) {

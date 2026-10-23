@@ -5,11 +5,13 @@ import androidx.annotation.StringRes
 import com.gestor_ventures.R
 import com.gestor_ventures.back.model.Alerta
 import com.gestor_ventures.back.model.TipoAlerta
+import com.gestor_ventures.back.notificaciones.AjustesNotificaciones
 
 /** HU-38. Estado de la pantalla Notificaciones: por ahora, las alertas del negocio. */
 data class NotificacionesUiState(
     val alertas: List<Alerta> = emptyList(),
     val cargando: Boolean = true,
+    val ajustes: AjustesNotificaciones = AjustesNotificaciones(),
 ) {
     val vacio: Boolean get() = !cargando && alertas.isEmpty()
 

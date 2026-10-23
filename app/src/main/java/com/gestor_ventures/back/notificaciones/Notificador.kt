@@ -55,7 +55,7 @@ object Notificador {
      * queda guardado, pero no hay cómo avisar.
      */
     fun mostrar(context: Context, id: Int, canal: String, titulo: String, texto: String) {
-        if (!puedeNotificar(context)) return
+        if (!puedeNotificar(context) || !PreferenciasNotificaciones(context).permite(canal)) return
 
         val abrirApp = PendingIntent.getActivity(
             context,
