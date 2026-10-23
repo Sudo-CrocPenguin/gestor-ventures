@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
 import com.gestor_ventures.back.model.ErrorNegocio
 import com.gestor_ventures.back.model.TipoActividad
+import com.gestor_ventures.front.components.GvBackTopBar
 import com.gestor_ventures.front.components.GvChip
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPasoTopBar
@@ -81,6 +82,7 @@ fun RegistrarNegocioScreen(
     uiState: RegistrarNegocioUiState,
     onBack: () -> Unit,
     puedeVolver: Boolean = true,
+    editando: Boolean = false,
     onNombreChange: (String) -> Unit,
     onCategoriaChange: (String) -> Unit,
     onTipoActividadChange: (TipoActividad) -> Unit,
@@ -90,12 +92,16 @@ fun RegistrarNegocioScreen(
 ) {
     Column(modifier.fillMaxSize()) {
         // Si es el primer negocio no hay a dónde volver: la app no funciona sin él.
-        GvPasoTopBar(
-            paso = PasoActual,
-            totalPasos = TotalPasos,
-            onBack = onBack,
-            mostrarVolver = puedeVolver,
-        )
+        if (editando) {
+            GvBackTopBar(titulo = stringResource(R.string.menu_info_negocio), onBack = onBack)
+        } else {
+            GvPasoTopBar(
+                paso = PasoActual,
+                totalPasos = TotalPasos,
+                onBack = onBack,
+                mostrarVolver = puedeVolver,
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -104,7 +110,7 @@ fun RegistrarNegocioScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Encabezado()
+            if (!editando) Encabezado()
 
             // 1. Cómo se llama.
             GvTextField(
@@ -152,7 +158,9 @@ fun RegistrarNegocioScreen(
 
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxWidth()) {
             GvPrimaryButton(
-                text = stringResource(R.string.negocio_continuar),
+                text = stringResource(
+                    if (editando) R.string.negocio_guardar_cambios else R.string.negocio_continuar,
+                ),
                 onClick = onGuardar,
                 enabled = uiState.puedeGuardar,
                 modifier = Modifier

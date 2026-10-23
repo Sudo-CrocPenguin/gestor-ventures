@@ -87,6 +87,7 @@ fun MainScreen(
         }
 
         val ruta = when (opcion) {
+            OpcionMenu.InformacionNegocio -> Rutas.EditarNegocio
             OpcionMenu.GastosFijos -> Rutas.GastosFijos
             OpcionMenu.MetaYReinversion -> Rutas.MetaYReinversion
             OpcionMenu.Categorias -> Rutas.Categorias

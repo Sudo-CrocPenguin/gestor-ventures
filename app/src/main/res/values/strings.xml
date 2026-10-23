@@ -243,6 +243,8 @@
     <!-- Letras de muestra sobre el color, para ver si el texto se lee encima. -->
     <string name="color_personalizado_muestra">Aa</string>
     <string name="negocio_continuar">Continuar</string>
+    <string name="negocio_guardar_cambios">Guardar cambios</string>
+    <string name="negocio_actualizado">Negocio actualizado</string>
     <string name="negocio_creado">Negocio creado ✓</string>
     <string name="negocio_error_nombre_vacio">Escribe el nombre del negocio.</string>
     <string name="negocio_error_nombre_largo">El nombre no puede pasar de 100 caracteres.</string>
