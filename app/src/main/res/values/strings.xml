@@ -195,6 +195,16 @@
     <string name="menu_metodos_pago">Métodos de pago</string>
     <string name="menu_equipo">Equipo (vendedores)</string>
     <string name="menu_mi_perfil">Mi perfil</string>
+    <string name="perfil_correo">Correo</string>
+    <string name="perfil_cambiar_foto">Cambiar foto</string>
+    <string name="perfil_quitar_foto">Quitar</string>
+    <string name="perfil_foto_ayuda">JPG, PNG o WEBP de hasta 5 MB.</string>
+    <string name="perfil_actualizado">Perfil actualizado</string>
+    <string name="perfil_error_telefono">El teléfono debe tener solo números, entre 7 y 15 dígitos.</string>
+    <string name="perfil_error_foto_formato">Esa imagen no sirve: usa una foto JPG, PNG o WEBP.</string>
+    <string name="perfil_error_foto_pesada">La foto pesa más de 5 MB. Elige una más liviana.</string>
+    <string name="perfil_error_foto_ilegible">No pudimos leer esa foto. Prueba con otra.</string>
+    <string name="perfil_error_usuario">No encontramos tu perfil. Cierra sesión y vuelve a entrar.</string>
     <string name="menu_notificaciones">Notificaciones</string>
     <string name="menu_cerrar_sesion">Cerrar sesión</string>
     <string name="menu_negocio_cambiado">Ahora estás en %1$s · %2$s</string>

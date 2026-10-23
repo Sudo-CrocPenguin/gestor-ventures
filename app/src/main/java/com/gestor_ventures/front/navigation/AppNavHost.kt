@@ -26,6 +26,7 @@ import com.gestor_ventures.front.ui.finanzas.HistorialRoute
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.reportes.ReportesRoute
+import com.gestor_ventures.front.ui.auth.PerfilRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
 import com.gestor_ventures.front.ui.negocio.EditarNegocioRoute
 import com.gestor_ventures.front.ui.negocio.GastosYObligacionesRoute
@@ -42,6 +43,8 @@ object Rutas {
 
     /** HU-10. Editar la información del negocio activo, desde el menú lateral. */
     const val EditarNegocio = "editar_negocio"
+
+    const val Perfil = "perfil"
 
     /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
     const val GastosFijos = "gastos_fijos"
@@ -150,6 +153,17 @@ fun AppNavHost(
         composable(Rutas.MetaYReinversion) {
             val mensaje = stringResource(R.string.meta_guardada)
             MetaYReinversionRoute(
+                onBack = { navController.popBackStack() },
+                onGuardado = {
+                    navController.popBackStack()
+                    mostrarMensaje(mensaje)
+                },
+            )
+        }
+
+        composable(Rutas.Perfil) {
+            val mensaje = stringResource(R.string.perfil_actualizado)
+            PerfilRoute(
                 onBack = { navController.popBackStack() },
                 onGuardado = {
                     navController.popBackStack()
