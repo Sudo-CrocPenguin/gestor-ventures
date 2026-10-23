@@ -8,12 +8,11 @@ import com.gestor_ventures.back.model.SeleccionDePeriodo
 import com.gestor_ventures.back.model.TipoCategoria
 import com.gestor_ventures.back.model.Venta
 import com.gestor_ventures.back.model.personalizado
+import com.gestor_ventures.back.model.pesosEnTexto
 import com.gestor_ventures.back.repository.ClienteRepository
 import com.gestor_ventures.back.repository.NegocioRepository
 import com.gestor_ventures.back.repository.VentaRepository
 import kotlinx.coroutines.flow.first
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -264,10 +263,7 @@ class ContextoDelNegocio @Inject constructor(
     }
 
     /** "$ 1.240.000", como lo escribiría el emprendedor. */
-    private fun pesos(monto: Double): String {
-        val simbolos = DecimalFormatSymbols(LocaleColombia).apply { groupingSeparator = '.' }
-        return "$ " + DecimalFormat("#,##0", simbolos).format(monto.roundToLong())
-    }
+    private fun pesos(monto: Double): String = pesosEnTexto(monto)
 
     private fun fechaLarga(fecha: LocalDate): String =
         fecha.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", LocaleColombia))

@@ -1,6 +1,7 @@
 package com.gestor_ventures
 
 import android.app.Application
+import com.gestor_ventures.back.notificaciones.AlertasWorker
 import com.gestor_ventures.back.notificaciones.Notificador
 import dagger.hilt.android.HiltAndroidApp
 
@@ -12,5 +13,6 @@ class GestorVenturesApp : Application() {
     override fun onCreate() {
         super.onCreate()
         Notificador.crearCanales(this)
+        AlertasWorker.programar(this)
     }
 }

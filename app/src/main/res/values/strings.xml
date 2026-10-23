@@ -651,4 +651,13 @@
         <item quantity="one">%d pregunta</item>
         <item quantity="other">%d preguntas</item>
     </plurals>
+    <string name="notificacion_canal_alertas">Alertas del negocio</string>
+    <string name="notificacion_canal_alertas_desc">Avisos cuando bajan las ventas, un gasto se dispara o la meta de ahorro se atrasa</string>
+    <string name="alerta_caida_ventas">Tus ventas bajaron</string>
+    <string name="alerta_gasto_elevado">Un gasto se disparó</string>
+    <string name="alerta_meta_en_riesgo">Tu meta de ahorro está en riesgo</string>
+    <string name="alertas_titulo">Alertas</string>
+    <string name="alertas_vacio">Todo en orden: no hay alertas. El asistente revisa tu negocio todos los días y te avisa si bajan las ventas, se dispara un gasto o se atrasa tu meta.</string>
+    <string name="alertas_marcar_leida">Marcar como leída</string>
+    <string name="alertas_marcar_todas">Marcar todas</string>
 </resources>

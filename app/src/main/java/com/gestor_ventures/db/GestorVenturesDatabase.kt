@@ -3,6 +3,7 @@ package com.gestor_ventures.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.gestor_ventures.db.dao.AlertaDao
 import com.gestor_ventures.db.dao.CajaDao
 import com.gestor_ventures.db.dao.CategoriaDao
 import com.gestor_ventures.db.dao.CitaDao
@@ -119,4 +120,6 @@ abstract class GestorVenturesDatabase : RoomDatabase() {
 
     /** HU-35. */
     abstract fun sugerenciaDao(): SugerenciaDao
+
+    abstract fun alertaDao(): AlertaDao
 }

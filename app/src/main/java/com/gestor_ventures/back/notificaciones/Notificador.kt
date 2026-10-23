@@ -24,6 +24,8 @@ object Notificador {
 
     const val CanalAgenda = "agenda"
 
+    const val CanalAlertas = "alertas"
+
     /** Desde Android 8 una notificación necesita un canal. Se crea al abrir la app. */
     fun crearCanales(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -32,7 +34,13 @@ object Notificador {
             context.getString(R.string.notificacion_canal_agenda),
             NotificationManager.IMPORTANCE_HIGH,
         ).apply { description = context.getString(R.string.notificacion_canal_agenda_desc) }
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(canal)
+        val alertas = NotificationChannel(
+            CanalAlertas,
+            context.getString(R.string.notificacion_canal_alertas),
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ).apply { description = context.getString(R.string.notificacion_canal_alertas_desc) }
+        context.getSystemService(NotificationManager::class.java)
+            .createNotificationChannels(listOf(canal, alertas))
     }
 
     /** Desde Android 13 el usuario tiene que dar permiso; antes, siempre se puede. */

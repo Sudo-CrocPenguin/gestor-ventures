@@ -28,6 +28,7 @@ import com.gestor_ventures.front.ui.asistente.AsistenteRoute
 import com.gestor_ventures.front.ui.asistente.HistorialAsistenteRoute
 import com.gestor_ventures.front.ui.asistente.PromocionesRoute
 import com.gestor_ventures.front.ui.auth.PerfilRoute
+import com.gestor_ventures.front.ui.notificaciones.NotificacionesRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
 import com.gestor_ventures.front.ui.negocio.EditarNegocioRoute
 import com.gestor_ventures.front.ui.negocio.GastosYObligacionesRoute
@@ -47,6 +48,8 @@ object Rutas {
 
     /** HU-04. Editar el perfil de quien tiene la sesión abierta, desde el menú lateral. */
     const val Perfil = "perfil"
+
+    const val Notificaciones = "notificaciones"
 
     /** HU-35. Ideas de promociones del asistente. */
     const val Promociones = "promociones"
@@ -173,6 +176,10 @@ fun AppNavHost(
                     mostrarMensaje(mensaje)
                 },
             )
+        }
+
+        composable(Rutas.Notificaciones) {
+            NotificacionesRoute(onBack = { navController.popBackStack() })
         }
 
         composable(Rutas.Perfil) {
