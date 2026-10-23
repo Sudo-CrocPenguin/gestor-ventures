@@ -7,6 +7,7 @@ import com.gestor_ventures.db.dao.CajaDao
 import com.gestor_ventures.db.dao.CategoriaDao
 import com.gestor_ventures.db.dao.CitaDao
 import com.gestor_ventures.db.dao.ClienteDao
+import com.gestor_ventures.db.dao.ConsultaIaDao
 import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.dao.GastoFijoDao
@@ -111,4 +112,6 @@ abstract class GestorVenturesDatabase : RoomDatabase() {
 
     /** HU-26. */
     abstract fun recordatorioDao(): RecordatorioDao
+
+    abstract fun consultaIaDao(): ConsultaIaDao
 }

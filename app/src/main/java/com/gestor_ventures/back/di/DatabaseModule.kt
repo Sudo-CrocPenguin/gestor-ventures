@@ -9,6 +9,7 @@ import com.gestor_ventures.db.dao.CajaDao
 import com.gestor_ventures.db.dao.CategoriaDao
 import com.gestor_ventures.db.dao.CitaDao
 import com.gestor_ventures.db.dao.ClienteDao
+import com.gestor_ventures.db.dao.ConsultaIaDao
 import com.gestor_ventures.db.dao.CostoDao
 import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.dao.GastoFijoDao
@@ -87,6 +88,9 @@ object DatabaseModule {
 
     @Provides
     fun proveerRecordatorioDao(db: GestorVenturesDatabase): RecordatorioDao = db.recordatorioDao()
+
+    @Provides
+    fun proveerConsultaIaDao(db: GestorVenturesDatabase): ConsultaIaDao = db.consultaIaDao()
 
     @Provides
     @Singleton
