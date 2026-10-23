@@ -20,6 +20,16 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * HU-04. Guarda los cambios del perfil del emprendedor: nombre, teléfono y foto.
+ *
+ * El correo no se edita acá: es con el que la cuenta entra a Firebase, y cambiarlo sería otra
+ * historia.
+ *
+ * La foto no se guarda en la base de datos. Se copia a una carpeta privada de la app y en la
+ * tabla `usuarios` queda solo la dirección de esa copia. Así la foto sigue viéndose aunque el
+ * usuario borre la original de su galería.
+ */
 @Singleton
 class PerfilRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -27,6 +37,13 @@ class PerfilRepository @Inject constructor(
     private val reloj: Reloj,
 ) {
 
+    /**
+     * Valida y guarda el perfil, y anota la fecha de actualización. Devuelve null si todo salió
+     * bien, o el error si algo no cumple las reglas; en ese caso no se guarda nada.
+     *
+     * La foto vieja se borra solo después de guardar, para no quedarse sin ninguna si algo
+     * falla en el medio.
+     */
     suspend fun actualizarPerfil(
         usuarioId: Long,
         nombre: String,
@@ -61,6 +78,10 @@ class PerfilRepository @Inject constructor(
         null
     }
 
+    /**
+     * El nombre no puede quedar vacío ni pasar de 50 caracteres. El teléfono es opcional, pero
+     * si se escribe tiene que ser solo números y tener entre 7 y 15 dígitos.
+     */
     private fun validar(nombre: String, telefono: String?): ErrorPerfil? = when {
         nombre.isEmpty() -> ErrorPerfil.NombreVacio
         nombre.length > MaxCaracteresNombreUsuario -> ErrorPerfil.NombreMuyLargo
@@ -69,6 +90,7 @@ class PerfilRepository @Inject constructor(
         else -> null
     }
 
+    /** La foto tiene que ser JPG, PNG o WEBP y pesar máximo 5 MB. */
     private fun validarFoto(uri: Uri): ErrorPerfil? {
         val tipo = context.contentResolver.getType(uri)
         if (tipo !in FormatosDeFotoPerfil) return ErrorPerfil.FotoFormatoNoSoportado
@@ -77,6 +99,10 @@ class PerfilRepository @Inject constructor(
         return if (tamano > MaxBytesFotoPerfil) ErrorPerfil.FotoMuyPesada else null
     }
 
+    /**
+     * Cuánto pesa la foto. Primero se le pregunta a Android; si no lo sabe, se lee el archivo y
+     * se cuenta, parando apenas pasa del máximo para no leer de más una foto enorme.
+     */
     private fun tamanoDe(uri: Uri): Long? {
         context.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)
             ?.use { cursor ->
@@ -98,6 +124,11 @@ class PerfilRepository @Inject constructor(
         }
     }
 
+    /**
+     * Copia la foto elegida a la carpeta privada de la app y devuelve su dirección. El nombre
+     * lleva la hora para que cada foto nueva sea un archivo distinto y la pantalla no muestre
+     * una vieja guardada en memoria.
+     */
     private fun copiarFoto(usuarioId: Long, uri: Uri): String? {
         val extension = FormatosDeFotoPerfil[context.contentResolver.getType(uri)] ?: return null
         val carpeta = File(context.filesDir, CarpetaFotos).apply { mkdirs() }
@@ -113,6 +144,7 @@ class PerfilRepository @Inject constructor(
         }
     }
 
+    /** Borra una foto vieja, pero solo si es una copia de la app: nunca toca la galería. */
     private fun borrarFoto(fotoUrl: String?) {
         val archivo = fotoUrl?.toUri()?.path?.let(::File) ?: return
         val carpeta = File(context.filesDir, CarpetaFotos)

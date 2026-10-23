@@ -42,6 +42,12 @@ import com.gestor_ventures.front.components.GvTextField
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.util.aIniciales
 
+/**
+ * HU-04. "Mi perfil" del menú lateral.
+ *
+ * La foto se elige con el selector de fotos de Android, que no pide permisos: el usuario solo
+ * le da a la app la foto que escoge, no su galería entera.
+ */
 @Composable
 fun PerfilRoute(
     onBack: () -> Unit,
@@ -73,6 +79,10 @@ fun PerfilRoute(
     )
 }
 
+/**
+ * HU-04. Foto arriba, después nombre, correo y teléfono. El correo se muestra pero no se edita:
+ * es la cuenta con la que se entra a la app.
+ */
 @Composable
 fun PerfilScreen(
     uiState: PerfilUiState,
@@ -121,6 +131,7 @@ fun PerfilScreen(
                 keyboardType = KeyboardType.Phone,
             )
 
+            // Primero el error que devolvió el repositorio; si no hay, lo que ya se ve mal en el formulario.
             val aviso = uiState.error?.mensajeRes()
                 ?: R.string.perfil_error_telefono.takeIf { uiState.telefonoInvalido }
                 ?: R.string.auth_error_nombre_largo.takeIf { uiState.nombreMuyLargo }
@@ -146,6 +157,7 @@ fun PerfilScreen(
     }
 }
 
+/** La foto (o las iniciales), con los botones para cambiarla o quitarla. */
 @Composable
 private fun Foto(
     iniciales: String,

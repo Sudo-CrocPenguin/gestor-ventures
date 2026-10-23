@@ -19,6 +19,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * HU-04. Edita el perfil de quien tiene la sesión abierta.
+ *
+ * Los cambios se guardan todos juntos al tocar "Guardar cambios", no uno por uno: así nunca
+ * queda un perfil a medio editar.
+ */
 @HiltViewModel
 class PerfilViewModel @Inject constructor(
     private val perfilRepository: PerfilRepository,
@@ -28,9 +34,11 @@ class PerfilViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PerfilUiState())
     val uiState: StateFlow<PerfilUiState> = _uiState.asStateFlow()
 
+    /** Avisa una sola vez que el perfil quedó guardado, para que la pantalla se cierre. */
     private val _guardado = Channel<Unit>(Channel.BUFFERED)
     val guardado: Flow<Unit> = _guardado.receiveAsFlow()
 
+    /** Llena el formulario con el perfil actual. */
     init {
         viewModelScope.launch {
             val usuario = sesionRepository.usuarioActual.filterNotNull().first()
@@ -50,11 +58,13 @@ class PerfilViewModel @Inject constructor(
         _uiState.update { it.copy(nombre = texto, error = null) }
     }
 
+    /** Solo deja escribir números, y no más de 15. */
     fun onTelefonoChange(texto: String) {
         val digitos = texto.filter(Char::isDigit).take(LargoDeTelefono.last)
         _uiState.update { it.copy(telefono = digitos, error = null) }
     }
 
+    /** La foto elegida en la galería. No se copia hasta guardar. */
     fun onFotoElegida(uri: String) {
         _uiState.update { it.copy(cambioDeFoto = CambioDeFoto.Nueva(uri), error = null) }
     }
@@ -63,6 +73,7 @@ class PerfilViewModel @Inject constructor(
         _uiState.update { it.copy(cambioDeFoto = CambioDeFoto.Quitar, error = null) }
     }
 
+    /** Si el repositorio rechaza algo, la pantalla se queda abierta con el aviso. */
     fun guardar() {
         val estado = _uiState.value
         if (!estado.puedeGuardar) return

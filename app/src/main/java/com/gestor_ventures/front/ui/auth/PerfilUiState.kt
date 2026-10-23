@@ -7,16 +7,20 @@ import com.gestor_ventures.back.model.ErrorPerfil
 import com.gestor_ventures.back.model.LargoDeTelefono
 import com.gestor_ventures.back.model.MaxCaracteresNombreUsuario
 
+/** HU-04. Estado de la pantalla "Mi perfil". */
 data class PerfilUiState(
     val nombre: String = "",
     val correo: String = "",
     val telefono: String = "",
+    /** La foto que ya está guardada en la app; null si no hay. */
     val fotoGuardada: String? = null,
+    /** Lo que el usuario hizo con la foto y todavía no guardó. */
     val cambioDeFoto: CambioDeFoto = CambioDeFoto.SinCambios,
     val cargando: Boolean = true,
     val guardando: Boolean = false,
     val error: ErrorPerfil? = null,
 ) {
+    /** La foto que se muestra ahora: la nueva si eligió una, ninguna si la quitó, o la guardada. */
     val fotoVisible: String?
         get() = when (val cambio = cambioDeFoto) {
             CambioDeFoto.SinCambios -> fotoGuardada
@@ -24,6 +28,7 @@ data class PerfilUiState(
             is CambioDeFoto.Nueva -> cambio.uri
         }
 
+    /** Para avisar antes de guardar. La regla de verdad la aplica el repositorio. */
     val telefonoInvalido: Boolean
         get() = telefono.isNotEmpty() && telefono.length !in LargoDeTelefono
 
@@ -33,6 +38,7 @@ data class PerfilUiState(
         get() = !cargando && !guardando && nombre.isNotBlank() && !nombreMuyLargo && !telefonoInvalido
 }
 
+/** Texto que ve el usuario para cada error del perfil. */
 @StringRes
 fun ErrorPerfil.mensajeRes(): Int = when (this) {
     ErrorPerfil.NombreVacio -> R.string.auth_error_nombre_vacio

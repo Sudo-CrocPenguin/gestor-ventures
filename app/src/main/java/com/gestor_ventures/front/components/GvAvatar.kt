@@ -33,6 +33,9 @@ import kotlinx.coroutines.withContext
 /**
  * Avatar con las iniciales de un usuario o negocio ("Dulce Antojo" → "DA"). El tamaño de la
  * letra sale del tamaño del recuadro, para que se vea igual en cualquier medida.
+ *
+ * HU-04. Si se le pasa una [foto], la muestra recortada al recuadro; mientras carga, o si no se
+ * puede leer, se ven las iniciales.
  */
 @Composable
 fun GvAvatar(
@@ -73,6 +76,7 @@ fun GvAvatar(
     }
 }
 
+/** Carga la foto fuera del hilo de la pantalla, para que abrir el menú no se trabe. */
 @Composable
 private fun rememberFoto(foto: String?, ladoPx: Int): ImageBitmap? {
     val context = LocalContext.current
@@ -82,6 +86,11 @@ private fun rememberFoto(foto: String?, ladoPx: Int): ImageBitmap? {
     return imagen
 }
 
+/**
+ * Lee la foto a un tamaño cercano al del avatar y no a su tamaño original. Una foto de celular
+ * puede tener 4000 píxeles de lado; cargarla entera para un recuadro de 50 gastaría memoria
+ * de sobra.
+ */
 private fun decodificar(context: Context, foto: String, ladoPx: Int): ImageBitmap? = runCatching {
     val uri = foto.toUri()
     val medidas = BitmapFactory.Options().apply { inJustDecodeBounds = true }

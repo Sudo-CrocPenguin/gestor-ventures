@@ -44,6 +44,7 @@ object Rutas {
     /** HU-10. Editar la información del negocio activo, desde el menú lateral. */
     const val EditarNegocio = "editar_negocio"
 
+    /** HU-04. Editar el perfil de quien tiene la sesión abierta, desde el menú lateral. */
     const val Perfil = "perfil"
 
     /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
