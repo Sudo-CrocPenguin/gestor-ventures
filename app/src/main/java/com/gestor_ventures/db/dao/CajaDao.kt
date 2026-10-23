@@ -1,0 +1,90 @@
+package com.gestor_ventures.db.dao
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
+import com.gestor_ventures.db.entity.CajaEntity
+import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
+
+/**
+ * HU-19 a HU-23. Las jornadas de caja del negocio.
+ *
+ * Una caja es un periodo con principio y final: se abre contando el efectivo con el que se
+ * arranca y se cierra contando el que quedó. Lo que pasa en el medio —ventas, gastos, costos—
+ * no se copia acá: ya vive en sus propias tablas y se consulta por el rango de fechas de la
+ * caja (ver la nota de [CajaEntity]).
+ *
+ * La regla de HU-19 es que no puede haber dos cajas abiertas a la vez, y por eso casi todo
+ * acá gira alrededor de [obtenerAbierta]: es lo que responde "¿ya hay una jornada en curso?".
+ */
+@Dao
+interface CajaDao {
+
+    @Insert
+    suspend fun insertar(caja: CajaEntity): Long
+
+    /**
+     * HU-21 y HU-22. Cierra la jornada: le pone el monto contado, la hora y la nota.
+     *
+     * Es un `@Update` sobre la misma fila y no una tabla aparte de cierres: una caja cerrada
+     * sigue siendo la misma jornada, solo que terminada. Partirla en dos obligaría a juntarlas
+     * de nuevo para el historial (HU-23).
+     */
+    @Update
+    suspend fun actualizar(caja: CajaEntity)
+
+    @Query("SELECT * FROM cajas WHERE caja_id = :cajaId")
+    suspend fun obtener(cajaId: Long): CajaEntity?
+
+    /**
+     * La caja abierta del negocio, si hay alguna. El repositorio la consulta antes de abrir
+     * otra, porque abrir una segunda sin cerrar la primera deja dos jornadas reclamando los
+     * mismos movimientos y ninguna cuadra al final.
+     *
+     * El `LIMIT 1` no sobra aunque la regla prometa que solo hay una: si alguna vez llegara a
+     * haber dos, es mejor que esto devuelva la más reciente a que reviente.
+     */
+    @Query(
+        """
+        SELECT * FROM cajas
+        WHERE negocio_id = :negocioId AND estado_caja = 'ABIERTA'
+        ORDER BY fecha_hora_apertura DESC, caja_id DESC
+        LIMIT 1
+        """,
+    )
+    suspend fun obtenerAbierta(negocioId: Long): CajaEntity?
+
+    /**
+     * HU-23. Las jornadas ya cerradas de un periodo, de la más reciente a la más antigua.
+     *
+     * Filtra por la hora de cierre y no por la de apertura: lo que el usuario busca cuando mira
+     * el historial es cómo terminó cada día, y un turno que arrancó un lunes a las 11 de la
+     * noche y cerró el martes pertenece al martes en su cabeza.
+     */
+    @Query(
+        """
+        SELECT * FROM cajas
+        WHERE negocio_id = :negocioId AND estado_caja = 'CERRADA'
+          AND fecha_hora_cierre BETWEEN :desde AND :hasta
+        ORDER BY fecha_hora_cierre DESC, caja_id DESC
+        """,
+    )
+    fun observarCerradasEntre(
+        negocioId: Long,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
+    ): Flow<List<CajaEntity>>
+
+    /** La misma consulta, pero seguida: la pantalla cambia sola al abrir o cerrar la caja. */
+    @Query(
+        """
+        SELECT * FROM cajas
+        WHERE negocio_id = :negocioId AND estado_caja = 'ABIERTA'
+        ORDER BY fecha_hora_apertura DESC, caja_id DESC
+        LIMIT 1
+        """,
+    )
+    fun observarAbierta(negocioId: Long): Flow<CajaEntity?>
+}

@@ -7,7 +7,6 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.gestor_ventures.db.enums.MetodoPago
 import com.gestor_ventures.db.enums.TipoRegistroVenta
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 /**
@@ -56,7 +55,19 @@ data class VentaEntity(
     val metodoPago: MetodoPago? = null,
 
     @ColumnInfo(name = "fecha_hora")
-    val fechaHora: LocalDateTime
+    val fechaHora: LocalDateTime,
+
+    /** HU-11. Apunte libre del negocio sobre la venta ("pedido para el sábado"). */
+    val nota: String? = null,
+
+    /**
+     * HU-18. Cuándo se corrigió por última vez, o nulo si nunca se tocó.
+     *
+     * Se guarda para poder distinguir un registro original de uno corregido: en el historial,
+     * saber que una cifra se editó es parte de poder confiar en ella. Ver [MIGRACION_4_5].
+     */
+    @ColumnInfo(name = "fecha_modificacion")
+    val fechaModificacion: LocalDateTime? = null
 )
 
 /** HU-13. Costo directo asociado a un producto/servicio, usado para calcular margen. */
@@ -96,7 +107,16 @@ data class CostoEntity(
     val montoCosto: Double, // > 0
 
     @ColumnInfo(name = "fecha_registro")
-    val fechaRegistro: LocalDateTime
+    val fechaRegistro: LocalDateTime,
+
+    /**
+     * HU-18. Cuándo se corrigió por última vez, o nulo si nunca se tocó.
+     *
+     * Se guarda para poder distinguir un registro original de uno corregido: en el historial,
+     * saber que una cifra se editó es parte de poder confiar en ella. Ver [MIGRACION_4_5].
+     */
+    @ColumnInfo(name = "fecha_modificacion")
+    val fechaModificacion: LocalDateTime? = null
 )
 
 /** HU-14. Gasto general del negocio, distinto de los gastos fijos (HU-06). */
@@ -133,5 +153,23 @@ data class GastoEntity(
 
     val monto: Double, // > 0
 
-    val fecha: LocalDate
+    /**
+     * HU-14, HU-20. Cuándo se registró el gasto, con hora.
+     *
+     * Antes guardaba solo el día. La caja (HU-19 a HU-23) es un periodo con principio y final
+     * dentro del mismo día, así que un gasto sin hora no se puede ubicar en una jornada: con
+     * dos turnos en un día, el mismo gasto caía en los dos. Ventas y costos ya guardaban la
+     * hora; esto deja a los tres iguales. Ver [MIGRACION_3_4].
+     */
+    @ColumnInfo(name = "fecha_hora")
+    val fechaHora: LocalDateTime,
+
+    /**
+     * HU-18. Cuándo se corrigió por última vez, o nulo si nunca se tocó.
+     *
+     * Se guarda para poder distinguir un registro original de uno corregido: en el historial,
+     * saber que una cifra se editó es parte de poder confiar en ella. Ver [MIGRACION_4_5].
+     */
+    @ColumnInfo(name = "fecha_modificacion")
+    val fechaModificacion: LocalDateTime? = null
 )

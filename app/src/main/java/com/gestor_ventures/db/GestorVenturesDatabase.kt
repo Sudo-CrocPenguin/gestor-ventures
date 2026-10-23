@@ -3,6 +3,24 @@ package com.gestor_ventures.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.gestor_ventures.db.dao.AlertaDao
+import com.gestor_ventures.db.dao.CajaDao
+import com.gestor_ventures.db.dao.CategoriaDao
+import com.gestor_ventures.db.dao.CitaDao
+import com.gestor_ventures.db.dao.ClienteDao
+import com.gestor_ventures.db.dao.ConsultaIaDao
+import com.gestor_ventures.db.dao.CostoDao
+import com.gestor_ventures.db.dao.GastoDao
+import com.gestor_ventures.db.dao.GastoFijoDao
+import com.gestor_ventures.db.dao.MetaAhorroDao
+import com.gestor_ventures.db.dao.NegocioDao
+import com.gestor_ventures.db.dao.ObligacionDao
+import com.gestor_ventures.db.dao.PedidoDao
+import com.gestor_ventures.db.dao.RecordatorioClienteDao
+import com.gestor_ventures.db.dao.RecordatorioDao
+import com.gestor_ventures.db.dao.SugerenciaDao
+import com.gestor_ventures.db.dao.UsuarioDao
+import com.gestor_ventures.db.dao.VentaDao
 import com.gestor_ventures.db.entity.AlertaEntity
 import com.gestor_ventures.db.entity.CajaEntity
 import com.gestor_ventures.db.entity.CategoriaEntity
@@ -26,8 +44,14 @@ import com.gestor_ventures.db.entity.VentaEntity
 
 /**
  * Base de datos local (Room/SQLite) de Gestor Ventures. 20 entidades cubriendo las
- * Épicas 1 a 8 (HU-01 a HU-41). Los DAO se agregan en la siguiente etapa, ej.:
- *   abstract fun usuarioDao(): UsuarioDao
+ * Épicas 1 a 8 (HU-01 a HU-41).
+ *
+ * Los DAO se van agregando a medida que cada historia los necesita.
+ *
+ * Versión 2: `negocios.color_marca` (HU-05). Ver [MIGRACION_1_2].
+ * Versión 3: `ventas.nota` (HU-11). Ver [MIGRACION_2_3].
+ * Versión 4: `gastos.fecha` pasa a `gastos.fecha_hora` (HU-20). Ver [MIGRACION_3_4].
+ * Versión 5: fecha de modificación en ventas, gastos y costos (HU-18). Ver [MIGRACION_4_5].
  */
 @Database(
     entities = [
@@ -52,8 +76,51 @@ import com.gestor_ventures.db.entity.VentaEntity
         AlertaEntity::class,
         NotificacionEntity::class
     ],
-    version = 1,
+    version = 5,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
-abstract class GestorVenturesDatabase : RoomDatabase()
+abstract class GestorVenturesDatabase : RoomDatabase() {
+
+    abstract fun usuarioDao(): UsuarioDao
+
+    abstract fun negocioDao(): NegocioDao
+
+    abstract fun gastoFijoDao(): GastoFijoDao
+
+    abstract fun metaAhorroDao(): MetaAhorroDao
+
+    abstract fun ventaDao(): VentaDao
+
+    abstract fun categoriaDao(): CategoriaDao
+
+    abstract fun gastoDao(): GastoDao
+
+    abstract fun costoDao(): CostoDao
+
+    abstract fun obligacionDao(): ObligacionDao
+
+    abstract fun clienteDao(): ClienteDao
+
+    abstract fun cajaDao(): CajaDao
+
+    abstract fun recordatorioClienteDao(): RecordatorioClienteDao
+
+    /** HU-24. */
+    abstract fun citaDao(): CitaDao
+
+    /** HU-25. */
+    abstract fun pedidoDao(): PedidoDao
+
+    /** HU-26. */
+    abstract fun recordatorioDao(): RecordatorioDao
+
+    /** HU-34. */
+    abstract fun consultaIaDao(): ConsultaIaDao
+
+    /** HU-35. */
+    abstract fun sugerenciaDao(): SugerenciaDao
+
+    /** HU-38. */
+    abstract fun alertaDao(): AlertaDao
+}

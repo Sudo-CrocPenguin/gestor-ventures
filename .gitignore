@@ -13,3 +13,12 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Credenciales de Firebase — cada dev/entorno pone las suyas, no se versionan.
+/app/google-services.json
+.env
+.env.*
+
+# Scratch del compilador de Kotlin y configuración por máquina del IDE.
+/.kotlin
+/.idea/deviceManager.xml

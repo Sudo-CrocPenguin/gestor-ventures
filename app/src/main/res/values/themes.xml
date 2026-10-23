@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.Gestorventures" parent="android:Theme.Material.Light.NoActionBar" />
+    <!--
+        Tema de la ventana, no de la app: lo que se ve en el arranque, antes de que Compose
+        dibuje. Los colores de la app salen de `front/theme/Theme.kt`.
+
+        El fondo cambia con el modo claro/oscuro del equipo (ver values-night). Antes estaba
+        fijo en blanco y, con la app en oscuro, el arranque era un destello blanco.
+    -->
+    <style name="Theme.Gestorventures" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/fondo_app</item>
+        <!-- Android 12 en adelante dibuja la pantalla de arranque él mismo. -->
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/fondo_app</item>
+        <!-- Fondo claro: los iconos de la barra de estado van oscuros para que se vean. -->
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
 </resources>
