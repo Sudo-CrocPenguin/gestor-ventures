@@ -95,6 +95,8 @@ class AgendaRepository @Inject constructor(
         return null
     }
 
+    fun hoy(): LocalDate = reloj.ahora().toLocalDate()
+
     private suspend fun validarCita(
         negocioId: Long,
         clienteId: Long,

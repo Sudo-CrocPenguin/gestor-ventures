@@ -26,6 +26,7 @@ import com.gestor_ventures.front.ui.finanzas.HistorialRoute
 import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.reportes.ReportesRoute
+import com.gestor_ventures.front.ui.agenda.AgendaRoute
 import com.gestor_ventures.front.ui.auth.PerfilRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
 import com.gestor_ventures.front.ui.negocio.EditarNegocioRoute
@@ -252,8 +253,11 @@ fun AppNavHost(
         }
 
         // Pestañas cuya pantalla aún no existe: se reemplazan a medida que se construyen.
+        composable(TopLevelDestination.Agenda.route) {
+            AgendaRoute()
+        }
+
         listOf(
-            TopLevelDestination.Agenda,
             TopLevelDestination.Asistente,
         ).forEach { destination ->
             composable(destination.route) { PendingDestination(destination) }
