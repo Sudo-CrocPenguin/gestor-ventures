@@ -1,6 +1,8 @@
 package com.gestor_ventures.front.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -23,6 +25,7 @@ import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.reportes.ReportesRoute
 import com.gestor_ventures.front.ui.agenda.AgendaRoute
 import com.gestor_ventures.front.ui.asistente.AsistenteRoute
+import com.gestor_ventures.front.ui.asistente.HistorialAsistenteRoute
 import com.gestor_ventures.front.ui.asistente.PromocionesRoute
 import com.gestor_ventures.front.ui.auth.PerfilRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
@@ -47,6 +50,8 @@ object Rutas {
 
     /** HU-35. Ideas de promociones del asistente. */
     const val Promociones = "promociones"
+
+    const val HistorialAsistente = "historial_asistente"
 
     /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
     const val GastosFijos = "gastos_fijos"
@@ -84,6 +89,8 @@ object Rutas {
 
 /** Nombre del id de negocio dentro de la ruta. */
 const val ArgumentoNegocioId = "negocioId"
+
+private const val ClaveConversacionElegida = "conversacion_elegida"
 
 /** Nombre del id de cliente dentro de la ruta. */
 const val ArgumentoClienteId = "clienteId"
@@ -258,8 +265,26 @@ fun AppNavHost(
         }
 
         // HU-34. Preguntarle al asistente por las ventas del negocio.
-        composable(TopLevelDestination.Asistente.route) {
-            AsistenteRoute(onVerPromociones = { navController.navigate(Rutas.Promociones) })
+        composable(TopLevelDestination.Asistente.route) { entrada ->
+            val conversacionElegida by entrada.savedStateHandle
+                .getStateFlow<Long?>(ClaveConversacionElegida, null)
+                .collectAsStateWithLifecycle()
+            AsistenteRoute(
+                onVerPromociones = { navController.navigate(Rutas.Promociones) },
+                onVerHistorial = { navController.navigate(Rutas.HistorialAsistente) },
+                conversacionElegida = conversacionElegida,
+                onConversacionAbierta = { entrada.savedStateHandle[ClaveConversacionElegida] = null },
+            )
+        }
+
+        composable(Rutas.HistorialAsistente) {
+            HistorialAsistenteRoute(
+                onBack = { navController.popBackStack() },
+                onAbrir = { sesionId ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set(ClaveConversacionElegida, sesionId)
+                    navController.popBackStack()
+                },
+            )
         }
 
         composable(Rutas.Promociones) {

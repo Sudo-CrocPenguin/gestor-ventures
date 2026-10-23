@@ -1,6 +1,7 @@
 package com.gestor_ventures.back.repository
 
 import com.gestor_ventures.BuildConfig
+import com.gestor_ventures.back.model.ConversacionAsistente
 import com.gestor_ventures.back.model.ErrorAsistente
 import com.gestor_ventures.back.model.MensajeAsistente
 import com.gestor_ventures.back.model.Reloj
@@ -47,6 +48,22 @@ class AsistenteRepository @Inject constructor(
 
     fun mensajesDeSesion(negocioId: Long, sesionId: Long): Flow<List<MensajeAsistente>> =
         consultaIaDao.observarDeSesion(negocioId, sesionId).map { filas -> filas.map(::aMensaje) }
+
+    fun conversaciones(negocioId: Long): Flow<List<ConversacionAsistente>> =
+        consultaIaDao.observarSesiones(negocioId).map { filas ->
+            filas.map {
+                ConversacionAsistente(
+                    sesionId = it.sesionId,
+                    primeraPregunta = it.primeraPregunta,
+                    ultimaFecha = it.ultimaFecha,
+                    cantidadDePreguntas = it.cantidad,
+                )
+            }
+        }
+
+    suspend fun eliminarConversacion(negocioId: Long, sesionId: Long) {
+        consultaIaDao.eliminarSesion(negocioId, sesionId)
+    }
 
     /** Una conversación nueva se identifica con el momento en que empezó. */
     fun nuevaSesion(): Long = reloj.ahora().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()

@@ -95,6 +95,12 @@ class AsistenteViewModel @Inject constructor(
     }
 
     /** Empieza de cero. La conversación anterior queda guardada para el historial (HU-39). */
+    fun abrirConversacion(sesionId: Long) {
+        if (_uiState.value.enviando) return
+        sesion.value = sesionId
+        _uiState.update { it.copy(pregunta = "", error = null) }
+    }
+
     fun nuevaConversacion() {
         if (_uiState.value.enviando) return
         sesion.value = asistenteRepository.nuevaSesion()

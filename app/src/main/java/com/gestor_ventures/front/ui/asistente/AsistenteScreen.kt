@@ -52,8 +52,21 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 import java.time.LocalDateTime
 
 @Composable
-fun AsistenteRoute(onVerPromociones: () -> Unit, viewModel: AsistenteViewModel = hiltViewModel()) {
+fun AsistenteRoute(
+    onVerPromociones: () -> Unit,
+    onVerHistorial: () -> Unit,
+    conversacionElegida: Long?,
+    onConversacionAbierta: () -> Unit,
+    viewModel: AsistenteViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(conversacionElegida) {
+        conversacionElegida?.let {
+            viewModel.abrirConversacion(it)
+            onConversacionAbierta()
+        }
+    }
 
     AsistenteScreen(
         uiState = uiState,
@@ -62,6 +75,7 @@ fun AsistenteRoute(onVerPromociones: () -> Unit, viewModel: AsistenteViewModel =
         onSugerencia = viewModel::usarSugerencia,
         onNuevaConversacion = viewModel::nuevaConversacion,
         onVerPromociones = onVerPromociones,
+        onVerHistorial = onVerHistorial,
     )
 }
 
@@ -77,6 +91,7 @@ fun AsistenteScreen(
     onSugerencia: (String) -> Unit,
     onNuevaConversacion: () -> Unit,
     onVerPromociones: () -> Unit,
+    onVerHistorial: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // Cada mensaje nuevo baja la lista hasta el final, como en cualquier chat.
@@ -91,8 +106,13 @@ fun AsistenteScreen(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            TextButton(onClick = onVerPromociones, enabled = !uiState.sinNegocio) {
-                Text(stringResource(R.string.asistente_promociones))
+            Row {
+                TextButton(onClick = onVerPromociones, enabled = !uiState.sinNegocio) {
+                    Text(stringResource(R.string.asistente_promociones))
+                }
+                TextButton(onClick = onVerHistorial, enabled = !uiState.sinNegocio) {
+                    Text(stringResource(R.string.asistente_historial))
+                }
             }
             if (!uiState.conversacionVacia) {
                 TextButton(onClick = onNuevaConversacion, enabled = !uiState.enviando) {
@@ -295,6 +315,7 @@ private fun VistaPrevia(uiState: AsistenteUiState) {
                 onSugerencia = {},
                 onNuevaConversacion = {},
                 onVerPromociones = {},
+                onVerHistorial = {},
             )
         }
     }

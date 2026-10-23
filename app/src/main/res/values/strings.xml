@@ -641,4 +641,14 @@
     <string name="promociones_descartar">Descartar</string>
     <string name="promociones_quitar">Quitar</string>
     <string name="promociones_guardadas">Guardadas</string>
+    <string name="asistente_historial">Historial</string>
+    <string name="historial_asistente_titulo">Conversaciones anteriores</string>
+    <string name="historial_asistente_vacio">Todavía no tienes conversaciones con el asistente. Las que tengas van a quedar acá para revisarlas después.</string>
+    <string name="historial_asistente_eliminar">Eliminar</string>
+    <string name="historial_asistente_eliminar_titulo">¿Eliminar esta conversación?</string>
+    <string name="historial_asistente_eliminar_ayuda">Se borra \"%1$s\" con todas sus respuestas. No se puede deshacer.</string>
+    <plurals name="historial_asistente_preguntas">
+        <item quantity="one">%d pregunta</item>
+        <item quantity="other">%d preguntas</item>
+    </plurals>
 </resources>

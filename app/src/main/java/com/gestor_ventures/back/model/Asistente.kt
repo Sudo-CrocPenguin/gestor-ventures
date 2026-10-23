@@ -32,6 +32,13 @@ enum class ErrorAsistente {
 
 /** La respuesta del asistente, o por qué no la hubo. */
 /** HU-35. Una idea de promoción. [guardada] en false es una idea nueva, todavía sin decidir. */
+data class ConversacionAsistente(
+    val sesionId: Long,
+    val primeraPregunta: String,
+    val ultimaFecha: LocalDateTime,
+    val cantidadDePreguntas: Int,
+)
+
 data class Sugerencia(
     val id: Long,
     val contenido: String,
