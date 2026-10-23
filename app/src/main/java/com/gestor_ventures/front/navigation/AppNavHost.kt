@@ -1,11 +1,6 @@
 package com.gestor_ventures.front.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -27,6 +22,7 @@ import com.gestor_ventures.front.ui.finanzas.RegistrarVentaRoute
 import com.gestor_ventures.front.ui.inicio.InicioRoute
 import com.gestor_ventures.front.ui.reportes.ReportesRoute
 import com.gestor_ventures.front.ui.agenda.AgendaRoute
+import com.gestor_ventures.front.ui.asistente.AsistenteRoute
 import com.gestor_ventures.front.ui.auth.PerfilRoute
 import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
 import com.gestor_ventures.front.ui.negocio.EditarNegocioRoute
@@ -252,16 +248,13 @@ fun AppNavHost(
             ClienteDetalleRoute(onBack = { navController.popBackStack() })
         }
 
-        // Pestañas cuya pantalla aún no existe: se reemplazan a medida que se construyen.
         // HU-24 y HU-25. Las citas y los pedidos que vienen.
         composable(TopLevelDestination.Agenda.route) {
             AgendaRoute()
         }
 
-        listOf(
-            TopLevelDestination.Asistente,
-        ).forEach { destination ->
-            composable(destination.route) { PendingDestination(destination) }
+        composable(TopLevelDestination.Asistente.route) {
+            AsistenteRoute()
         }
     }
 }
@@ -272,16 +265,5 @@ fun NavHostController.navigateToTopLevel(destination: TopLevelDestination) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
         restoreState = true
-    }
-}
-
-@Composable
-private fun PendingDestination(destination: TopLevelDestination) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = stringResource(R.string.pantalla_pendiente, stringResource(destination.labelRes)),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }

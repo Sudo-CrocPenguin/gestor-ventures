@@ -609,4 +609,24 @@
     <string name="recordatorio_ayuda_cita">Te llega una notificación antes de la hora de la cita.</string>
     <string name="recordatorio_ayuda_pedido">Se cuenta desde las 8:00 a. m. del día de entrega.</string>
     <string name="recordatorio_sin_permiso">Las notificaciones están apagadas: el recordatorio se guarda, pero no te va a llegar. Actívalas en los ajustes del teléfono.</string>
+    <string name="asistente_titulo">Pregúntale a tu asistente</string>
+    <string name="asistente_subtitulo">Responde con los datos reales de tu negocio: ventas, gastos y cómo vas este mes.</string>
+    <string name="asistente_sin_negocio">Registra tu negocio para que el asistente tenga datos con qué responderte.</string>
+    <string name="asistente_sugerencia_semana">¿Cómo me fue esta semana?</string>
+    <string name="asistente_sugerencia_mes">¿Cómo voy este mes comparado con el anterior?</string>
+    <string name="asistente_sugerencia_dia">¿Qué día de la semana vendo más?</string>
+    <string name="asistente_sugerencia_producto">¿Cuál es mi producto más vendido?</string>
+    <string name="asistente_pregunta">Tu pregunta</string>
+    <string name="asistente_pregunta_placeholder">Ej. ¿Cómo estuvieron mis ventas en septiembre?</string>
+    <string name="asistente_enviar">Enviar</string>
+    <string name="asistente_pensando">Revisando tus números…</string>
+    <string name="asistente_nueva_conversacion">Nueva conversación</string>
+    <string name="asistente_error_vacia">Escribe tu pregunta.</string>
+    <string name="asistente_error_larga">La pregunta no puede tener más de 500 caracteres.</string>
+    <string name="asistente_error_sin_api_key">Falta configurar la clave del asistente (GEMINI_API_KEY en local.properties).</string>
+    <string name="asistente_error_api_key">La clave del asistente no es válida. Revísala en local.properties.</string>
+    <string name="asistente_error_conexion">No hay conexión a internet. Tu pregunta sigue ahí: vuelve a enviarla cuando tengas señal.</string>
+    <string name="asistente_error_limite">El asistente recibió demasiadas preguntas seguidas. Espera un minuto y vuelve a intentar.</string>
+    <string name="asistente_error_servicio">El asistente no está disponible en este momento. Intenta de nuevo en un rato.</string>
+    <string name="asistente_error_respuesta_vacia">El asistente no supo qué responder. Prueba a preguntarlo de otra forma.</string>
 </resources>
