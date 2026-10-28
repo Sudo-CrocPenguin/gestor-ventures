@@ -1,15 +1,27 @@
 package com.gestor_ventures.front.ui.clientes
 
 import androidx.lifecycle.SavedStateHandle
+import com.gestor_ventures.back.model.ErrorRecordatorio
 import com.gestor_ventures.back.model.MetodoPago
 import com.gestor_ventures.back.model.Reloj
+import com.gestor_ventures.back.model.TipoRecordatorio
 import com.gestor_ventures.back.model.TipoRegistroVenta
 import com.gestor_ventures.back.repository.ClienteRepository
+import com.gestor_ventures.back.repository.NegocioActivoRepository
+import com.gestor_ventures.back.repository.NegocioRepository
+import com.gestor_ventures.back.repository.RecordatorioClienteRepository
 import com.gestor_ventures.back.repository.VentaRepository
+import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
+import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.ClienteDaoFalso
+import com.gestor_ventures.db.dao.NegocioDaoFalso
+import com.gestor_ventures.db.dao.RecordatorioClienteDaoFalso
 import com.gestor_ventures.db.dao.VentaDaoFalso
+import com.gestor_ventures.db.entity.NegocioEntity
+import com.gestor_ventures.db.enums.TipoActividad
 import com.gestor_ventures.front.navigation.ArgumentoClienteId
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -19,6 +31,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -26,11 +40,13 @@ import org.junit.Test
 import java.time.LocalDateTime
 
 /**
- * HU-30. El perfil de un cliente y lo que le ha comprado al negocio.
+ * HU-30, HU-31 y HU-32. El perfil de un cliente, lo que le ha comprado al negocio y lo que se
+ * le ha recordado.
  *
  * Lo que de verdad se fija acá es que cada compra sea de ese cliente y de nadie más: si se
  * colaran las de otro, el total acumulado —que es lo que responde "cuánto vale este cliente"—
- * diría cualquier cosa.
+ * diría cualquier cosa. Lo mismo con los recordatorios: el historial de lo que se le dijo a
+ * alguien no sirve si trae lo que se le dijo a otro.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClienteDetalleViewModelTest {
@@ -41,9 +57,17 @@ class ClienteDetalleViewModelTest {
 
     private val clienteDao = ClienteDaoFalso()
     private val ventaDao = VentaDaoFalso()
+    private val negocioDao = NegocioDaoFalso()
+    private val recordatorioDao = RecordatorioClienteDaoFalso()
 
     private val clienteRepository = ClienteRepository(clienteDao)
     private val ventaRepository = VentaRepository(ventaDao, reloj)
+    private val recordatorioRepository = RecordatorioClienteRepository(recordatorioDao, reloj)
+
+    private val negocioActivo = NegocioActivoRepository(
+        NegocioRepository(negocioDao, reloj),
+        sesionRepositoryDePrueba(),
+    )
 
     private val negocioId = 1L
 
@@ -52,8 +76,18 @@ class ClienteDetalleViewModelTest {
     private val estado get() = viewModel.uiState.value
 
     @Before
-    fun prepararHiloPrincipal() {
+    fun prepararHiloPrincipal() = runTest {
         Dispatchers.setMain(dispatcher)
+        negocioDao.insertar(
+            NegocioEntity(
+                usuarioId = SemillaTemporal.USUARIO_ID,
+                nombreNegocio = "Dulce Antojo",
+                tipoActividad = TipoActividad.PRODUCTOS,
+                categoriaNegocio = "Repostería",
+                porcentajeReinversion = 0.0,
+                fechaCreacion = ahora,
+            ),
+        )
     }
 
     @After
@@ -87,10 +121,17 @@ class ClienteDetalleViewModelTest {
         viewModel = ClienteDetalleViewModel(
             clienteRepository = clienteRepository,
             ventaRepository = ventaRepository,
+            negocioActivoRepository = negocioActivo,
+            recordatorioRepository = recordatorioRepository,
             savedStateHandle = SavedStateHandle(
                 mapOf(ArgumentoClienteId to clienteId.toString()),
             ),
         )
+    }
+
+    /** Lo que haría la pantalla: abrir la hoja con la plantilla ya escrita. */
+    private fun escribirRecordatorio(mensaje: String) {
+        viewModel.abrirRecordatorio(mensaje)
     }
 
     @Test
@@ -222,5 +263,165 @@ class ClienteDetalleViewModelTest {
         advanceUntilIdle()
 
         assertNull(estado.whatsapp)
+    }
+
+    // ---------- HU-32: los recordatorios ----------
+
+    @Test
+    fun elNombreDelNegocioLlegaParaFirmarElMensaje() = runTest(dispatcher) {
+        val id = crearCliente("Laura Gómez", telefono = "3001112233")
+        abrirPerfil(id)
+        advanceUntilIdle()
+
+        // La plantilla la firma el negocio, no el dueño: sin el nombre quedaría sin firma.
+        assertEquals("Dulce Antojo", estado.negocio)
+    }
+
+    @Test
+    fun sinTelefonoElPerfilNoOfreceRecordatorio() = runTest(dispatcher) {
+        val id = crearCliente("Camila Torres")
+        abrirPerfil(id)
+        advanceUntilIdle()
+
+        // El recordatorio sale por WhatsApp: sin teléfono no hay a dónde mandarlo.
+        assertFalse(estado.puedeRecordar)
+    }
+
+    @Test
+    fun laHojaAbreConLaPlantillaYaEscrita() = runTest(dispatcher) {
+        val id = crearCliente("Laura Gómez", telefono = "3001112233")
+        abrirPerfil(id)
+        advanceUntilIdle()
+
+        escribirRecordatorio("Hola Laura, te recuerdo tu cita.")
+
+        assertEquals(TipoRecordatorio.Cita, estado.recordatorio?.tipo)
+        assertEquals("Hola Laura, te recuerdo tu cita.", estado.recordatorio?.mensaje)
+    }
+
+    @Test
+    fun cambiarElTipoTraeLaPlantillaDeEseTipo() = runTest(dispatcher) {
+        val id = crearCliente("Laura Gómez", telefono = "3001112233")
+        abrirPerfil(id)
+        advanceUntilIdle()
+        escribirRecordatorio("Te recuerdo tu cita.")
+
+        viewModel.onTipoRecordatorioChange(
+            TipoRecordatorio.PagoPendiente,
+            "Te recuerdo tu saldo pendiente.",
+        )
+
+        assertEquals(TipoRecordatorio.PagoPendiente, estado.recordatorio?.tipo)
+        assertEquals("Te recuerdo tu saldo pendiente.", estado.recordatorio?.mensaje)
+    }
+
+    @Test
+    fun enviarDejaConstanciaYCierraLaHoja() = runTest(dispatcher) {
+        val id = crearCliente("Laura Gómez", telefono = "3001112233")
+        abrirPerfil(id)
+        advanceUntilIdle()
+        escribirRecordatorio("Hola Laura, te recuerdo tu cita de mañana.")
+
+        viewModel.enviarRecordatorio()
+        advanceUntilIdle()
+
+        assertNull(estado.recordatorio)
+        assertEquals(1, estado.recordatorios.size)
+        assertEquals(TipoRecordatorio.Cita, estado.recordatorios.single().tipo)
+        assertEquals(ahora, estado.recordatorios.single().fechaEnvio)
+    }
+
+    @Test
+    fun loQueQuedaGuardadoEsElMensajeCorregidoYNoLaPlantilla() = runTest(dispatcher) {
+        val id = crearCliente("Laura Gómez", telefono = "3001112233")
+        abrirPerfil(id)
+        advanceUntilIdle()
+        escribirRecordatorio("Hola Laura Gómez, te recuerdo tu cita.")
+
+        viewModel.onMensajeRecordatorioChange("Anita, pásate cuando puedas 🙂")
+        viewModel.enviarRecordatorio()
+        advanceUntilIdle()
+
+        assertEquals("Anita, pásate cuando puedas 🙂", estado.recordatorios.single().mensaje)
+    }
+
+    @Test
+    fun whatsAppSeAbreConElMensajeAdentro() = runTest(dispatcher) {
+        val id = crearCliente("Laura Gómez", telefono = "3001112233")
+        abrirPerfil(id)
+        advanceUntilIdle()
+        escribirRecordatorio("Hola Laura")
+
+        // El aviso queda en el buzón aunque nadie lo esté esperando todavía.
+        val aviso = async { viewModel.abrirWhatsApp.first() }
+        viewModel.enviarRecordatorio()
+        advanceUntilIdle()
+
+        assertEquals("https://wa.me/573001112233?text=Hola%20Laura", aviso.await())
+    }
+
+    @Test
+    fun unMensajeEnBlancoNoSeMandaYLaHojaSeQuedaConElAviso() = runTest(dispatcher) {
+        val id = crearCliente("Laura Gómez", telefono = "3001112233")
+        abrirPerfil(id)
+        advanceUntilIdle()
+        escribirRecordatorio("   ")
+
+        assertFalse(estado.recordatorio!!.puedeEnviar)
+
+        viewModel.enviarRecordatorio()
+        advanceUntilIdle()
+
+        // La hoja sigue abierta: lo escrito no se pierde y se puede corregir.
+        assertNotNull(estado.recordatorio)
+        assertEquals(ErrorRecordatorio.MensajeVacio, estado.errorRecordatorio)
+        assertTrue(estado.recordatorios.isEmpty())
+    }
+
+    @Test
+    fun elHistorialVaDelMasRecienteAlMasAntiguo() = runTest(dispatcher) {
+        val id = crearCliente("Laura Gómez", telefono = "3001112233")
+        abrirPerfil(id)
+        advanceUntilIdle()
+
+        escribirRecordatorio("El primero")
+        viewModel.enviarRecordatorio()
+        advanceUntilIdle()
+        escribirRecordatorio("El segundo")
+        viewModel.enviarRecordatorio()
+        advanceUntilIdle()
+
+        // Los dos salieron a la misma hora de prueba: desempata el más recién guardado.
+        assertEquals(
+            listOf("El segundo", "El primero"),
+            estado.recordatorios.map { it.mensaje },
+        )
+    }
+
+    @Test
+    fun losRecordatoriosDeOtroClienteNoSeCuelan() = runTest(dispatcher) {
+        val laura = crearCliente("Laura Gómez", telefono = "3001112233")
+        val andres = crearCliente("Andrés Ruiz", telefono = "3009998877")
+        recordatorioRepository.registrarEnvio(andres, TipoRecordatorio.Cita, "Para Andrés")
+
+        abrirPerfil(laura)
+        advanceUntilIdle()
+
+        assertTrue(estado.recordatorios.isEmpty())
+    }
+
+    @Test
+    fun loEscritoNoSePierdeSiLlegaUnaVentaConLaHojaAbierta() = runTest(dispatcher) {
+        val id = crearCliente("Laura Gómez", telefono = "3001112233")
+        abrirPerfil(id)
+        advanceUntilIdle()
+        escribirRecordatorio("Hola Laura, te recuerdo tu cita.")
+
+        // Una venta registrada desde otra pantalla hace que el perfil se recargue solo.
+        venderA(id, 30_000.0)
+        advanceUntilIdle()
+
+        assertEquals("Hola Laura, te recuerdo tu cita.", estado.recordatorio?.mensaje)
+        assertEquals(30_000.0, estado.totalAcumulado, 0.001)
     }
 }

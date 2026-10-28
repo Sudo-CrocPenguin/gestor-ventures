@@ -31,9 +31,19 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 
 private val FieldShape = RoundedCornerShape(13.dp)
 
+/** Alto de arranque de un campo multilínea: alcanza para ver un mensaje corto completo. */
+private const val LineasMinimas = 6
+
+/** De ahí no crece más; a partir de esa altura el campo se desplaza por dentro. */
+private const val LineasMaximas = 10
+
 /**
  * Campo de texto del sistema de diseño: etiqueta encima y caja redondeada que se marca con el
  * color primario al escribir. [trailing] sirve para poner algo al final, como "COP".
+ *
+ * [multilinea] es para un texto que se lee de corrido —un mensaje, una nota larga— y no para un
+ * dato: la caja arranca alta, el Enter escribe un renglón en vez de cerrar el teclado, y el
+ * texto se acomoda arriba para que al llegar a la segunda línea la primera no se mueva.
  */
 @Composable
 fun GvTextField(
@@ -43,6 +53,7 @@ fun GvTextField(
     modifier: Modifier = Modifier,
     placeholder: String = "",
     keyboardType: KeyboardType = KeyboardType.Text,
+    multilinea: Boolean = false,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     textStyle: TextStyle = LocalTextStyle.current.copy(fontSize = 15.sp),
     leading: @Composable (() -> Unit)? = null,
@@ -70,11 +81,14 @@ fun GvTextField(
                 .background(MaterialTheme.colorScheme.surface)
                 .border(if (enfocado) 1.5.dp else 1.dp, bordeColor, FieldShape)
                 .padding(horizontal = 13.dp, vertical = 13.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = if (multilinea) Alignment.Top else Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             leading?.invoke()
-            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = if (multilinea) Alignment.TopStart else Alignment.CenterStart,
+            ) {
                 if (value.isEmpty() && placeholder.isNotEmpty()) {
                     Text(
                         text = placeholder,
@@ -87,7 +101,9 @@ fun GvTextField(
                     onValueChange = onValueChange,
                     modifier = Modifier.fillMaxWidth(),
                     textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
-                    singleLine = true,
+                    singleLine = !multilinea,
+                    minLines = if (multilinea) LineasMinimas else 1,
+                    maxLines = if (multilinea) LineasMaximas else 1,
                     cursorBrush = androidx.compose.ui.graphics.SolidColor(
                         GestorVenturesTheme.colors.acento,
                     ),

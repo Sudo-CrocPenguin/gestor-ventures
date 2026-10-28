@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -29,13 +31,16 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gestor_ventures.R
 import com.gestor_ventures.back.model.Cliente
+import com.gestor_ventures.back.model.TipoRecordatorio
 import com.gestor_ventures.front.components.GvBackTopBar
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvCardHeader
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvPrimaryButton
+import com.gestor_ventures.front.components.GvSoftButton
 import com.gestor_ventures.front.components.ListRow
 import com.gestor_ventures.front.components.MoneyText
+import com.gestor_ventures.front.components.StatusPill
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.theme.NumericTextStyle
 import com.gestor_ventures.front.util.formatDiaCorto
@@ -48,17 +53,30 @@ fun ClienteDetalleRoute(onBack: () -> Unit, viewModel: ClienteDetalleViewModel =
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
 
+    val abrirChat: (String) -> Unit = { enlace ->
+        contexto.startActivity(Intent(Intent.ACTION_VIEW, enlace.toUri()))
+    }
+
+    // HU-32. WhatsApp se abre cuando el recordatorio ya quedó guardado, no al tocar el botón.
+    LaunchedEffect(viewModel) {
+        viewModel.abrirWhatsApp.collect { enlace -> abrirChat(enlace) }
+    }
+
     ClienteDetalleScreen(
         uiState = uiState,
         onBack = onBack,
-        onAbrirWhatsApp = { enlace ->
-            contexto.startActivity(Intent(Intent.ACTION_VIEW, enlace.toUri()))
-        },
+        onAbrirWhatsApp = abrirChat,
+        onAbrirRecordatorio = viewModel::abrirRecordatorio,
+        onTipoRecordatorioChange = viewModel::onTipoRecordatorioChange,
+        onMensajeRecordatorioChange = viewModel::onMensajeRecordatorioChange,
+        onEnviarRecordatorio = viewModel::enviarRecordatorio,
+        onCerrarRecordatorio = viewModel::cerrarRecordatorio,
     )
 }
 
 /**
- * HU-30 y HU-31. El perfil de un cliente: cómo ubicarlo y qué le ha comprado al negocio.
+ * HU-30, HU-31 y HU-32. El perfil de un cliente: cómo ubicarlo, qué le ha comprado al negocio
+ * y qué se le ha recordado.
  *
  * El total acumulado va arriba y grande porque es lo que responde "¿cuánto vale este cliente
  * para mí?". El detalle de cada compra va debajo, para cuando esa cifra sorprende.
@@ -68,9 +86,18 @@ fun ClienteDetalleScreen(
     uiState: ClienteDetalleUiState,
     onBack: () -> Unit,
     onAbrirWhatsApp: (String) -> Unit,
+    onAbrirRecordatorio: (String) -> Unit,
+    onTipoRecordatorioChange: (TipoRecordatorio, String) -> Unit,
+    onMensajeRecordatorioChange: (String) -> Unit,
+    onEnviarRecordatorio: () -> Unit,
+    onCerrarRecordatorio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val cliente = uiState.cliente
+    val plantilla = plantillasDeRecordatorio(
+        cliente = cliente?.nombre.orEmpty(),
+        negocio = uiState.negocio,
+    )
 
     Column(modifier.fillMaxSize()) {
         GvBackTopBar(titulo = cliente?.nombre.orEmpty(), onBack = onBack)
@@ -113,6 +140,16 @@ fun ClienteDetalleScreen(
                 )
             }
 
+            // HU-32. Abre con la plantilla del tipo que la hoja trae marcado, para que el
+            // mensaje esté escrito desde el primer momento.
+            if (uiState.puedeRecordar) {
+                GvSoftButton(
+                    text = stringResource(R.string.cliente_accion_recordatorio),
+                    onClick = { onAbrirRecordatorio(plantilla(FormularioRecordatorio().tipo)) },
+                    iconRes = R.drawable.ic_bell,
+                )
+            }
+
             Text(
                 text = stringResource(R.string.cliente_historial_compras),
                 style = MaterialTheme.typography.titleSmall,
@@ -128,10 +165,37 @@ fun ClienteDetalleScreen(
                 key(compra.id) { FilaDeCompra(compra) }
             }
 
+            // HU-32. El historial solo aparece cuando hay algo que contar: un título con nada
+            // debajo parece que la app perdió los recordatorios.
+            if (uiState.recordatorios.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.cliente_recordatorio_historial),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+
+                uiState.recordatorios.forEach { recordatorio ->
+                    key(recordatorio.id) { FilaDeRecordatorio(recordatorio) }
+                }
+            }
+
             // Lo que falta de la historia, dicho de frente en vez de que parezca un olvido.
             if (!uiState.cargando) {
                 GvInfoNote(stringResource(R.string.cliente_citas_pendientes))
             }
+        }
+
+        uiState.recordatorio?.let { formulario ->
+            RecordatorioSheet(
+                cliente = cliente?.nombre.orEmpty(),
+                formulario = formulario,
+                error = uiState.errorRecordatorio,
+                onTipoChange = { tipo -> onTipoRecordatorioChange(tipo, plantilla(tipo)) },
+                onMensajeChange = onMensajeRecordatorioChange,
+                onEnviar = onEnviarRecordatorio,
+                onCerrar = onCerrarRecordatorio,
+            )
         }
     }
 }
@@ -204,6 +268,43 @@ private fun FilaDeCompra(compra: CompraUi, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * HU-32. Un recordatorio ya mandado.
+ *
+ * Se muestra el mensaje y no solo el tipo: al volver a escribirle, lo que sirve es qué se le
+ * dijo, no que se le dijo algo. Recortado a tres líneas para que el historial siga siendo una
+ * lista y no una sucesión de párrafos.
+ */
+@Composable
+private fun FilaDeRecordatorio(recordatorio: RecordatorioUi, modifier: Modifier = Modifier) {
+    GvCard(modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StatusPill(text = stringResource(recordatorio.tipo.etiquetaRes()))
+            Text(
+                text = stringResource(
+                    R.string.cliente_recordatorio_cuando,
+                    formatDiaCorto(recordatorio.fechaEnvio.toLocalDate()),
+                    formatHour(recordatorio.fechaEnvio.toLocalTime()),
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            text = recordatorio.mensaje,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+    }
+}
+
 @Preview(name = "Perfil del cliente", widthDp = 380, heightDp = 860)
 @Preview(
     name = "Perfil del cliente (oscuro)",
@@ -217,6 +318,7 @@ private fun ClienteDetallePreview() {
     VistaPreviaDetalle(
         ClienteDetalleUiState(
             cargando = false,
+            negocio = "Dulce Antojo",
             cliente = Cliente(
                 id = 1,
                 nombre = "Laura Gómez",
@@ -227,6 +329,21 @@ private fun ClienteDetallePreview() {
                 CompraUi(3, "Torta personalizada", 85_000.0, hoy),
                 CompraUi(2, "Cupcakes x6", 7_500.0, hoy.minusDays(4)),
                 CompraUi(1, "", 25_000.0, hoy.minusDays(11)),
+            ),
+            recordatorios = listOf(
+                RecordatorioUi(
+                    id = 2,
+                    tipo = TipoRecordatorio.Cita,
+                    mensaje = "Hola Laura 👋\n\nTe recuerdo tu cita de decoración el martes " +
+                        "a las 11:00 a. m.\n\n¡Te espero!\nDulce Antojo",
+                    fechaEnvio = hoy.minusDays(1),
+                ),
+                RecordatorioUi(
+                    id = 1,
+                    tipo = TipoRecordatorio.PagoPendiente,
+                    mensaje = "Hola Laura 👋\n\nTe recuerdo el saldo pendiente de 40.000.",
+                    fechaEnvio = hoy.minusDays(9),
+                ),
             ),
         ),
     )
@@ -247,7 +364,16 @@ private fun ClienteSinComprasPreview() {
 private fun VistaPreviaDetalle(uiState: ClienteDetalleUiState) {
     GestorVenturesTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            ClienteDetalleScreen(uiState = uiState, onBack = {}, onAbrirWhatsApp = {})
+            ClienteDetalleScreen(
+                uiState = uiState,
+                onBack = {},
+                onAbrirWhatsApp = {},
+                onAbrirRecordatorio = {},
+                onTipoRecordatorioChange = { _, _ -> },
+                onMensajeRecordatorioChange = {},
+                onEnviarRecordatorio = {},
+                onCerrarRecordatorio = {},
+            )
         }
     }
 }
