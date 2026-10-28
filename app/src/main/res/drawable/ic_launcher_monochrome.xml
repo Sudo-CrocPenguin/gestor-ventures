@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Versión de una sola tinta para los íconos temáticos de Android 13+. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.66"
+        android:scaleY="0.66"
+        android:translateX="19.35"
+        android:translateY="25.3">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M18,60H26a4,4 0 0 1 4,4V80a4,4 0 0 1 -4,4H18a4,4 0 0 1 -4,-4V64a4,4 0 0 1 4,-4Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M42,46H50a4,4 0 0 1 4,4V80a4,4 0 0 1 -4,4H42a4,4 0 0 1 -4,-4V50a4,4 0 0 1 4,-4Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M66,34H74a4,4 0 0 1 4,4V80a4,4 0 0 1 -4,4H66a4,4 0 0 1 -4,-4V38a4,4 0 0 1 4,-4Z" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M66.3,16a11.7,11.7 0 1 0 23.4,0a11.7,11.7 0 1 0 -23.4,0Z"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="2.6" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M78,9V23M82,12.5C81,10.5 75,10.5 74.5,14C74,18 82,17 81.5,21C81,24.5 75,24 74,21.5"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round"
+            android:strokeWidth="2.4" />
+    </group>
+</vector>
