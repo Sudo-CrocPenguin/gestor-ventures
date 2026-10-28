@@ -51,6 +51,8 @@ import com.gestor_ventures.front.components.GvCardHeader
 import com.gestor_ventures.front.components.GvInfoNote
 import com.gestor_ventures.front.components.GvSoftButton
 import com.gestor_ventures.front.components.ListRow
+import com.gestor_ventures.front.model.iconRes
+import com.gestor_ventures.front.model.tituloRes
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.util.formatLongDate
 import java.time.LocalDateTime

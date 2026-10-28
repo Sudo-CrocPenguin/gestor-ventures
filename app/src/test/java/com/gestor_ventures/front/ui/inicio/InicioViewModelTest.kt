@@ -1,9 +1,13 @@
 package com.gestor_ventures.front.ui.inicio
 
+import com.gestor_ventures.back.model.AlertaNueva
 import com.gestor_ventures.back.model.MetodoPago
+import com.gestor_ventures.back.model.TipoAlerta
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.TipoRegistroVenta
+import com.gestor_ventures.back.repository.AlertaRepository
 import com.gestor_ventures.back.repository.BaseFinancieraRepository
+import com.gestor_ventures.back.repository.CategoriaRepository
 import com.gestor_ventures.back.repository.CajaRepository
 import com.gestor_ventures.back.repository.CostoRepository
 import com.gestor_ventures.back.repository.GastoRepository
@@ -15,8 +19,12 @@ import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.back.usecase.CalcularAhorroMensual
 import com.gestor_ventures.back.usecase.CalcularResumenFinanciero
 import com.gestor_ventures.back.usecase.CalcularSaldoEsperado
+import com.gestor_ventures.back.usecase.CompararGastosPorCategoria
+import com.gestor_ventures.back.usecase.GenerarAlertas
 import com.gestor_ventures.db.SemillaTemporal
+import com.gestor_ventures.db.dao.AlertaDaoFalso
 import com.gestor_ventures.db.dao.CajaDaoFalso
+import com.gestor_ventures.db.dao.CategoriaDaoFalso
 import com.gestor_ventures.db.dao.CostoDaoFalso
 import com.gestor_ventures.db.dao.GastoDaoFalso
 import com.gestor_ventures.db.dao.GastoFijoDaoFalso
@@ -91,6 +99,22 @@ class InicioViewModelTest {
         reloj = reloj,
     )
 
+    private val alertaDao = AlertaDaoFalso()
+    private val alertaRepository = AlertaRepository(alertaDao, reloj)
+
+    private val generarAlertas = GenerarAlertas(
+        alertaRepository = alertaRepository,
+        ventaRepository = ventaRepository,
+        baseFinancieraRepository = baseFinancieraRepository,
+        calcularResumenFinanciero = calcularResumen,
+        compararGastosPorCategoria = CompararGastosPorCategoria(
+            gastoRepository = GastoRepository(GastoDaoFalso(), reloj),
+            costoRepository = CostoRepository(CostoDaoFalso(), reloj),
+            categoriaRepository = CategoriaRepository(CategoriaDaoFalso()),
+        ),
+        reloj = reloj,
+    )
+
     private lateinit var viewModel: InicioViewModel
 
     private val estado get() = viewModel.uiState.value
@@ -134,8 +158,10 @@ class InicioViewModelTest {
             negocioActivoRepository = negocioActivo,
             sesionRepository = sesionRepository,
             ventaRepository = ventaRepository,
+            alertaRepository = alertaRepository,
             calcularResumenFinanciero = calcularResumen,
             calcularSaldoEsperado = calcularSaldoEsperado,
+            generarAlertas = generarAlertas,
             reloj = reloj,
         )
         backgroundScope.launch { viewModel.uiState.collect { } }
@@ -220,5 +246,83 @@ class InicioViewModelTest {
         advanceUntilIdle()
 
         assertEquals(300_000.0, estado.resumenHoy.ventas, 0.001)
+    }
+
+    // ---------- HU-38: las alertas del negocio ----------
+
+    @Test
+    fun elSaludoNoAnunciaAlertasQueNoExisten() = runTest(dispatcher) {
+        crearNegocio()
+        abrirPantalla()
+        advanceUntilIdle()
+
+        // Antes decía "2 alertas nuevas" siempre, fuera verdad o no: era un número fijo.
+        assertEquals(0, estado.alertasNuevas)
+        assertTrue(estado.alertas.isEmpty())
+    }
+
+    @Test
+    fun lasAlertasDelNegocioLleganAlInicio() = runTest(dispatcher) {
+        val negocioId = crearNegocio()
+        alertaRepository.registrar(
+            negocioId,
+            AlertaNueva(TipoAlerta.CaidaVentas, "Vendiste menos que la semana pasada."),
+        )
+        abrirPantalla()
+        advanceUntilIdle()
+
+        assertEquals(1, estado.alertas.size)
+        assertEquals(1, estado.alertasNuevas)
+    }
+
+    @Test
+    fun unaAlertaLeidaDejaDeContarComoNueva() = runTest(dispatcher) {
+        val negocioId = crearNegocio()
+        alertaRepository.registrar(
+            negocioId,
+            AlertaNueva(TipoAlerta.GastoElevado, "Tus gastos van por encima de lo normal."),
+        )
+        abrirPantalla()
+        advanceUntilIdle()
+
+        alertaRepository.marcarLeida(estado.alertas.single().id)
+        advanceUntilIdle()
+
+        // Sigue en la lista —pasó de verdad— pero ya no se anuncia como nueva.
+        assertEquals(1, estado.alertas.size)
+        assertEquals(0, estado.alertasNuevas)
+    }
+
+    // ---------- Las últimas ventas del día ----------
+
+    @Test
+    fun lasUltimasVentasVanDeLaMasRecienteALaMasVieja() = runTest(dispatcher) {
+        val negocioId = crearNegocio()
+        vender(negocioId, 10_000.0)
+        vender(negocioId, 20_000.0)
+        abrirPantalla()
+        advanceUntilIdle()
+
+        assertEquals(listOf(20_000.0, 10_000.0), estado.ultimasVentas.map { it.monto })
+    }
+
+    @Test
+    fun elInicioNoSeLlenaConTodasLasVentasDelDia() = runTest(dispatcher) {
+        val negocioId = crearNegocio()
+        repeat(8) { vender(negocioId, 1_000.0) }
+        abrirPantalla()
+        advanceUntilIdle()
+
+        // Un día bueno trae decenas de ventas; el inicio es un resumen, no el historial.
+        assertEquals(5, estado.ultimasVentas.size)
+    }
+
+    @Test
+    fun sinVentasNoHayNadaQueListar() = runTest(dispatcher) {
+        crearNegocio()
+        abrirPantalla()
+        advanceUntilIdle()
+
+        assertTrue(estado.ultimasVentas.isEmpty())
     }
 }

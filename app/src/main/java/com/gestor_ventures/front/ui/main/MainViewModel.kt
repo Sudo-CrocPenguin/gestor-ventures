@@ -3,6 +3,7 @@ package com.gestor_ventures.front.ui.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Negocio
+import com.gestor_ventures.back.repository.AlertaRepository
 import com.gestor_ventures.back.repository.AuthRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
@@ -28,6 +29,7 @@ class MainViewModel @Inject constructor(
     sesionRepository: SesionRepository,
     private val negocioActivoRepository: NegocioActivoRepository,
     private val authRepository: AuthRepository,
+    alertaRepository: AlertaRepository,
 ) : ViewModel() {
 
     val uiState: StateFlow<MainUiState> = combine(
@@ -38,13 +40,17 @@ class MainViewModel @Inject constructor(
         // registro de ventas necesitan saber el mismo.
         negocioActivoRepository.seleccionado,
         sesionRepository.usuarioActual,
-    ) { negocios, elegido, usuario ->
+        // HU-38. El número de la campana sale de las alertas de verdad del negocio activo. Era
+        // un número fijo, así que marcaba avisos pendientes aunque no hubiera ninguno.
+        negocioActivoRepository.negocioActivoId.flatMapLatest { negocioId ->
+            if (negocioId == null) flowOf(emptyList()) else alertaRepository.alertas(negocioId)
+        },
+    ) { negocios, elegido, usuario, alertas ->
         MainUiState(
             usuario = usuario?.aUsuarioUi(),
             negocios = negocios.map(::aNegocioUi),
             negocioActivoId = elegido?.toString(),
-            // Las notificaciones (HU-40/HU-41) todavía no tienen datos reales.
-            notificacionesSinLeer = MainPreviewData.NOTIFICACIONES_SIN_LEER,
+            notificacionesSinLeer = alertas.count { !it.leida },
             cargando = false,
         )
     }.stateIn(

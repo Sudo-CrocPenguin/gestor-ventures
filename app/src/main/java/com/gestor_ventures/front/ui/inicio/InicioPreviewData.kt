@@ -1,23 +1,26 @@
 package com.gestor_ventures.front.ui.inicio
 
+import com.gestor_ventures.back.model.Alerta
+import com.gestor_ventures.back.model.TipoAlerta
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 /**
  * Datos del mockup para los @Preview.
  *
- * Los dos primeros valores también los usa la pantalla de verdad, marcados como TEMPORAL:
- * el saludo espera a HU-01 (la cuenta del usuario) y las alertas a HU-40 (notificaciones).
+ * El nombre también lo usa la pantalla de verdad, marcado como TEMPORAL: el saludo espera a
+ * HU-01 (la cuenta del usuario).
  */
 object InicioPreviewData {
 
     const val NombreTemporal = "Sebastián"
-    const val AlertasTemporales = 2
+
+    private val ayer: LocalDateTime = LocalDateTime.now().minusDays(1)
 
     val uiState = InicioUiState(
         nombreUsuario = NombreTemporal,
         fecha = LocalDate.now(),
-        alertasNuevas = AlertasTemporales,
         resumenHoy = ResumenHoyUi(
             ventas = 148_500.0,
             variacionVentasVsAyer = 12,
@@ -30,6 +33,27 @@ object InicioPreviewData {
             horaApertura = LocalTime.of(8, 0),
             montoInicial = 50_000.0,
             saldoEsperado = 122_500.0,
+        ),
+        alertas = listOf(
+            Alerta(
+                id = 2,
+                tipo = TipoAlerta.CaidaVentas,
+                descripcion = "Vendiste 32 % menos que la semana pasada.",
+                leida = false,
+                fechaGeneracion = ayer,
+            ),
+            Alerta(
+                id = 1,
+                tipo = TipoAlerta.GastoElevado,
+                descripcion = "Tus gastos de este mes van por encima de lo normal.",
+                leida = true,
+                fechaGeneracion = ayer.minusDays(2),
+            ),
+        ),
+        ultimasVentas = listOf(
+            VentaDeHoyUi(3, "Torta personalizada", 85_000.0, LocalTime.of(14, 20)),
+            VentaDeHoyUi(2, "Cupcakes x6", 7_500.0, LocalTime.of(11, 5)),
+            VentaDeHoyUi(1, "", 25_000.0, LocalTime.of(9, 40)),
         ),
     )
 }

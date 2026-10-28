@@ -123,6 +123,7 @@ fun AppNavHost(
                 onRegistrarVenta = { navController.navigate(Rutas.RegistrarVenta) },
                 onAbrirCaja = { navController.navigate(Rutas.Caja) },
                 onDefinirMeta = { navController.navigate(Rutas.MetaYReinversion) },
+                onVerAlertas = { navController.navigate(Rutas.Notificaciones) },
             )
         }
 

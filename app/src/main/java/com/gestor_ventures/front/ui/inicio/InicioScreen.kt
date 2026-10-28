@@ -27,6 +27,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.gestor_ventures.R
 import com.gestor_ventures.front.components.GvCard
 import com.gestor_ventures.front.components.GvCardHeader
+import com.gestor_ventures.front.components.GvDosColumnas
 import com.gestor_ventures.front.components.GvTextLink
 import com.gestor_ventures.front.components.QuickActionButton
 import com.gestor_ventures.front.theme.GestorVenturesTheme
@@ -39,6 +40,7 @@ fun InicioRoute(
     onRegistrarVenta: () -> Unit,
     onAbrirCaja: () -> Unit,
     onDefinirMeta: () -> Unit,
+    onVerAlertas: () -> Unit,
     viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -48,6 +50,7 @@ fun InicioRoute(
         onRegistrarVenta = onRegistrarVenta,
         onAbrirCaja = onAbrirCaja,
         onDefinirMeta = onDefinirMeta,
+        onVerAlertas = onVerAlertas,
     )
 }
 
@@ -58,6 +61,7 @@ fun InicioScreen(
     onRegistrarVenta: () -> Unit,
     onAbrirCaja: () -> Unit,
     onDefinirMeta: () -> Unit,
+    onVerAlertas: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -76,9 +80,31 @@ fun InicioScreen(
         if (uiState.metaCumplida) {
             MetaCumplidaCard(onDefinirMeta = onDefinirMeta)
         }
-        ResumenHoyCard(resumen = uiState.resumenHoy, onVerFinanzas = onVerFinanzas)
-        AccionesRapidas(onRegistrarVenta = onRegistrarVenta, onAbrirCaja = onAbrirCaja)
-        CajaDelTurnoCard(caja = uiState.cajaAbierta)
+        // Acostada, la tablet tiene ancho de sobra y alto de menos: el resumen se queda a la
+        // izquierda y lo de hacer —las acciones y la caja del turno— pasa a la derecha. Parada
+        // vuelve a ser una sola columna, en este mismo orden.
+        GvDosColumnas(
+            izquierda = {
+                ResumenHoyCard(resumen = uiState.resumenHoy, onVerFinanzas = onVerFinanzas)
+            },
+            derecha = {
+                AccionesRapidas(onRegistrarVenta = onRegistrarVenta, onAbrirCaja = onAbrirCaja)
+                CajaDelTurnoCard(caja = uiState.cajaAbierta)
+
+                // HU-38. Los avisos no esperan a que alguien entre a notificaciones.
+                if (uiState.alertas.isNotEmpty()) {
+                    AlertasCard(alertas = uiState.alertas, onVerTodas = onVerAlertas)
+                }
+
+                // Sin ventas la tarjeta no aparece: vacía ocupa lo mismo y no dice nada.
+                if (uiState.ultimasVentas.isNotEmpty()) {
+                    UltimasVentasCard(
+                        ventas = uiState.ultimasVentas,
+                        onVerHistorial = onVerFinanzas,
+                    )
+                }
+            },
+        )
     }
 }
 
@@ -187,6 +213,7 @@ private fun InicioScreenPreview() {
                 onRegistrarVenta = {},
                 onAbrirCaja = {},
                 onDefinirMeta = {},
+                onVerAlertas = {},
             )
         }
     }
