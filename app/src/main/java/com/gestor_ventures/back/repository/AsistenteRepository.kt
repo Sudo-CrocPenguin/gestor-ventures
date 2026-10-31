@@ -25,11 +25,16 @@ import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Rápido y con nivel gratuito: alcanza de sobra para resumir números. */
 /** La tabla de sugerencias admite otros tipos más adelante; por ahora solo hay promociones. */
 private const val TipoPromocion = "promocion"
 
-private const val ModeloGemini = "gemini-2.5-flash"
+/**
+ * El modelo que responde. "flash-lite" es el rápido y con nivel gratuito: alcanza de sobra para
+ * resumir números y contesta en un par de segundos. El nombre es un alias que Google mantiene
+ * apuntando a la versión vigente: "gemini-2.5-flash" dejó de estar disponible para cuentas nuevas
+ * (responde 404) y los modelos "flash" completos tardan casi un minuto, que es lo que espera la app.
+ */
+private const val ModeloGemini = "gemini-flash-lite-latest"
 
 /**
  * HU-34 y HU-35. Habla con Gemini y guarda cada pregunta con su respuesta, y cada idea de
@@ -153,7 +158,7 @@ class AsistenteRepository @Inject constructor(
                 ?.joinToString("") { it.text }
                 ?.trim()
         } catch (e: HttpException) {
-            return Generado.Error(errorDe(e.code()))
+            return Generado.Error(errorDe(e.code(), e.response()?.errorBody()?.string().orEmpty()))
         } catch (_: IOException) {
             return Generado.Error(ErrorAsistente.SinConexion)
         }
@@ -176,9 +181,15 @@ class AsistenteRepository @Inject constructor(
         fechaGeneracion = entidad.fechaGeneracion,
     )
 
-    private fun errorDe(codigo: Int): ErrorAsistente = when (codigo) {
-        400, 401, 403 -> ErrorAsistente.ApiKeyInvalida
-        429 -> ErrorAsistente.LimiteAlcanzado
+    /**
+     * Gemini responde 400 tanto cuando la clave no sirve como cuando la petición está mal
+     * armada; solo en el primer caso el cuerpo dice de la clave. Confundirlos mandaba a revisar
+     * una clave que estaba bien.
+     */
+    private fun errorDe(codigo: Int, cuerpo: String): ErrorAsistente = when {
+        codigo == 401 || codigo == 403 -> ErrorAsistente.ApiKeyInvalida
+        codigo == 400 && cuerpo.contains("API key", ignoreCase = true) -> ErrorAsistente.ApiKeyInvalida
+        codigo == 429 -> ErrorAsistente.LimiteAlcanzado
         else -> ErrorAsistente.ServicioNoDisponible
     }
 

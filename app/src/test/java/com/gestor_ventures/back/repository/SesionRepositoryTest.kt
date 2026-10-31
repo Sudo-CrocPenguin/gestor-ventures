@@ -56,6 +56,24 @@ class SesionRepositoryTest {
         assertEquals(1L, sesionRepository.usuarioId())
     }
 
+    /**
+     * Quien no entraba hace más de una semana y vuelve a iniciar sesión con la contraseña
+     * correcta tiene que quedar adentro. Firebase abre la sesión antes de que `AuthRepository`
+     * anote el nuevo acceso, y esa sesión recién abierta se evaluaba con el último acceso viejo:
+     * se cerraba sola y el login "no hacía nada", sin ningún mensaje.
+     */
+    @Test
+    fun usuarioId_trasIniciarSesionConUltimoAccesoVencido_quedaAdentro() = runTest {
+        authRepository.registrar("Sebastián Orrego", correo, contrasena)
+        autenticador.sesion.value = null
+        ahora = ahora.plusDays(10)
+
+        val resultado = authRepository.iniciarSesion(correo, contrasena)
+
+        assertEquals(true, resultado is com.gestor_ventures.back.model.ResultadoAuth.Exito)
+        assertEquals(1L, sesionRepository.usuarioId())
+    }
+
     @Test
     fun usuarioId_trasCerrarSesion_vuelveANulo() = runTest {
         authRepository.registrar("Sebastián Orrego", correo, contrasena)

@@ -143,8 +143,8 @@ sealed interface PorCancelar {
     data class DePedido(val pedido: Pedido) : PorCancelar
 }
 
-/** HU-28. Qué le pasó a la cita o al pedido, para escribirle al cliente el mensaje correcto. */
-enum class TipoAviso { CitaCambiada, CitaCancelada, PedidoCambiado, PedidoCancelado }
+/** HU-26/HU-28. Qué le pasó a la cita o al pedido, o si solo se le recuerda la cita, para escribirle al cliente el mensaje correcto. */
+enum class TipoAviso { CitaRecordatorio, CitaCambiada, CitaCancelada, PedidoCambiado, PedidoCancelado }
 
 /**
  * HU-28. Lo que hace falta para avisarle al cliente de un cambio por WhatsApp.
@@ -158,6 +158,11 @@ data class AvisoAlCliente(
     val telefono: String,
     val fecha: LocalDate,
     val hora: LocalTime? = null,
+    /** HU-26. El servicio de la cita, para escribir el recordatorio "según su servicio". */
+    val servicio: String? = null,
+    val nombreNegocio: String = "",
+    /** Celular de WhatsApp de la empresa, sin indicativo; null si todavía no se vinculó. */
+    val whatsappEmpresa: String? = null,
 )
 
 /** Texto que ve el usuario para cada regla de la agenda. */

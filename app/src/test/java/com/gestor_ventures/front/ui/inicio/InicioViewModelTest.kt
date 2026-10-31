@@ -1,10 +1,16 @@
 package com.gestor_ventures.front.ui.inicio
 
 import com.gestor_ventures.back.model.AlertaNueva
+import com.gestor_ventures.back.model.Cita
+import com.gestor_ventures.back.model.EstadoCita
+import com.gestor_ventures.back.model.EstadoPedido
+import com.gestor_ventures.back.model.Pedido
+import com.gestor_ventures.back.model.ProductoPedido
 import com.gestor_ventures.back.model.MetodoPago
 import com.gestor_ventures.back.model.TipoAlerta
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.TipoRegistroVenta
+import com.gestor_ventures.back.repository.AgendaDelDiaFalsa
 import com.gestor_ventures.back.repository.AlertaRepository
 import com.gestor_ventures.back.repository.BaseFinancieraRepository
 import com.gestor_ventures.back.repository.CategoriaRepository
@@ -49,6 +55,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import java.time.LocalTime
 import org.junit.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -81,16 +88,19 @@ class InicioViewModelTest {
 
     private val cajaRepository = CajaRepository(cajaDao, reloj)
 
+    private val gastoDao = GastoDaoFalso()
+    private val gastoRepository = GastoRepository(gastoDao, reloj)
+
     private val calcularSaldoEsperado = CalcularSaldoEsperado(
         cajaRepository = cajaRepository,
         ventaRepository = ventaRepository,
-        gastoRepository = GastoRepository(GastoDaoFalso(), reloj),
+        gastoRepository = gastoRepository,
         costoRepository = CostoRepository(CostoDaoFalso(), reloj),
     )
 
     private val calcularResumen = CalcularResumenFinanciero(
         ventaRepository = ventaRepository,
-        gastoRepository = GastoRepository(GastoDaoFalso(), reloj),
+        gastoRepository = gastoRepository,
         costoRepository = CostoRepository(CostoDaoFalso(), reloj),
         baseFinancieraRepository = baseFinancieraRepository,
         obligacionRepository = ObligacionRepository(ObligacionDaoFalso(), reloj),
@@ -102,13 +112,15 @@ class InicioViewModelTest {
     private val alertaDao = AlertaDaoFalso()
     private val alertaRepository = AlertaRepository(alertaDao, reloj)
 
+    private val agendaRepository = AgendaDelDiaFalsa()
+
     private val generarAlertas = GenerarAlertas(
         alertaRepository = alertaRepository,
         ventaRepository = ventaRepository,
         baseFinancieraRepository = baseFinancieraRepository,
         calcularResumenFinanciero = calcularResumen,
         compararGastosPorCategoria = CompararGastosPorCategoria(
-            gastoRepository = GastoRepository(GastoDaoFalso(), reloj),
+            gastoRepository = gastoRepository,
             costoRepository = CostoRepository(CostoDaoFalso(), reloj),
             categoriaRepository = CategoriaRepository(CategoriaDaoFalso()),
         ),
@@ -158,6 +170,8 @@ class InicioViewModelTest {
             negocioActivoRepository = negocioActivo,
             sesionRepository = sesionRepository,
             ventaRepository = ventaRepository,
+            gastoRepository = gastoRepository,
+            agendaRepository = agendaRepository,
             alertaRepository = alertaRepository,
             calcularResumenFinanciero = calcularResumen,
             calcularSaldoEsperado = calcularSaldoEsperado,
@@ -246,6 +260,82 @@ class InicioViewModelTest {
         advanceUntilIdle()
 
         assertEquals(300_000.0, estado.resumenHoy.ventas, 0.001)
+    }
+
+    @Test
+    fun elResumenDelDiaTraeLosGastosDeHoy() = runTest(dispatcher) {
+        val negocioId = crearNegocio()
+        gastoRepository.registrarGasto(negocioId, "Domicilio", 15_000.0)
+        gastoRepository.registrarGasto(negocioId, "Papelería", 28_000.0)
+        abrirPantalla()
+        advanceUntilIdle()
+
+        assertEquals(43_000.0, estado.resumenHoy.gastos, 0.001)
+        assertEquals(2, estado.resumenHoy.cantidadGastos)
+    }
+
+    // ---------- Pendiente para hoy: lo que falta por hacer en la agenda ----------
+
+    private fun cita(id: Long, hora: LocalTime, estado: EstadoCita, cliente: String = "Camila") = Cita(
+        id = id,
+        clienteId = 1,
+        nombreCliente = cliente,
+        fecha = hoy,
+        hora = hora,
+        descripcion = "Manicure",
+        estado = estado,
+    )
+
+    private fun pedido(id: Long, estado: EstadoPedido) = Pedido(
+        id = id,
+        clienteId = 1,
+        nombreCliente = "Sandra",
+        fechaEntrega = hoy,
+        productos = listOf(ProductoPedido("Torta", 2)),
+        estado = estado,
+    )
+
+    @Test
+    fun lasCitasPendientesDeHoyVanEnOrdenDeHora() = runTest(dispatcher) {
+        crearNegocio()
+        agendaRepository.citas.value = listOf(
+            cita(1, LocalTime.of(16, 0), EstadoCita.PROGRAMADA, "Tarde"),
+            cita(2, LocalTime.of(9, 30), EstadoCita.PROGRAMADA, "Mañana"),
+        )
+        abrirPantalla()
+        advanceUntilIdle()
+
+        assertEquals(listOf("Mañana", "Tarde"), estado.pendientesHoy.map { it.cliente })
+    }
+
+    @Test
+    fun loQueYaSeAtendioOSeCanceloNoEsUnPendiente() = runTest(dispatcher) {
+        crearNegocio()
+        agendaRepository.citas.value = listOf(
+            cita(1, LocalTime.of(9, 0), EstadoCita.COMPLETADA),
+            cita(2, LocalTime.of(10, 0), EstadoCita.CANCELADA),
+            cita(3, LocalTime.of(11, 0), EstadoCita.PROGRAMADA),
+        )
+        agendaRepository.pedidos.value = listOf(
+            pedido(1, EstadoPedido.ENTREGADO),
+            pedido(2, EstadoPedido.CANCELADO),
+            pedido(3, EstadoPedido.EN_PROCESO),
+        )
+        abrirPantalla()
+        advanceUntilIdle()
+
+        assertEquals(2, estado.pendientesHoy.size)
+        assertTrue(estado.pendientesHoy[0].esCita)
+        assertFalse(estado.pendientesHoy[1].esCita)
+    }
+
+    @Test
+    fun sinCitasNiPedidosNoHayPendientes() = runTest(dispatcher) {
+        crearNegocio()
+        abrirPantalla()
+        advanceUntilIdle()
+
+        assertTrue(estado.pendientesHoy.isEmpty())
     }
 
     // ---------- HU-38: las alertas del negocio ----------

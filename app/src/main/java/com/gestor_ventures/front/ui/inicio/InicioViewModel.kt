@@ -2,9 +2,11 @@ package com.gestor_ventures.front.ui.inicio
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gestor_ventures.back.model.Gasto
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.Venta
 import com.gestor_ventures.back.repository.AlertaRepository
+import com.gestor_ventures.back.repository.GastoRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.SesionRepository
 import com.gestor_ventures.back.repository.VentaRepository
@@ -25,6 +27,9 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import com.gestor_ventures.back.model.EstadoCita
+import com.gestor_ventures.back.model.EstadoPedido
+import com.gestor_ventures.back.repository.AgendaDelDia
 
 /** Cuántas ventas del día caben en el inicio antes de que deje de ser un resumen. */
 private const val MaxUltimasVentas = 5
@@ -32,10 +37,8 @@ private const val MaxUltimasVentas = 5
 /**
  * HU-16. Resumen del día del negocio activo.
  *
- * Las ventas (HU-11/HU-12), la meta de ahorro (HU-08), la caja del turno (HU-19/HU-20), las
- * alertas (HU-38) y el nombre de quien entró (HU-01) son reales. Los gastos del día se
- * muestran vacíos a propósito: preferimos que la pantalla diga "todavía no hay" y no un número
- * que el usuario tome por bueno.
+ * Las ventas (HU-11/HU-12), los gastos (HU-14), la meta de ahorro (HU-08), la caja del turno
+ * (HU-19/HU-20), las alertas (HU-38) y el nombre de quien entró (HU-01) son reales.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -43,6 +46,8 @@ class InicioViewModel @Inject constructor(
     private val negocioActivoRepository: NegocioActivoRepository,
     private val sesionRepository: SesionRepository,
     private val ventaRepository: VentaRepository,
+    private val gastoRepository: GastoRepository,
+    private val agendaRepository: AgendaDelDia,
     private val alertaRepository: AlertaRepository,
     private val calcularResumenFinanciero: CalcularResumenFinanciero,
     private val calcularSaldoEsperado: CalcularSaldoEsperado,
@@ -63,10 +68,15 @@ class InicioViewModel @Inject constructor(
         .flatMapLatest { negocioId ->
             // Sin negocio todavía hay a quién saludar: la cuenta existe antes que el negocio.
             if (negocioId == null) {
-                sesionRepository.usuarioActual.map { estadoBase(nombre = it?.primerNombre.orEmpty()) }
+                sesionRepository.usuarioActual.map {
+                    estadoBase(nombre = it?.primerNombre.orEmpty()).copy(sinNegocio = true)
+                }
             } else {
                 resumenDe(negocioId)
             }
+        }
+        .combine(negocioActivoRepository.esLider) { estado, esLider ->
+            estado.copy(esVendedor = !esLider && !estado.sinNegocio)
         }
         .stateIn(
             scope = viewModelScope,
@@ -75,14 +85,18 @@ class InicioViewModel @Inject constructor(
         )
 
     private fun resumenDe(negocioId: Long): Flow<InicioUiState> =
-        // La caja y las alertas van aparte y no dentro del `combine` de abajo porque ese ya
-        // llegó a cinco flujos, que es el tope de esa forma de combinar.
+        // La caja, las alertas y los gastos van aparte y no dentro del `combine` de abajo porque
+        // ese ya llegó a cinco flujos, que es el tope de esa forma de combinar.
         combine(
             resumenDelDia(negocioId),
             calcularSaldoEsperado(negocioId),
             alertaRepository.alertas(negocioId),
-        ) { estado, saldo, alertas ->
+            gastosDelDia(negocioId),
+            pendientesDeHoy(negocioId),
+        ) { estado, saldo, alertas, gastos, pendientes ->
             estado.copy(
+                pendientesHoy = pendientes,
+                resumenHoy = estado.resumenHoy.copy(gastos = gastos.sumOf { it.monto }, cantidadGastos = gastos.size),
                 cajaAbierta = saldo?.let {
                     CajaAbiertaUi(
                         horaApertura = it.caja.fechaHoraApertura.toLocalTime(),
@@ -93,6 +107,49 @@ class InicioViewModel @Inject constructor(
                 alertas = alertas,
             )
         }
+
+    /**
+     * Lo que la agenda tiene para hoy y está sin hacer: las citas programadas en orden de hora y
+     * los pedidos pendientes o en proceso que se entregan hoy. Una cita ya atendida o cancelada,
+     * o un pedido ya entregado, no es un pendiente.
+     */
+    private fun pendientesDeHoy(negocioId: Long): Flow<List<PendienteHoyUi>> {
+        val hoy = reloj.ahora().toLocalDate()
+        return combine(
+            agendaRepository.citasEntre(negocioId, hoy, hoy),
+            agendaRepository.pedidosEntre(negocioId, hoy, hoy),
+        ) { citas, pedidos ->
+            val deCitas = citas
+                .filter { it.estado == EstadoCita.PROGRAMADA }
+                .sortedBy { it.hora }
+                .map {
+                    PendienteHoyUi(
+                        id = it.id,
+                        esCita = true,
+                        cliente = it.nombreCliente,
+                        detalle = it.descripcion.orEmpty(),
+                        hora = it.hora,
+                    )
+                }
+            val deLaCasa = pedidos
+                .filter { it.estado == EstadoPedido.PENDIENTE || it.estado == EstadoPedido.EN_PROCESO }
+                .map {
+                    PendienteHoyUi(
+                        id = it.id,
+                        esCita = false,
+                        cliente = it.nombreCliente,
+                        detalle = it.productos.joinToString(", ") { p -> "${p.cantidad} × ${p.nombre}" },
+                    )
+                }
+            deCitas + deLaCasa
+        }
+    }
+
+    /** Los gastos que se registraron hoy: el total y cuántos son salen de la misma lista. */
+    private fun gastosDelDia(negocioId: Long): Flow<List<Gasto>> {
+        val hoy = reloj.ahora().toLocalDate()
+        return gastoRepository.gastosEntre(negocioId, hoy, hoy)
+    }
 
     private fun resumenDelDia(negocioId: Long): Flow<InicioUiState> {
         val hoy = reloj.ahora().toLocalDate()

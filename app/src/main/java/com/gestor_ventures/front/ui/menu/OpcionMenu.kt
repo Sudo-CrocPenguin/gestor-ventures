@@ -18,9 +18,12 @@ enum class OpcionMenu(
     MetaYReinversion(R.string.menu_meta_ahorro, R.drawable.ic_chart_line),   // HU-08, HU-09
     Categorias(R.string.menu_categorias, R.drawable.ic_list),                // HU-15
     MetodosPago(R.string.menu_metodos_pago, R.drawable.ic_card),             // HU-11
+    WhatsAppEmpresa(R.string.menu_whatsapp_empresa, R.drawable.ic_message),
     Equipo(R.string.menu_equipo, R.drawable.ic_team),
     MiPerfil(R.string.menu_mi_perfil, R.drawable.ic_user),                   // HU-04
     Notificaciones(R.string.menu_notificaciones, R.drawable.ic_bell),        // HU-40, HU-41
+    Apariencia(R.string.menu_apariencia, R.drawable.ic_sun),
+    VerTour(R.string.menu_ver_tour, R.drawable.ic_lightbulb),
     CerrarSesion(R.string.menu_cerrar_sesion, R.drawable.ic_logout),         // HU-02
 }
 
@@ -35,10 +38,11 @@ fun opcionesDeConfiguracion(rol: RolNegocio): List<OpcionMenu> = when (rol) {
         OpcionMenu.MetaYReinversion,
         OpcionMenu.Categorias,
         OpcionMenu.MetodosPago,
+        OpcionMenu.WhatsAppEmpresa,
         OpcionMenu.Equipo,
     )
     RolNegocio.Vendedor -> emptyList()
 }
 
 /** Opciones que ve cualquier rol. */
-val opcionesGenerales = listOf(OpcionMenu.MiPerfil, OpcionMenu.Notificaciones)
+val opcionesGenerales = listOf(OpcionMenu.MiPerfil, OpcionMenu.Notificaciones, OpcionMenu.Apariencia, OpcionMenu.VerTour)

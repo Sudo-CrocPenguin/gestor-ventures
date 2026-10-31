@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.gestor_ventures.back.model.ErrorWhatsApp
+import com.gestor_ventures.back.model.celularColombiano
 
 /** Tope de caracteres del nombre, como quedó especificado en HU-05. */
 private const val MaxCaracteresNombre = 100
@@ -31,6 +33,14 @@ class NegocioRepository @Inject constructor(
     /** Negocios del usuario, ordenados por nombre. Se actualiza solo al crear o editar uno. */
     fun negociosDeUsuario(usuarioId: Long): Flow<List<Negocio>> =
         negocioDao.observarDeUsuario(usuarioId).map { entidades -> entidades.map(::aNegocio) }
+
+    /**
+     * Los negocios que ve quien tiene la sesión abierta: los que creó y aquellos donde lo
+     * invitaron como vendedor.
+     */
+    fun negociosAccesibles(usuarioId: Long, correo: String): Flow<List<Negocio>> =
+        negocioDao.observarAccesibles(usuarioId, correo.trim().lowercase())
+            .map { entidades -> entidades.map(::aNegocio) }
 
     fun observarNegocio(negocioId: Long): Flow<Negocio?> =
         negocioDao.observar(negocioId).map { entidad -> entidad?.let(::aNegocio) }
@@ -99,6 +109,22 @@ class NegocioRepository @Inject constructor(
         return ResultadoNegocio.Exito(negocioId)
     }
 
+    /**
+     * Vincula el celular de WhatsApp con el que el negocio escribe a sus clientes, o lo desvincula
+     * si llega `null`. Acepta el número como lo escribe la gente ("300 123 4567", "+57 300…") y lo
+     * guarda solo con los diez dígitos.
+     */
+    suspend fun vincularWhatsApp(negocioId: Long, telefono: String?): ErrorWhatsApp? {
+        if (negocioDao.obtener(negocioId) == null) return ErrorWhatsApp.NegocioNoExiste
+        if (telefono == null) {
+            negocioDao.actualizarWhatsApp(negocioId, null)
+            return null
+        }
+        val celular = celularColombiano(telefono) ?: return ErrorWhatsApp.NumeroInvalido
+        negocioDao.actualizarWhatsApp(negocioId, celular)
+        return null
+    }
+
     private fun validar(
         nombre: String,
         categoria: String,
@@ -113,12 +139,14 @@ class NegocioRepository @Inject constructor(
 
     private fun aNegocio(entidad: NegocioEntity) = Negocio(
         id = entidad.negocioId,
+        usuarioId = entidad.usuarioId,
         nombre = entidad.nombreNegocio,
         tipoActividad = entidad.tipoActividad.aDominio(),
         categoria = entidad.categoriaNegocio,
         porcentajeReinversion = entidad.porcentajeReinversion,
         colorMarca = entidad.colorMarca,
         fechaCreacion = entidad.fechaCreacion,
+        whatsappEmpresa = entidad.whatsappEmpresa,
     )
 }
 

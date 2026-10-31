@@ -14,6 +14,9 @@ class NegocioDaoFalso : NegocioDao {
     val negocios = MutableStateFlow<List<NegocioEntity>>(emptyList())
     private var siguienteId = 1L
 
+    /** Los (negocio, correo) que el equipo tendría: lo que en la base real sale de `miembros_equipo`. */
+    val invitados = mutableListOf<Pair<Long, String>>()
+
     override suspend fun insertar(negocio: NegocioEntity): Long {
         val id = siguienteId++
         negocios.value = negocios.value + negocio.copy(negocioId = id)
@@ -36,6 +39,18 @@ class NegocioDaoFalso : NegocioDao {
         negocios.map { lista ->
             lista.filter { it.usuarioId == usuarioId }.sortedBy { it.nombreNegocio.lowercase() }
         }
+
+    override fun observarAccesibles(usuarioId: Long, correo: String): Flow<List<NegocioEntity>> =
+        negocios.map { lista ->
+            lista.filter { n -> n.usuarioId == usuarioId || invitados.any { it.first == n.negocioId && it.second == correo } }
+                .sortedBy { it.nombreNegocio.lowercase() }
+        }
+
+    override suspend fun actualizarWhatsApp(negocioId: Long, whatsapp: String?) {
+        negocios.value = negocios.value.map {
+            if (it.negocioId == negocioId) it.copy(whatsappEmpresa = whatsapp) else it
+        }
+    }
 
     override suspend fun contarDeUsuario(usuarioId: Long): Int =
         negocios.value.count { it.usuarioId == usuarioId }

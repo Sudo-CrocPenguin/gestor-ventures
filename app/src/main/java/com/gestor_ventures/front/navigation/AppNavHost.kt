@@ -33,6 +33,9 @@ import com.gestor_ventures.front.ui.negocio.BaseFinancieraRoute
 import com.gestor_ventures.front.ui.negocio.EditarNegocioRoute
 import com.gestor_ventures.front.ui.negocio.GastosYObligacionesRoute
 import com.gestor_ventures.front.ui.negocio.MetaYReinversionRoute
+import com.gestor_ventures.front.ui.negocio.MetodosPagoRoute
+import com.gestor_ventures.front.ui.negocio.WhatsAppEmpresaRoute
+import com.gestor_ventures.front.ui.equipo.EquipoRoute
 import com.gestor_ventures.front.ui.negocio.NegocioListoRoute
 import com.gestor_ventures.front.ui.negocio.RegistrarNegocioRoute
 
@@ -60,6 +63,15 @@ object Rutas {
 
     /** HU-06. Configuración de gastos fijos del negocio activo, desde el menú lateral. */
     const val GastosFijos = "gastos_fijos"
+
+    /** HU-11. Qué métodos de pago acepta el negocio activo. */
+    const val MetodosPago = "metodos_pago"
+
+    /** El WhatsApp con el que el negocio activo le escribe a sus clientes. */
+    const val WhatsAppEmpresa = "whatsapp_empresa"
+
+    /** Los vendedores del negocio activo. */
+    const val Equipo = "equipo"
 
     /** HU-15. Categorías con las que el negocio clasifica gastos y costos. */
     const val Categorias = "categorias"
@@ -124,6 +136,8 @@ fun AppNavHost(
                 onAbrirCaja = { navController.navigate(Rutas.Caja) },
                 onDefinirMeta = { navController.navigate(Rutas.MetaYReinversion) },
                 onVerAlertas = { navController.navigate(Rutas.Notificaciones) },
+                onRegistrarNegocio = { navController.navigate(Rutas.RegistrarNegocio) },
+                onVerAgenda = { navController.navigateToTopLevel(TopLevelDestination.Agenda) },
             )
         }
 
@@ -162,6 +176,25 @@ fun AppNavHost(
         // HU-17: se entra desde el resumen, a arreglar algo que quedó mal registrado.
         composable(Rutas.Historial) {
             HistorialRoute(onBack = { navController.popBackStack() })
+        }
+
+        composable(Rutas.WhatsAppEmpresa) {
+            val mensaje = stringResource(R.string.whatsapp_empresa_guardado)
+            WhatsAppEmpresaRoute(
+                onBack = { navController.popBackStack() },
+                onGuardado = {
+                    navController.popBackStack()
+                    mostrarMensaje(mensaje)
+                },
+            )
+        }
+
+        composable(Rutas.Equipo) {
+            EquipoRoute(onBack = { navController.popBackStack() })
+        }
+
+        composable(Rutas.MetodosPago) {
+            MetodosPagoRoute(onBack = { navController.popBackStack() })
         }
 
         composable(Rutas.Categorias) {
@@ -275,7 +308,7 @@ fun AppNavHost(
 
         // HU-24 y HU-25. Las citas y los pedidos que vienen.
         composable(TopLevelDestination.Agenda.route) {
-            AgendaRoute()
+            AgendaRoute(onVincularWhatsApp = { navController.navigate(Rutas.WhatsAppEmpresa) })
         }
 
         // HU-34. Preguntarle al asistente por las ventas del negocio.

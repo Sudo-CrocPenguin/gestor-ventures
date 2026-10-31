@@ -21,6 +21,8 @@ data class RegistrarVentaUiState(
     val monto: String = "",
     val productoServicio: String = "",
     val metodoPago: MetodoPagoUi = MetodoPagoUi.Efectivo,
+    /** HU-11. Los métodos que el negocio tiene activos: solo esos se ofrecen. */
+    val metodosDisponibles: List<MetodoPagoUi> = MetodoPagoUi.entries,
     /** HU-29/HU-30. A quién se le vendió. Opcional: a mucha gente se le vende sin registrarla. */
     val clienteId: Long? = null,
     val clientes: List<Cliente> = emptyList(),

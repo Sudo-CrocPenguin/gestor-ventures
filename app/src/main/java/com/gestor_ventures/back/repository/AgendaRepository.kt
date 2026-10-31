@@ -46,14 +46,14 @@ class AgendaRepository @Inject constructor(
     private val negocioDao: NegocioDao,
     private val recordatorioRepository: RecordatorioRepository,
     private val reloj: Reloj,
-) {
+) : AgendaDelDia {
 
     /** Las citas de un rango de días. También las usará el calendario (HU-27). */
-    fun citasEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Cita>> =
+    override fun citasEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Cita>> =
         citaDao.observarEntre(negocioId, desde, hasta).map { filas -> filas.map(::aCita) }
 
     /** Los pedidos que se entregan en un rango de días. */
-    fun pedidosEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Pedido>> =
+    override fun pedidosEntre(negocioId: Long, desde: LocalDate, hasta: LocalDate): Flow<List<Pedido>> =
         pedidoDao.observarEntre(negocioId, desde, hasta).map { filas -> filas.map(::aPedido) }
 
     /**

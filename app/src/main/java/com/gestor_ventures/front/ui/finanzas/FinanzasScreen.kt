@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gestor_ventures.R
 import com.gestor_ventures.front.components.GvSegmentedToggle
+import com.gestor_ventures.front.components.tourTarget
 
 /**
  * Las tres preguntas que se le hacen a las finanzas del negocio: cómo va el mes (HU-16), en qué
@@ -44,7 +45,9 @@ fun FinanzasRoute(
             seleccionada = seccion,
             etiqueta = { stringResource(it.labelRes) },
             onSeleccionar = { seccion = it },
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .tourTarget("finanzas_secciones"),
         )
 
         // Cada sección trae su propio contenido desplazable y su botón fijo abajo.

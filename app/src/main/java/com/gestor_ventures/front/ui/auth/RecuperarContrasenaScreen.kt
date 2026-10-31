@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -79,6 +81,7 @@ fun RecuperarContrasenaScreen(
             Column(
                 modifier = Modifier
                     .weight(1f)
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp),
                 // Centrado vertical: en una tablet el contenido queda a media altura en vez
                 // de pegado arriba, debajo de la flecha de volver.
@@ -144,8 +147,8 @@ fun RecuperarContrasenaScreen(
                 AnimatedVisibility(visible = uiState.enviado) {
                     GvInfoNote(
                         text = stringResource(R.string.recuperar_enviado),
-                        containerColor = GestorVenturesTheme.colors.successContainer,
-                        contentColor = GestorVenturesTheme.colors.success,
+                        containerColor = GestorVenturesTheme.colors.ingresoContainer,
+                        contentColor = GestorVenturesTheme.colors.ingreso,
                         modifier = Modifier.padding(top = 14.dp),
                     )
                 }

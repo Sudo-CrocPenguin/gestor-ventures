@@ -123,6 +123,7 @@ fun RegistrarVentaScreen(
                 clientes = uiState.clientes,
                 clienteId = uiState.clienteId,
                 onClienteChange = onClienteChange,
+                metodosDisponibles = uiState.metodosDisponibles,
             )
 
             AnimatedVisibility(visible = uiState.error != null) {
@@ -134,8 +135,10 @@ fun RegistrarVentaScreen(
             }
         }
 
+        // Del color del fondo y no de la tarjeta: en blanco, la franja del botón se veía como un
+        // cuadro pegado alrededor de "Guardar venta".
         Surface(
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxWidth(),
         ) {
             GvPrimaryButton(

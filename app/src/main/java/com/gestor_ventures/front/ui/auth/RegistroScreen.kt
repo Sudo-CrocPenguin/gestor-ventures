@@ -210,9 +210,12 @@ fun RegistroScreen(
             Spacer(Modifier.height(20.dp))
 
             GvPrimaryButton(
-                text = stringResource(R.string.registro_crear_cuenta),
+                text = stringResource(
+                    if (uiState.cargando) R.string.registro_creando else R.string.registro_crear_cuenta,
+                ),
                 onClick = onCrearCuenta,
                 enabled = uiState.puedeCrearCuenta,
+                cargando = uiState.cargando,
             )
 
             Spacer(Modifier.height(22.dp))

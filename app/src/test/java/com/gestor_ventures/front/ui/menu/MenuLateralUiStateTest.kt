@@ -39,6 +39,7 @@ class MenuLateralUiStateTest {
                 OpcionMenu.MetaYReinversion,
                 OpcionMenu.Categorias,
                 OpcionMenu.MetodosPago,
+                OpcionMenu.WhatsAppEmpresa,
                 OpcionMenu.Equipo,
             ),
             estadoCon("dulce").opcionesConfiguracion,
@@ -57,6 +58,6 @@ class MenuLateralUiStateTest {
 
     @Test
     fun opcionesGenerales_lasVeCualquierRol() {
-        assertEquals(listOf(OpcionMenu.MiPerfil, OpcionMenu.Notificaciones), opcionesGenerales)
+        assertEquals(listOf(OpcionMenu.MiPerfil, OpcionMenu.Notificaciones, OpcionMenu.Apariencia, OpcionMenu.VerTour), opcionesGenerales)
     }
 }

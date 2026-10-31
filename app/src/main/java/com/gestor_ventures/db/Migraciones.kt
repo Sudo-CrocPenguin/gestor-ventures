@@ -110,5 +110,58 @@ val MIGRACION_4_5 = object : Migration(4, 5) {
     }
 }
 
+/**
+ * v5 → v6: HU-11 deja que cada negocio apague los métodos de pago que no usa.
+ *
+ * Tabla nueva y vacía: sin filas todos los métodos están activos, que es como funcionaba la app.
+ */
+val MIGRACION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `metodos_pago_inactivos` (
+                `metodo_pago_inactivo_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `negocio_id` INTEGER NOT NULL,
+                `metodo_pago` TEXT NOT NULL,
+                FOREIGN KEY(`negocio_id`) REFERENCES `negocios`(`negocio_id`)
+                    ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_metodos_pago_inactivos_negocio_id_metodo_pago` " +
+                "ON `metodos_pago_inactivos` (`negocio_id`, `metodo_pago`)",
+        )
+    }
+}
+
+/**
+ * v6 → v7: el negocio guarda el celular de WhatsApp con el que escribe a sus clientes, y nace la
+ * tabla del equipo de vendedores. Una columna y una tabla nuevas, ambas vacías: nada de lo que ya
+ * existía cambia.
+ */
+val MIGRACION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `negocios` ADD COLUMN `whatsapp_empresa` TEXT")
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `miembros_equipo` (
+                `miembro_equipo_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `negocio_id` INTEGER NOT NULL,
+                `correo` TEXT NOT NULL,
+                `estado_miembro` TEXT NOT NULL,
+                `fecha_invitacion` INTEGER NOT NULL,
+                FOREIGN KEY(`negocio_id`) REFERENCES `negocios`(`negocio_id`)
+                    ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_miembros_equipo_negocio_id_correo` " +
+                "ON `miembros_equipo` (`negocio_id`, `correo`)",
+        )
+    }
+}
+
 /** Todas las migraciones, en orden, para pasárselas al constructor de la base de datos. */
-val MIGRACIONES = arrayOf(MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4, MIGRACION_4_5)
+val MIGRACIONES = arrayOf(MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4, MIGRACION_4_5, MIGRACION_5_6, MIGRACION_6_7)

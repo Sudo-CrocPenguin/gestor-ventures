@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gestor_ventures.front.components.AnchoMaximoApp
 import com.gestor_ventures.front.theme.GestorVenturesTheme
+import com.gestor_ventures.front.components.tourTarget
 
 /** Barra de pestañas inferior; la pestaña activa lleva un indicador en el borde superior. */
 @Composable
@@ -77,6 +78,7 @@ private fun GvBottomBarItem(
     val color = if (selected) GestorVenturesTheme.colors.acento else MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         modifier = modifier
+            .tourTarget("tab_${destination.route}")
             .selectable(selected = selected, onClick = onClick, role = Role.Tab)
             .padding(bottom = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

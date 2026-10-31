@@ -410,6 +410,16 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
+    /**
+     * HU-26. Le recuerda la cita al cliente por WhatsApp, con su fecha y hora ya escritas en el
+     * mensaje. Es el mismo aviso de los cambios: la app no manda nada, abre el chat con el texto.
+     */
+    fun recordarCitaElegida() {
+        val cita = _uiState.value.citaElegida ?: return
+        _uiState.update { it.copy(citaElegida = null) }
+        avisar(TipoAviso.CitaRecordatorio, cita.clienteId, cita.fecha, cita.hora, cita.descripcion)
+    }
+
     fun cerrarAviso() {
         _uiState.update { it.copy(aviso = null) }
     }
@@ -418,19 +428,31 @@ class AgendaViewModel @Inject constructor(
      * HU-28. Prepara el aviso al cliente. Si no tiene teléfono no hay a quién escribirle por
      * WhatsApp, así que no se muestra nada.
      */
-    private fun avisar(tipo: TipoAviso, clienteId: Long, fecha: LocalDate, hora: LocalTime? = null) {
+    private fun avisar(
+        tipo: TipoAviso,
+        clienteId: Long,
+        fecha: LocalDate,
+        hora: LocalTime? = null,
+        servicio: String? = null,
+    ) {
         val cliente = _uiState.value.clientes.firstOrNull { it.id == clienteId } ?: return
         val telefono = cliente.telefono ?: return
-        _uiState.update {
-            it.copy(
-                aviso = AvisoAlCliente(
-                    tipo = tipo,
-                    nombreCliente = cliente.nombre,
-                    telefono = telefono,
-                    fecha = fecha,
-                    hora = hora,
-                ),
-            )
+        viewModelScope.launch {
+            val negocio = negocioActivoRepository.negocioActivo.first()
+            _uiState.update {
+                it.copy(
+                    aviso = AvisoAlCliente(
+                        tipo = tipo,
+                        nombreCliente = cliente.nombre,
+                        telefono = telefono,
+                        fecha = fecha,
+                        hora = hora,
+                        servicio = servicio?.trim()?.takeIf { s -> s.isNotEmpty() },
+                        nombreNegocio = negocio?.nombre.orEmpty(),
+                        whatsappEmpresa = negocio?.whatsappEmpresa,
+                    ),
+                )
+            }
         }
     }
 

@@ -48,6 +48,7 @@ import com.gestor_ventures.front.util.formatMesYAnio
 import com.gestor_ventures.front.util.formatPesos
 import java.time.LocalDate
 import kotlin.math.roundToInt
+import com.gestor_ventures.front.components.tourTarget
 
 @Composable
 fun ResumenFinancieroRoute(
@@ -116,6 +117,7 @@ fun ResumenFinancieroScreen(
             seleccion = uiState.seleccion,
             onRapido = onPeriodoChange,
             onPersonalizar = onPersonalizar,
+            modifier = Modifier.tourTarget("finanzas_periodos"),
         )
 
         // Un periodo sin un solo movimiento se dice con una frase; un tablero de ceros no dice nada.
@@ -161,7 +163,7 @@ private fun MovimientosCard(
             Kpi(
                 label = stringResource(R.string.resumen_ingresos),
                 monto = resumen.ingresos,
-                color = GestorVenturesTheme.colors.success,
+                color = GestorVenturesTheme.colors.ingreso,
                 modifier = Modifier.weight(1f),
             )
             Kpi(
@@ -363,7 +365,7 @@ private fun MetaCard(progreso: ProgresoMeta, modifier: Modifier = Modifier) {
             },
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
             color = if (progreso.cumplida) {
-                GestorVenturesTheme.colors.success
+                GestorVenturesTheme.colors.ingreso
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
             },
@@ -435,7 +437,7 @@ private fun etiquetaDe(rango: RangoFechas): String = when {
 @Composable
 private fun colorDeSaldo(monto: Double): Color = when {
     monto < 0 -> MaterialTheme.colorScheme.error
-    monto > 0 -> GestorVenturesTheme.colors.success
+    monto > 0 -> GestorVenturesTheme.colors.ingreso
     else -> MaterialTheme.colorScheme.onSurface
 }
 

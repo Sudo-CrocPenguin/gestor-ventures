@@ -4,12 +4,15 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.gestor_ventures.db.dao.AlertaDao
+import com.gestor_ventures.db.dao.MetodoPagoDao
+import com.gestor_ventures.db.entity.MetodoPagoInactivoEntity
 import com.gestor_ventures.db.dao.CajaDao
 import com.gestor_ventures.db.dao.CategoriaDao
 import com.gestor_ventures.db.dao.CitaDao
 import com.gestor_ventures.db.dao.ClienteDao
 import com.gestor_ventures.db.dao.ConsultaIaDao
 import com.gestor_ventures.db.dao.CostoDao
+import com.gestor_ventures.db.dao.EquipoDao
 import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
@@ -32,6 +35,7 @@ import com.gestor_ventures.db.entity.DetallePedidoEntity
 import com.gestor_ventures.db.entity.GastoEntity
 import com.gestor_ventures.db.entity.GastoFijoEntity
 import com.gestor_ventures.db.entity.MetaAhorroEntity
+import com.gestor_ventures.db.entity.MiembroEquipoEntity
 import com.gestor_ventures.db.entity.NegocioEntity
 import com.gestor_ventures.db.entity.NotificacionEntity
 import com.gestor_ventures.db.entity.ObligacionEntity
@@ -74,9 +78,11 @@ import com.gestor_ventures.db.entity.VentaEntity
         ConsultaIaEntity::class,
         SugerenciaEntity::class,
         AlertaEntity::class,
-        NotificacionEntity::class
+        NotificacionEntity::class,
+        MetodoPagoInactivoEntity::class,
+        MiembroEquipoEntity::class
     ],
-    version = 5,
+    version = 7,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -123,4 +129,10 @@ abstract class GestorVenturesDatabase : RoomDatabase() {
 
     /** HU-38. */
     abstract fun alertaDao(): AlertaDao
+
+    /** HU-11. */
+    abstract fun metodoPagoDao(): MetodoPagoDao
+
+    /** Equipo de vendedores. */
+    abstract fun equipoDao(): EquipoDao
 }

@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.gestor_ventures.back.model.Reloj
 import com.gestor_ventures.back.model.ResultadoVenta
 import com.gestor_ventures.back.repository.ClienteRepository
+import com.gestor_ventures.back.repository.MetodoPagoRepository
 import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.VentaRepository
 import com.gestor_ventures.front.model.MetodoPagoUi
 import com.gestor_ventures.front.model.TipoRegistroVentaUi
 import com.gestor_ventures.front.model.aDominio
+import com.gestor_ventures.front.model.aUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -40,6 +42,7 @@ class RegistrarVentaViewModel @Inject constructor(
     private val clienteRepository: ClienteRepository,
     private val negocioActivoRepository: NegocioActivoRepository,
     private val reloj: Reloj,
+    private val metodoPagoRepository: MetodoPagoRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegistrarVentaUiState(fechaHora = reloj.ahora()))
@@ -57,6 +60,24 @@ class RegistrarVentaViewModel @Inject constructor(
                     }
                 }
                 .collect { clientes -> _uiState.update { it.copy(clientes = clientes) } }
+        }
+
+        // HU-11. Solo se ofrecen los métodos que el negocio tiene activos. Si el elegido se apagó,
+        // el formulario pasa al primero que quede, para no guardar con uno que ya no se acepta.
+        viewModelScope.launch {
+            negocioActivoRepository.negocioActivoId
+                .flatMapLatest { negocioId ->
+                    if (negocioId == null) flowOf(null) else metodoPagoRepository.activos(negocioId)
+                }
+                .collect { activos ->
+                    val disponibles = activos?.map { it.aUi() }?.ifEmpty { null } ?: MetodoPagoUi.entries
+                    _uiState.update {
+                        it.copy(
+                            metodosDisponibles = disponibles,
+                            metodoPago = if (it.metodoPago in disponibles) it.metodoPago else disponibles.first(),
+                        )
+                    }
+                }
         }
     }
 

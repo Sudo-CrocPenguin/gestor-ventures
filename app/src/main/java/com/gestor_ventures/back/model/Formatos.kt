@@ -72,3 +72,22 @@ fun pesosEnTexto(monto: Double): String {
     val simbolos = DecimalFormatSymbols(Locale.forLanguageTag("es-CO")).apply { groupingSeparator = '.' }
     return "$ " + DecimalFormat("#,##0", simbolos).format(round(monto))
 }
+
+/** Un celular colombiano tiene diez dígitos y empieza por 3. */
+private const val LargoCelular = 10
+
+/**
+ * El celular colombiano de diez dígitos que hay dentro de lo que escribió el usuario, o null si
+ * no es uno. Acepta espacios, guiones, paréntesis y el indicativo ("+57 300 123 4567").
+ */
+fun celularColombiano(texto: String): String? {
+    var digitos = soloDigitos(texto)
+    if (digitos.length == LargoCelular + IndicativoColombia.length && digitos.startsWith(IndicativoColombia)) {
+        digitos = digitos.removePrefix(IndicativoColombia)
+    }
+    return digitos.takeIf { it.length == LargoCelular && it.startsWith("3") }
+}
+
+/** "3001234567" → "+57 300 123 4567". */
+fun celularConFormato(celular: String): String =
+    "+$IndicativoColombia ${celular.take(3)} ${celular.drop(3).take(3)} ${celular.drop(6)}"

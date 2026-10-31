@@ -17,7 +17,7 @@ enum class TopLevelDestination(
     Asistente("asistente", R.string.destino_asistente, R.drawable.ic_lightbulb),
 }
 
-/** Pestañas del rol Líder (administrador). El rol Vendedor tendrá su propio conjunto. */
+/** Pestañas del rol Líder (administrador): todo el negocio. */
 val destinosLider = listOf(
     TopLevelDestination.Inicio,
     TopLevelDestination.Finanzas,
@@ -25,3 +25,17 @@ val destinosLider = listOf(
     TopLevelDestination.Clientes,
     TopLevelDestination.Asistente,
 )
+
+/**
+ * Pestañas del rol Vendedor (mockups/fase1-navegable.html, "Qué ve cada rol"): su turno en el
+ * inicio, la agenda y la lista de clientes. Finanzas y el asistente quedan ocultos.
+ */
+val destinosVendedor = listOf(
+    TopLevelDestination.Inicio,
+    TopLevelDestination.Agenda,
+    TopLevelDestination.Clientes,
+)
+
+/** Las pestañas que ve quien tiene ese rol en el negocio activo. */
+fun destinosDe(esLider: Boolean): List<TopLevelDestination> =
+    if (esLider) destinosLider else destinosVendedor

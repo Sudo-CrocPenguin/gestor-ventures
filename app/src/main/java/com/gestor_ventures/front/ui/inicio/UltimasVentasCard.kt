@@ -12,6 +12,10 @@ import com.gestor_ventures.front.components.ListRow
 import com.gestor_ventures.front.components.MoneyText
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.util.formatHour
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 
 /**
  * HU-11/HU-12. Lo último que se vendió hoy.
@@ -25,27 +29,39 @@ import com.gestor_ventures.front.util.formatHour
 @Composable
 fun UltimasVentasCard(
     ventas: List<VentaDeHoyUi>,
-    onVerHistorial: () -> Unit,
+    onVerHistorial: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     GvCard(modifier) {
         GvCardHeader(title = stringResource(R.string.inicio_ultimas_ventas)) {
-            GvTextLink(text = stringResource(R.string.inicio_ver_todas), onClick = onVerHistorial)
+            onVerHistorial?.let { GvTextLink(text = stringResource(R.string.inicio_ver_todas), onClick = it) }
         }
 
-        ventas.forEach { venta ->
+        // Cada fila lleva su espacio y una línea fina: sin ellos los íconos de las ventas
+        // quedaban pegados uno encima del otro.
+        ventas.forEachIndexed { indice, venta ->
             key(venta.id) {
+                if (indice > 0) SeparadorDeFilas()
                 ListRow(
                     title = venta.titulo.ifBlank { stringResource(R.string.inicio_venta_rapida) },
                     subtitle = formatHour(venta.hora),
                     iconRes = R.drawable.ic_plus,
-                    iconContainerColor = GestorVenturesTheme.colors.successContainer,
-                    iconColor = GestorVenturesTheme.colors.success,
+                    iconContainerColor = GestorVenturesTheme.colors.ingresoContainer,
+                    iconColor = GestorVenturesTheme.colors.ingreso,
                     trailing = {
-                        MoneyText(monto = venta.monto, color = GestorVenturesTheme.colors.success)
+                        MoneyText(monto = venta.monto, color = GestorVenturesTheme.colors.ingreso)
                     },
                 )
             }
         }
     }
+}
+
+/** Línea fina con aire arriba y abajo para separar filas dentro de una tarjeta. */
+@Composable
+internal fun SeparadorDeFilas() {
+    HorizontalDivider(
+        color = MaterialTheme.colorScheme.outline,
+        modifier = Modifier.padding(vertical = 10.dp),
+    )
 }

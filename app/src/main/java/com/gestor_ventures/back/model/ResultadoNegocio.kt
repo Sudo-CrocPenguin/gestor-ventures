@@ -21,3 +21,9 @@ enum class ErrorNegocio {
     PorcentajeFueraDeRango,
     NegocioNoExiste,
 }
+
+/** Por qué no se pudo vincular el WhatsApp de la empresa. */
+enum class ErrorWhatsApp {
+    NumeroInvalido,
+    NegocioNoExiste,
+}

@@ -107,6 +107,7 @@ com.gestor_ventures/
 │   │   ├── asistente/                HU-34 a HU-39
 │   │   ├── reportes/                 HU-40 (gráficos de tendencia)
 │   │   └── notificaciones/           HU-41
+│   │   └── tour/                     Tour de bienvenida (primer ingreso y desde el menú)
 │   ├── components/                 Componentes visuales reutilizables (GvCard, MoneyText…)
 │   ├── model/                      Modelos de UI compartidos (UsuarioUi, NegocioUi, RolNegocio)
 │   ├── navigation/                 Pestañas (TopLevelDestination), AppNavHost, barra inferior
@@ -156,6 +157,8 @@ negocio activo tiene una sola fuente de verdad.
 Cada dominio en `back/repository/` corresponde a un grupo de tablas relacionadas
 (`NegocioRepository`, `VentaRepository`, `CajaRepository`, `ClienteRepository`,
 `AsistenteRepository`, etc.).
+
+`OnboardingRepository` recuerda qué cuentas acaban de crearse sin negocio: solo a esas la app las lleva sola a registrar su primer negocio; quien inicia sesión con una cuenta que ya existía ve el inicio con el botón para registrar uno. El rol es por negocio, no por cuenta: quien creó el negocio es su Líder y quien aparece en `miembros_equipo` con su correo es Vendedor (`NegocioRepository.negociosAccesibles`, `NegocioActivoRepository.esLider`). El Vendedor ve solo Inicio (su turno), Agenda y Clientes (`destinosDe`), y el tour se recorta igual (`pasosDelTour`). `TourRepository` guarda en `SharedPreferences` qué cuenta ya vio el tour de bienvenida (dato del teléfono, no del negocio). El tour señala botones reales: cada pantalla marca los suyos con `Modifier.tourTarget("id")` (`front/components/GvTourTarget.kt`) y los pasos viven en `front/ui/tour/TourUiState.kt`. `MetodoPagoRepository` guarda qué métodos de pago apagó cada negocio (tabla `metodos_pago_inactivos`; sin fila, activo). `EquipoRepository` guarda los vendedores invitados (`miembros_equipo`), y el celular de WhatsApp de la empresa vive en `negocios.whatsapp_empresa` (`NegocioRepository.vincularWhatsApp`); el recordatorio de citas se arma con él en `front/ui/agenda/RecordatorioCitaDialog.kt`.
 
 La excepción es `NegocioActivoRepository`, que no envuelve tablas sino el estado compartido de
 con qué negocio está trabajando el usuario. Vive en `back/` porque no es de ninguna pantalla:

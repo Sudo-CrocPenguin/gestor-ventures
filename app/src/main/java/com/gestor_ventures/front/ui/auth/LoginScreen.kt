@@ -116,7 +116,17 @@ fun LoginScreen(
                     .padding(top = 6.dp),
             )
 
-            Spacer(Modifier.height(28.dp))
+            Text(
+                text = stringResource(R.string.login_vendedor_ayuda),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
+            )
+
+            Spacer(Modifier.height(24.dp))
 
             GvTextField(
                 label = stringResource(R.string.auth_correo),
@@ -182,9 +192,12 @@ fun LoginScreen(
             Spacer(Modifier.height(20.dp))
 
             GvPrimaryButton(
-                text = stringResource(R.string.login_iniciar_sesion),
+                text = stringResource(
+                    if (uiState.cargando) R.string.login_iniciando else R.string.login_iniciar_sesion,
+                ),
                 onClick = onIniciarSesion,
                 enabled = uiState.puedeIniciarSesion,
+                cargando = uiState.cargando,
             )
 
             Spacer(Modifier.height(22.dp))

@@ -150,6 +150,31 @@ class AuthRepositoryTest {
         assertEquals(ResultadoAuth.Invalido(ErrorAuth.CredencialesInvalidas), resultado)
     }
 
+    /**
+     * Firebase conoce la cuenta pero este dispositivo no tiene su perfil (app reinstalada,
+     * teléfono nuevo). La contraseña estaba bien: no se rechaza, se crea el perfil.
+     */
+    @Test
+    fun iniciarSesion_conCuentaSinPerfilLocal_creaElPerfilYEntra() = runTest {
+        autenticador.crearCuenta(correo, contrasenaValida) // solo en Firebase, sin perfil local
+
+        val resultado = repository.iniciarSesion(correo, contrasenaValida)
+
+        assertEquals(ResultadoAuth.Exito(1L), resultado)
+        assertNotNull(usuarioDao.obtenerPorCorreo(correo))
+    }
+
+    /** Sin respuesta de Firebase no se espera para siempre: se avisa que no hubo conexión. */
+    @Test
+    fun iniciarSesion_siFirebaseNoResponde_avisaErrorDeRed() = runTest {
+        registrar()
+        autenticador.tardanza = Long.MAX_VALUE
+
+        val resultado = repository.iniciarSesion(correo, contrasenaValida)
+
+        assertEquals(ResultadoAuth.Invalido(ErrorAuth.ErrorDeRed), resultado)
+    }
+
     @Test
     fun iniciarSesion_conCorreoNoRegistrado_devuelveCredencialesInvalidas() = runTest {
         val resultado = repository.iniciarSesion("nadie@correo.com", contrasenaValida)

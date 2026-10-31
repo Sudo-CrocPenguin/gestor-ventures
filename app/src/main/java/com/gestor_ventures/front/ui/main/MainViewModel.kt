@@ -21,6 +21,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import com.gestor_ventures.back.model.ModoTema
+import com.gestor_ventures.back.repository.AparienciaRepository
+import com.gestor_ventures.back.repository.Onboarding
+import com.gestor_ventures.back.repository.EquipoRepository
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -30,11 +37,25 @@ class MainViewModel @Inject constructor(
     private val negocioActivoRepository: NegocioActivoRepository,
     private val authRepository: AuthRepository,
     alertaRepository: AlertaRepository,
+    private val onboarding: Onboarding,
+    private val equipoRepository: EquipoRepository,
+    private val aparienciaRepository: AparienciaRepository,
 ) : ViewModel() {
 
+    init {
+        // Un vendedor invitado que entra con su correo acepta la invitación: pasa de "Pendiente"
+        // a "Activo" en la pantalla de equipo del Líder.
+        viewModelScope.launch {
+            sesionRepository.usuarioActual
+                .map { it?.correo }
+                .distinctUntilChanged()
+                .collect { correo -> correo?.let { equipoRepository.aceptarInvitaciones(it) } }
+        }
+    }
+
     val uiState: StateFlow<MainUiState> = combine(
-        sesionRepository.observarUsuarioId().flatMapLatest { usuarioId ->
-            usuarioId?.let(negocioRepository::negociosDeUsuario) ?: flowOf(emptyList())
+        sesionRepository.usuarioActual.flatMapLatest { usuario ->
+            usuario?.let { negocioRepository.negociosAccesibles(it.id, it.correo) } ?: flowOf(emptyList())
         },
         // El negocio elegido a mano lo guarda el repositorio, no esta pantalla: el inicio y el
         // registro de ventas necesitan saber el mismo.
@@ -45,14 +66,18 @@ class MainViewModel @Inject constructor(
         negocioActivoRepository.negocioActivoId.flatMapLatest { negocioId ->
             if (negocioId == null) flowOf(emptyList()) else alertaRepository.alertas(negocioId)
         },
-    ) { negocios, elegido, usuario, alertas ->
+        aparienciaRepository.modo,
+    ) { negocios, elegido, usuario, alertas, modoTema ->
         MainUiState(
             usuario = usuario?.aUsuarioUi(),
-            negocios = negocios.map(::aNegocioUi),
+            negocios = negocios.map { aNegocioUi(it, esLider = it.usuarioId == usuario?.id) },
             negocioActivoId = elegido?.toString(),
             notificacionesSinLeer = alertas.count { !it.leida },
+            modoTema = modoTema,
             cargando = false,
         )
+    }.combine(onboarding.pendientes) { estado, pendientes ->
+        estado.copy(onboardingPendiente = estado.usuario?.correo?.trim()?.lowercase() in pendientes)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -69,21 +94,25 @@ class MainViewModel @Inject constructor(
         authRepository.cerrarSesion()
     }
 
+    /** Claro, oscuro o como el dispositivo: se aplica al instante en toda la app. */
+    fun cambiarModoTema(modo: ModoTema) {
+        aparienciaRepository.cambiar(modo)
+    }
+
     /** Cambia el negocio activo desde el menú lateral. */
     fun seleccionarNegocio(negocioId: String) {
+        // Con un negocio ya creado, la cuenta deja de ser "nueva sin negocio".
+        uiState.value.usuario?.correo?.let(onboarding::completar)
         negocioId.toLongOrNull()?.let(negocioActivoRepository::seleccionar)
     }
 }
 
-/**
- * El rol todavía no existe en la base de datos: quien crea el negocio es su Líder. Cuando se
- * modele el equipo (tabla pendiente), saldrá de ahí.
- */
-private fun aNegocioUi(negocio: Negocio) = NegocioUi(
+/** Quien creó el negocio es su Líder; quien entró por una invitación es Vendedor. */
+private fun aNegocioUi(negocio: Negocio, esLider: Boolean) = NegocioUi(
     id = negocio.id.toString(),
     nombre = negocio.nombre,
     categoria = negocio.categoria,
-    rol = RolNegocio.Lider,
+    rol = if (esLider) RolNegocio.Lider else RolNegocio.Vendedor,
     colorMarca = negocio.colorMarca,
 )
 

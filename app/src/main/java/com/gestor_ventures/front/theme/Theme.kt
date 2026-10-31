@@ -11,6 +11,10 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import android.app.Activity
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryLight,
@@ -116,8 +120,19 @@ private fun GestorColors.conMarca(
     return copy(
         acento = acentoSobre(marca, superficie, oscuro),
         primaryVariant = variante(marca, oscuro),
+        // Las ventas se pintan del color de marca, con el mismo ajuste de legibilidad del acento.
+        ingreso = acentoSobre(marca, superficie, oscuro),
+        ingresoContainer = suave(marca, oscuro),
     )
 }
+
+/**
+ * Si el tema que se está dibujando es el oscuro, sea por elección o porque lo es el dispositivo.
+ * Es nulo fuera de [GestorVenturesTheme]. Un tema anidado (la pantalla de registrar negocio
+ * se pinta con el color elegido) hereda este valor en vez de volver a preguntarle al sistema:
+ * si no, ignora el modo claro u oscuro que el usuario eligió en la app.
+ */
+val LocalTemaOscuro = staticCompositionLocalOf<Boolean?> { null }
 
 /**
  * Tema de la app. No usa color dinámico (Android 12+) para que la marca se vea igual en
@@ -128,7 +143,7 @@ private fun GestorColors.conMarca(
  */
 @Composable
 fun GestorVenturesTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = LocalTemaOscuro.current ?: isSystemInDarkTheme(),
     colorMarca: String? = null,
     content: @Composable () -> Unit,
 ) {
@@ -141,7 +156,19 @@ fun GestorVenturesTheme(
         baseGestor.conMarca(marca, darkTheme, base.surface)
     }
 
-    CompositionLocalProvider(LocalGestorColors provides gestorColors) {
+    // Los íconos de la barra de estado y de navegación se dibujan según el modo del dispositivo;
+    // si el usuario fuerza otro, hay que decirles de qué color es el fondo que tienen detrás.
+    val vista = LocalView.current
+    if (!vista.isInEditMode) {
+        SideEffect {
+            val ventana = (vista.context as? Activity)?.window ?: return@SideEffect
+            val controles = WindowCompat.getInsetsController(ventana, vista)
+            controles.isAppearanceLightStatusBars = !darkTheme
+            controles.isAppearanceLightNavigationBars = !darkTheme
+        }
+    }
+
+    CompositionLocalProvider(LocalGestorColors provides gestorColors, LocalTemaOscuro provides darkTheme) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = Typography,

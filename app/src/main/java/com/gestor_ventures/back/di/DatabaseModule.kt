@@ -12,9 +12,11 @@ import com.gestor_ventures.db.dao.CitaDao
 import com.gestor_ventures.db.dao.ClienteDao
 import com.gestor_ventures.db.dao.ConsultaIaDao
 import com.gestor_ventures.db.dao.CostoDao
+import com.gestor_ventures.db.dao.EquipoDao
 import com.gestor_ventures.db.dao.GastoDao
 import com.gestor_ventures.db.dao.GastoFijoDao
 import com.gestor_ventures.db.dao.MetaAhorroDao
+import com.gestor_ventures.db.dao.MetodoPagoDao
 import com.gestor_ventures.db.dao.NegocioDao
 import com.gestor_ventures.db.dao.ObligacionDao
 import com.gestor_ventures.db.dao.PedidoDao
@@ -99,6 +101,12 @@ object DatabaseModule {
 
     @Provides
     fun proveerAlertaDao(db: GestorVenturesDatabase): AlertaDao = db.alertaDao()
+
+    @Provides
+    fun proveerEquipoDao(db: GestorVenturesDatabase): EquipoDao = db.equipoDao()
+
+    @Provides
+    fun proveerMetodoPagoDao(db: GestorVenturesDatabase): MetodoPagoDao = db.metodoPagoDao()
 
     @Provides
     @Singleton

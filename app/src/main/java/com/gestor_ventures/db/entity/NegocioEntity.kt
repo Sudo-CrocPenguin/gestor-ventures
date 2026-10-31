@@ -58,7 +58,14 @@ data class NegocioEntity(
     val fechaCreacion: LocalDateTime,
 
     @ColumnInfo(name = "fecha_actualizacion")
-    val fechaActualizacion: LocalDateTime? = null
+    val fechaActualizacion: LocalDateTime? = null,
+
+    /**
+     * Celular de WhatsApp con el que el negocio escribe a sus clientes, sin indicativo y solo con
+     * dígitos ("3001234567"). Nulo = todavía no se vinculó.
+     */
+    @ColumnInfo(name = "whatsapp_empresa")
+    val whatsappEmpresa: String? = null
 )
 
 /** HU-06. Gastos recurrentes configurados a nivel de negocio; se suman al resumen (HU-16). */

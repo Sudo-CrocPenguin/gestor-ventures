@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gestor_ventures.R
+import com.gestor_ventures.front.components.tourTarget
 
 /**
  * Barra superior de la app: menú, [titulo] (el negocio activo) y campana de notificaciones
@@ -51,7 +52,7 @@ fun GvTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            IconButton(onClick = onMenuClick) {
+            IconButton(onClick = onMenuClick, modifier = Modifier.tourTarget("barra_menu")) {
                 Icon(
                     painter = painterResource(R.drawable.ic_menu),
                     contentDescription = stringResource(R.string.cd_abrir_menu),
@@ -69,7 +70,7 @@ fun GvTopBar(
                     .weight(1f)
                     .padding(horizontal = 4.dp),
             )
-            IconButton(onClick = onNotificacionesClick) {
+            IconButton(onClick = onNotificacionesClick, modifier = Modifier.tourTarget("barra_campana")) {
                 NotificationBell(notificacionesSinLeer)
             }
         }

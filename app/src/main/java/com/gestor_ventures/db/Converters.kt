@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.gestor_ventures.db.enums.EstadoCaja
 import com.gestor_ventures.db.enums.EstadoCita
 import com.gestor_ventures.db.enums.EstadoMeta
+import com.gestor_ventures.db.enums.EstadoMiembro
 import com.gestor_ventures.db.enums.EstadoPago
 import com.gestor_ventures.db.enums.EstadoPedido
 import com.gestor_ventures.db.enums.EstadoSugerencia
@@ -74,6 +75,9 @@ class Converters {
 
     @TypeConverter fun fromMetodoPago(v: MetodoPago?): String? = v?.name
     @TypeConverter fun toMetodoPago(v: String?): MetodoPago? = v?.let { MetodoPago.valueOf(it) }
+
+    @TypeConverter fun fromEstadoMiembro(v: EstadoMiembro?): String? = v?.name
+    @TypeConverter fun toEstadoMiembro(v: String?): EstadoMiembro? = v?.let { EstadoMiembro.valueOf(it) }
 
     @TypeConverter fun fromEstadoCaja(v: EstadoCaja?): String? = v?.name
     @TypeConverter fun toEstadoCaja(v: String?): EstadoCaja? = v?.let { EstadoCaja.valueOf(it) }

@@ -21,6 +21,8 @@ data class ClientesUiState(
     /** El cliente que el usuario tocó, mientras elige qué hacer con él. */
     val acciones: Cliente? = null,
     val error: ErrorCliente? = null,
+    /** Líder: puede agregar, corregir y borrar. El vendedor solo ve la lista y escribe por WhatsApp. */
+    val puedeAdministrar: Boolean = true,
 ) {
     /** El negocio no tiene clientes todavía, que es distinto de que la búsqueda no encuentre. */
     val vacio: Boolean get() = !cargando && clientes.isEmpty() && busqueda.isBlank()

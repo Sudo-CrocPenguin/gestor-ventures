@@ -17,6 +17,12 @@ data class InicioUiState(
     val alertas: List<Alerta> = emptyList(),
     /** HU-11/HU-12. Lo último que se vendió hoy, de lo más reciente a lo más viejo. */
     val ultimasVentas: List<VentaDeHoyUi> = emptyList(),
+    /** La cuenta no tiene ningún negocio en este dispositivo. */
+    val sinNegocio: Boolean = false,
+    /** Quien mira es Vendedor de este negocio: ve su turno, no las finanzas ni los avisos del dueño. */
+    val esVendedor: Boolean = false,
+    /** Lo que la agenda tiene para hoy y todavía no se ha hecho: citas por atender y pedidos por entregar. */
+    val pendientesHoy: List<PendienteHoyUi> = emptyList(),
 ) {
     /**
      * HU-38. Cuántos avisos están sin leer, que es lo que anuncia el saludo.
@@ -59,4 +65,16 @@ data class CajaAbiertaUi(
     val horaApertura: LocalTime,
     val montoInicial: Double,
     val saldoEsperado: Double,
+)
+
+/**
+ * Algo de la agenda que toca hoy: una cita a una hora, o un pedido que se entrega en el día.
+ * [hora] es nula en los pedidos, que se entregan "hoy" sin hora fija.
+ */
+data class PendienteHoyUi(
+    val id: Long,
+    val esCita: Boolean,
+    val cliente: String,
+    val detalle: String,
+    val hora: LocalTime? = null,
 )

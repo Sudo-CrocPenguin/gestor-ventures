@@ -1,5 +1,6 @@
 package com.gestor_ventures.back.repository
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -20,6 +21,9 @@ class AutenticadorFalso : Autenticador {
     var siguienteIniciarSesion: ResultadoAutenticador? = null
     var siguienteEnviarCorreo: ResultadoAutenticador? = null
 
+    /** Milisegundos que tarda en responder, para probar qué pasa cuando Firebase se cuelga. */
+    var tardanza: Long = 0
+
     override suspend fun crearCuenta(correo: String, contrasena: String): ResultadoAutenticador {
         siguienteCrearCuenta?.let { return it }
         if (cuentas.containsKey(correo)) return ResultadoAutenticador.CorreoYaRegistrado
@@ -29,6 +33,7 @@ class AutenticadorFalso : Autenticador {
     }
 
     override suspend fun iniciarSesion(correo: String, contrasena: String): ResultadoAutenticador {
+        if (tardanza > 0) delay(tardanza)
         siguienteIniciarSesion?.let { return it }
         val registrada = cuentas[correo] ?: return ResultadoAutenticador.CorreoNoRegistrado
         if (registrada != contrasena) return ResultadoAutenticador.CredencialesInvalidas

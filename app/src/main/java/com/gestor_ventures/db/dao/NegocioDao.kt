@@ -32,6 +32,24 @@ interface NegocioDao {
     @Query("SELECT * FROM negocios WHERE usuario_id = :usuarioId ORDER BY nombre_negocio COLLATE NOCASE")
     fun observarDeUsuario(usuarioId: Long): Flow<List<NegocioEntity>>
 
+    /** Guarda (o borra, con `null`) el celular de WhatsApp de la empresa. */
+    @Query("UPDATE negocios SET whatsapp_empresa = :whatsapp WHERE negocio_id = :negocioId")
+    suspend fun actualizarWhatsApp(negocioId: Long, whatsapp: String?)
+
+    /**
+     * Los negocios a los que tiene acceso quien tiene ese correo: los suyos (es el Líder) y
+     * aquellos donde alguien lo invitó como vendedor.
+     */
+    @Query(
+        """
+        SELECT * FROM negocios
+        WHERE usuario_id = :usuarioId
+           OR negocio_id IN (SELECT negocio_id FROM miembros_equipo WHERE correo = :correo)
+        ORDER BY nombre_negocio COLLATE NOCASE
+        """,
+    )
+    fun observarAccesibles(usuarioId: Long, correo: String): Flow<List<NegocioEntity>>
+
     /** Para saber si el usuario ya tiene negocios o hay que mandarlo a crear el primero. */
     @Query("SELECT COUNT(*) FROM negocios WHERE usuario_id = :usuarioId")
     suspend fun contarDeUsuario(usuarioId: Long): Int

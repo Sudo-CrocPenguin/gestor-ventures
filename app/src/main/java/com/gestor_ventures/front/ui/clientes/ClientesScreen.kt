@@ -39,6 +39,7 @@ import com.gestor_ventures.front.components.GvTextField
 import com.gestor_ventures.front.components.ListRow
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.util.aIniciales
+import com.gestor_ventures.front.components.tourTarget
 
 @Composable
 fun ClientesRoute(
@@ -112,6 +113,7 @@ fun ClientesScreen(
                 value = uiState.busqueda,
                 onValueChange = onBusquedaChange,
                 placeholder = stringResource(R.string.clientes_buscar_placeholder),
+                modifier = Modifier.tourTarget("clientes_buscar"),
             )
 
             AnimatedVisibility(visible = uiState.vacio) {
@@ -127,12 +129,16 @@ fun ClientesScreen(
             }
         }
 
-        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxWidth()) {
-            GvPrimaryButton(
-                text = stringResource(R.string.clientes_agregar),
-                onClick = onAgregar,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            )
+        if (uiState.puedeAdministrar) {
+            Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxWidth()) {
+                GvPrimaryButton(
+                    text = stringResource(R.string.clientes_agregar),
+                    onClick = onAgregar,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .tourTarget("clientes_agregar"),
+                )
+            }
         }
     }
 
@@ -158,18 +164,23 @@ fun ClientesScreen(
                     },
                     onClick = { whatsapp?.let(onAbrirWhatsApp) },
                 ),
-                AccionSheet(
-                    texto = stringResource(R.string.cliente_accion_editar),
-                    iconRes = R.drawable.ic_pencil,
-                    onClick = onEditar,
-                ),
-                AccionSheet(
-                    texto = stringResource(R.string.cliente_accion_eliminar),
-                    iconRes = R.drawable.ic_trash,
-                    destructiva = true,
-                    onClick = onEliminar,
-                ),
-            ),
+            ) + if (uiState.puedeAdministrar) {
+                listOf(
+                    AccionSheet(
+                        texto = stringResource(R.string.cliente_accion_editar),
+                        iconRes = R.drawable.ic_pencil,
+                        onClick = onEditar,
+                    ),
+                    AccionSheet(
+                        texto = stringResource(R.string.cliente_accion_eliminar),
+                        iconRes = R.drawable.ic_trash,
+                        destructiva = true,
+                        onClick = onEliminar,
+                    ),
+                )
+            } else {
+                emptyList()
+            },
             onCerrar = onCerrarAcciones,
         )
     }
@@ -200,15 +211,6 @@ private fun FilaCliente(cliente: Cliente, onClick: () -> Unit, modifier: Modifie
             modifier = Modifier
                 .clickable(onClick = onClick)
                 .semantics { contentDescription = etiqueta },
-            trailing = {
-                Text(
-                    text = cliente.nombre.aIniciales(),
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
-                    color = GestorVenturesTheme.colors.acento,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            },
         )
     }
 }

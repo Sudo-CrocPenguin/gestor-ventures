@@ -73,13 +73,13 @@ fun NegocioListoScreen(
             Box(
                 modifier = Modifier
                     .size(96.dp)
-                    .background(GestorVenturesTheme.colors.successContainer, CircleShape),
+                    .background(GestorVenturesTheme.colors.ingresoContainer, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_check),
                     contentDescription = null,
-                    tint = GestorVenturesTheme.colors.success,
+                    tint = GestorVenturesTheme.colors.ingreso,
                     modifier = Modifier.size(46.dp),
                 )
             }
@@ -188,6 +188,7 @@ private fun NegocioListoScreenPreview() {
                 uiState = NegocioListoUiState(
                     negocio = Negocio(
                         id = 1,
+                        usuarioId = 1,
                         nombre = "Dulce Antojo",
                         tipoActividad = TipoActividad.MIXTO,
                         categoria = "Repostería artesanal",

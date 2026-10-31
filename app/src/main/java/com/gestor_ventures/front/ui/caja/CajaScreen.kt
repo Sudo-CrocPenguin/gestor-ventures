@@ -174,8 +174,8 @@ private fun JornadaAbierta(caja: CajaAbiertaUi, modifier: Modifier = Modifier) {
         GvCardHeader(title = stringResource(R.string.caja_jornada_en_curso)) {
             StatusPill(
                 text = stringResource(R.string.caja_estado_abierta),
-                containerColor = GestorVenturesTheme.colors.successContainer,
-                contentColor = GestorVenturesTheme.colors.success,
+                containerColor = GestorVenturesTheme.colors.ingresoContainer,
+                contentColor = GestorVenturesTheme.colors.ingreso,
             )
         }
 

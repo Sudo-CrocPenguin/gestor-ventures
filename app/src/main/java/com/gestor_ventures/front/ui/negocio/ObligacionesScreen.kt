@@ -224,7 +224,7 @@ private fun FilaObligacion(
                 Icon(
                     painter = painterResource(R.drawable.ic_check),
                     contentDescription = stringResource(R.string.obligacion_pagada),
-                    tint = GestorVenturesTheme.colors.success,
+                    tint = GestorVenturesTheme.colors.ingreso,
                     modifier = Modifier.size(17.dp),
                 )
             }

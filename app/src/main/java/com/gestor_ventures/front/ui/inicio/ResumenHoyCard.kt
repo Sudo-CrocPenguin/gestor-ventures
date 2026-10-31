@@ -48,7 +48,7 @@ fun ResumenHoyCard(
                 label = stringResource(R.string.inicio_ventas),
                 monto = resumen.ventas,
                 detalle = resumen.variacionVentasVsAyer?.let { variacionTexto(it) },
-                montoColor = GestorVenturesTheme.colors.success,
+                montoColor = GestorVenturesTheme.colors.ingreso,
                 modifier = Modifier.weight(1f),
             )
             Kpi(

@@ -31,8 +31,8 @@ fun CajaDelTurnoCard(
             if (caja != null) {
                 StatusPill(
                     text = stringResource(R.string.caja_estado_abierta),
-                    containerColor = GestorVenturesTheme.colors.successContainer,
-                    contentColor = GestorVenturesTheme.colors.success,
+                    containerColor = GestorVenturesTheme.colors.ingresoContainer,
+                    contentColor = GestorVenturesTheme.colors.ingreso,
                 )
             }
         }
@@ -49,7 +49,8 @@ fun CajaDelTurnoCard(
                 subtitle = stringResource(
                     R.string.inicio_caja_apertura,
                     formatHour(caja.horaApertura),
-                    formatPesos(caja.montoInicial),
+                    // Sin esto, en una pantalla angosta el "$" quedaba solo al final de una línea.
+                    formatPesos(caja.montoInicial).replace(' ', '\u00A0'),
                 ),
                 iconRes = R.drawable.ic_box,
                 // La hora y el monto inicial no caben en una línea junto al saldo, y lo que

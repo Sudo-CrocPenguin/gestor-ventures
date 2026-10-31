@@ -5,6 +5,8 @@ import com.gestor_ventures.back.repository.NegocioActivoRepository
 import com.gestor_ventures.back.repository.NegocioRepository
 import com.gestor_ventures.back.repository.sesionRepositoryDePrueba
 import com.gestor_ventures.back.repository.ClienteRepository
+import com.gestor_ventures.back.repository.MetodoPagoRepository
+import com.gestor_ventures.db.dao.MetodoPagoDaoFalso
 import com.gestor_ventures.back.repository.VentaRepository
 import com.gestor_ventures.db.SemillaTemporal
 import com.gestor_ventures.db.dao.ClienteDaoFalso
@@ -84,6 +86,7 @@ class RegistrarVentaViewModelTest {
         clienteRepository,
         negocioActivo,
         reloj,
+        MetodoPagoRepository(MetodoPagoDaoFalso()),
     )
 
     @Test

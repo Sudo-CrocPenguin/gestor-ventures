@@ -29,7 +29,7 @@ enum class ColorMarca(val hex: String?, @param:StringRes val nombreRes: Int) {
  * cambia aunque el usuario esté previsualizando otro color.
  */
 @Composable
-fun colorBaseDeMarca(): Color = if (isSystemInDarkTheme()) PrimaryDark else PrimaryLight
+fun colorBaseDeMarca(): Color = if (LocalTemaOscuro.current ?: isSystemInDarkTheme()) PrimaryDark else PrimaryLight
 
 /**
  * El atajo al que corresponde un hexadecimal guardado, o null si el usuario eligió un color

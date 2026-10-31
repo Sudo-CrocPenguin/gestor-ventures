@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.gestor_ventures.R
 import com.gestor_ventures.front.model.NegocioUi
 import com.gestor_ventures.front.theme.GestorVenturesTheme
+import com.gestor_ventures.front.components.tourTarget
 
 /** Forma común de las filas del menú (negocios y "Agregar negocio"). */
 internal val MenuItemShape = RoundedCornerShape(13.dp)
@@ -97,6 +98,7 @@ fun MenuLateral(
                 .verticalScroll(rememberScrollState()),
         ) {
             SeccionPlegable(
+                modifier = Modifier.tourTarget("menu_general"),
                 titulo = stringResource(R.string.menu_general),
                 expandida = SeccionMenu.General in abiertas,
                 onToggle = { alternar(SeccionMenu.General) },
@@ -107,6 +109,7 @@ fun MenuLateral(
             }
 
             SeccionPlegable(
+                modifier = Modifier.tourTarget("menu_negocios"),
                 titulo = stringResource(R.string.menu_mis_negocios),
                 expandida = SeccionMenu.Negocios in abiertas,
                 onToggle = { alternar(SeccionMenu.Negocios) },
@@ -126,6 +129,7 @@ fun MenuLateral(
             val configuracion = uiState.opcionesConfiguracion
             if (configuracion.isNotEmpty()) {
                 SeccionPlegable(
+                    modifier = Modifier.tourTarget("menu_config"),
                     titulo = stringResource(
                         R.string.menu_configuracion,
                         uiState.negocioActivo?.nombre.orEmpty(),

@@ -46,8 +46,9 @@ fun AlertasCard(
             }
         }
 
-        alertas.take(MaxAlertasEnInicio).forEach { alerta ->
+        alertas.take(MaxAlertasEnInicio).forEachIndexed { indice, alerta ->
             key(alerta.id) {
+                if (indice > 0) SeparadorDeFilas()
                 ListRow(
                     title = stringResource(alerta.tipo.tituloRes()),
                     subtitle = alerta.descripcion,

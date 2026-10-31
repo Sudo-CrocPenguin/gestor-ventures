@@ -41,12 +41,20 @@ class NegocioActivoRepository @Inject constructor(
      * sesión abierta (o se cierra), no hay negocios que mostrar.
      */
     val negocioActivo: Flow<Negocio?> = combine(
-        sesionRepository.observarUsuarioId().flatMapLatest { usuarioId ->
-            usuarioId?.let(negocioRepository::negociosDeUsuario) ?: flowOf(emptyList())
+        sesionRepository.usuarioActual.flatMapLatest { usuario ->
+            usuario?.let { negocioRepository.negociosAccesibles(it.id, it.correo) } ?: flowOf(emptyList())
         },
         elegido,
     ) { negocios, elegidoId ->
         negocios.firstOrNull { it.id == elegidoId } ?: negocios.firstOrNull()
+    }
+
+    /**
+     * Si quien tiene la sesión es el Líder del negocio activo. Si no lo es, es Vendedor: ve solo
+     * lo suyo (su turno, la agenda y la lista de clientes) y no administra el negocio.
+     */
+    val esLider: Flow<Boolean> = combine(negocioActivo, sesionRepository.usuarioActual) { negocio, usuario ->
+        negocio != null && usuario != null && negocio.usuarioId == usuario.id
     }
 
     /** El id del negocio activo, para quien solo necesita saber a quién apuntarle los datos. */

@@ -53,6 +53,13 @@ data class GestorColors(
     val successContainer: Color,
     val warning: Color,
     val warningContainer: Color,
+    /**
+     * Lo que entra por ventas, en las pantallas donde no compite con un rojo de gastos: el
+     * precio de una venta y el ícono que lo acompaña. Sin color de marca es el verde de siempre;
+     * con uno, toma ese color, para que la app se vea de una sola paleta.
+     */
+    val ingreso: Color,
+    val ingresoContainer: Color,
 )
 
 internal val LightGestorColors = GestorColors(
@@ -62,6 +69,8 @@ internal val LightGestorColors = GestorColors(
     successContainer = SuccessSoftLight,
     warning = WarningLight,
     warningContainer = WarningSoftLight,
+    ingreso = SuccessLight,
+    ingresoContainer = SuccessSoftLight,
 )
 
 internal val DarkGestorColors = GestorColors(
@@ -71,4 +80,6 @@ internal val DarkGestorColors = GestorColors(
     successContainer = SuccessSoftDark,
     warning = WarningDark,
     warningContainer = WarningSoftDark,
+    ingreso = SuccessDark,
+    ingresoContainer = SuccessSoftDark,
 )

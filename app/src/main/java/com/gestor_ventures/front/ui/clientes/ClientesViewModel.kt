@@ -37,6 +37,11 @@ class ClientesViewModel @Inject constructor(
     private val busqueda = MutableStateFlow("")
 
     init {
+        viewModelScope.launch {
+            negocioActivoRepository.esLider.collect { esLider ->
+                _uiState.update { it.copy(puedeAdministrar = esLider) }
+            }
+        }
         // La lista la manda el repositorio; lo que el usuario está haciendo vive acá y responde
         // al instante, sin pasar por la base de datos para mostrar una letra escrita.
         viewModelScope.launch {

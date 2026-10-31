@@ -9,6 +9,8 @@ import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.ui.auth.AuthNavHost
 import com.gestor_ventures.front.ui.main.MainRoute
 import com.gestor_ventures.front.ui.main.MainViewModel
+import androidx.compose.foundation.isSystemInDarkTheme
+import com.gestor_ventures.back.model.ModoTema
 
 /**
  * Punto de entrada de la UI: sin sesión (HU-01/02) muestra el login; con sesión, la app.
@@ -20,16 +22,22 @@ import com.gestor_ventures.front.ui.main.MainViewModel
 @Composable
 fun AppRoot(appRootViewModel: AppRootViewModel = hiltViewModel()) {
     val usuarioId by appRootViewModel.usuarioId.collectAsStateWithLifecycle()
+    val modoTema by appRootViewModel.modoTema.collectAsStateWithLifecycle()
+    val oscuro = when (modoTema) {
+        ModoTema.SISTEMA -> isSystemInDarkTheme()
+        ModoTema.CLARO -> false
+        ModoTema.OSCURO -> true
+    }
 
     if (usuarioId == null) {
-        GestorVenturesTheme {
+        GestorVenturesTheme(darkTheme = oscuro) {
             GvAnchoDeLectura { AuthNavHost() }
         }
     } else {
         val mainViewModel: MainViewModel = hiltViewModel()
         val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
         // El tema toma el color del negocio activo (HU-05): si no tiene, se ve el azul de siempre.
-        GestorVenturesTheme(colorMarca = uiState.negocioActivo?.colorMarca) {
+        GestorVenturesTheme(darkTheme = oscuro, colorMarca = uiState.negocioActivo?.colorMarca) {
             MainRoute(mainViewModel)
         }
     }

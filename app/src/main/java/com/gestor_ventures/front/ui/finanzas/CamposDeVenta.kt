@@ -50,6 +50,8 @@ fun CamposDeVenta(
     clientes: List<Cliente> = emptyList(),
     clienteId: Long? = null,
     onClienteChange: ((Long?) -> Unit)? = null,
+    /** HU-11. Los que el negocio tiene activos; al corregir una venta vieja se ofrecen todos. */
+    metodosDisponibles: List<MetodoPagoUi> = MetodoPagoUi.entries,
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         AnimatedVisibility(visible = !esDetallada) {
@@ -76,7 +78,11 @@ fun CamposDeVenta(
                 onValueChange = onProductoServicioChange,
                 placeholder = stringResource(R.string.venta_producto_placeholder),
             )
-            MetodoDePago(seleccionado = metodoPago, onMetodoPagoChange = onMetodoPagoChange)
+            MetodoDePago(
+                seleccionado = metodoPago,
+                disponibles = metodosDisponibles,
+                onMetodoPagoChange = onMetodoPagoChange,
+            )
 
             // HU-29/HU-30. Solo en la venta detallada: la rápida es un total del día y no
             // tiene a quién apuntarle. El repositorio descarta el cliente igual si es rápida.
@@ -147,6 +153,7 @@ private fun ClienteDeLaVenta(
 @Composable
 private fun MetodoDePago(
     seleccionado: MetodoPagoUi,
+    disponibles: List<MetodoPagoUi>,
     onMetodoPagoChange: (MetodoPagoUi) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -161,7 +168,7 @@ private fun MetodoDePago(
             modifier = Modifier.selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            MetodoPagoUi.entries.forEach { metodo ->
+            disponibles.forEach { metodo ->
                 GvChip(
                     text = stringResource(metodo.labelRes),
                     selected = metodo == seleccionado,

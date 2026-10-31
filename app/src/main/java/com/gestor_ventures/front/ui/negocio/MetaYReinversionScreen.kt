@@ -164,7 +164,7 @@ private fun ProgresoActual(progreso: ProgresoMeta, modifier: Modifier = Modifier
             },
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
             color = if (progreso.cumplida) {
-                GestorVenturesTheme.colors.success
+                GestorVenturesTheme.colors.ingreso
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
             },

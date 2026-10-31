@@ -9,6 +9,7 @@ import com.gestor_ventures.db.entity.UsuarioEntity
 import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Tope de caracteres del nombre y formato de correo/contraseña, tal como quedó en HU-01. */
 private const val MaxCaracteresNombre = 50
@@ -18,6 +19,9 @@ private val FormatoContrasena = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*[^A-Za-z0-9])
 
 /** HU-02. Tras una semana sin actividad, la sesión expira automáticamente. */
 private val TiempoMaximoInactividad: Duration = Duration.ofDays(7)
+
+/** Cuánto se espera la respuesta de Firebase antes de avisar que no hubo conexión. */
+private const val TiempoMaximoDeEspera = 20_000L
 
 /**
  * HU-01, HU-02 y HU-03. Única puerta de entrada a la autenticación.
@@ -33,6 +37,18 @@ class AuthRepository @Inject constructor(
     private val reloj: Reloj,
 ) {
 
+    /** Cierto mientras `iniciarSesion` espera a Firebase y anota el acceso. Ver ahí por qué. */
+    @Volatile
+    private var iniciandoSesion = false
+
+    /**
+     * Espera a Firebase, pero no para siempre. Sin conexión, la llamada puede quedarse colgada
+     * sin responder, y el usuario veía el botón apagado sin ningún mensaje. Pasado el tiempo se
+     * trata como un error de red, que sí se le explica.
+     */
+    private suspend fun esperar(operacion: suspend () -> ResultadoAutenticador): ResultadoAutenticador =
+        withTimeoutOrNull(TiempoMaximoDeEspera) { operacion() } ?: ResultadoAutenticador.ErrorDeRed
+
     /** HU-01. Crea la cuenta y el perfil local si los datos son válidos. */
     suspend fun registrar(nombre: String, correo: String, contrasena: String): ResultadoAuth {
         val nombreLimpio = nombre.trim()
@@ -44,7 +60,7 @@ class AuthRepository @Inject constructor(
             return ResultadoAuth.Invalido(ErrorAuth.CorreoYaRegistrado)
         }
 
-        return when (autenticador.crearCuenta(correoLimpio, contrasena)) {
+        return when (esperar { autenticador.crearCuenta(correoLimpio, contrasena) }) {
             ResultadoAutenticador.Exito -> {
                 val ahora = reloj.ahora()
                 val usuarioId = usuarioDao.insertar(
@@ -72,17 +88,41 @@ class AuthRepository @Inject constructor(
             return ResultadoAuth.Invalido(ErrorAuth.CredencialesInvalidas)
         }
 
-        return when (autenticador.iniciarSesion(correoLimpio, contrasena)) {
-            ResultadoAutenticador.Exito -> {
-                val usuario = usuarioDao.obtenerPorCorreo(correoLimpio)
-                    ?: return ResultadoAuth.Invalido(ErrorAuth.CredencialesInvalidas)
-                usuarioDao.actualizar(usuario.copy(fechaUltimoAcceso = reloj.ahora()))
-                ResultadoAuth.Exito(usuario.usuarioId)
+        // Firebase abre la sesión antes de que se anote el nuevo acceso. Mientras dura este
+        // inicio de sesión, esa sesión recién abierta no se evalúa por inactividad: con un último
+        // acceso de hace más de una semana, se cerraba sola y el login "no hacía nada".
+        iniciandoSesion = true
+        try {
+            return when (esperar { autenticador.iniciarSesion(correoLimpio, contrasena) }) {
+                ResultadoAutenticador.Exito -> {
+                    val ahora = reloj.ahora()
+                    val usuario = usuarioDao.obtenerPorCorreo(correoLimpio)
+                    val usuarioId = if (usuario != null) {
+                        usuarioDao.actualizar(usuario.copy(fechaUltimoAcceso = ahora))
+                        usuario.usuarioId
+                    } else {
+                        // La cuenta existe y Firebase la validó, pero este dispositivo nunca
+                        // vio su perfil (app reinstalada, teléfono nuevo): se crea acá en vez
+                        // de rechazar una contraseña que estaba bien.
+                        usuarioDao.insertar(
+                            UsuarioEntity(
+                                nombre = correoLimpio.substringBefore('@'),
+                                correo = correoLimpio,
+                                contrasenaHash = "",
+                                fechaCreacion = ahora,
+                                fechaUltimoAcceso = ahora,
+                            ),
+                        )
+                    }
+                    ResultadoAuth.Exito(usuarioId)
+                }
+                ResultadoAutenticador.CredencialesInvalidas,
+                ResultadoAutenticador.CorreoNoRegistrado,
+                -> ResultadoAuth.Invalido(ErrorAuth.CredencialesInvalidas)
+                else -> ResultadoAuth.Invalido(ErrorAuth.ErrorDeRed)
             }
-            ResultadoAutenticador.CredencialesInvalidas,
-            ResultadoAutenticador.CorreoNoRegistrado,
-            -> ResultadoAuth.Invalido(ErrorAuth.CredencialesInvalidas)
-            else -> ResultadoAuth.Invalido(ErrorAuth.ErrorDeRed)
+        } finally {
+            iniciandoSesion = false
         }
     }
 
@@ -93,7 +133,7 @@ class AuthRepository @Inject constructor(
             return ResultadoAuth.Invalido(ErrorAuth.CorreoInvalido)
         }
 
-        return when (autenticador.enviarCorreoDeRecuperacion(correoLimpio)) {
+        return when (esperar { autenticador.enviarCorreoDeRecuperacion(correoLimpio) }) {
             ResultadoAutenticador.Exito -> ResultadoAuth.Exito()
             ResultadoAutenticador.CorreoNoRegistrado -> ResultadoAuth.Invalido(ErrorAuth.CorreoNoRegistrado)
             else -> ResultadoAuth.Invalido(ErrorAuth.ErrorDeRed)
@@ -117,6 +157,7 @@ class AuthRepository @Inject constructor(
      * usuario al abrirla) es quien debe llamar esto y actuar según el resultado.
      */
     suspend fun sesionActiva(usuarioId: Long): Boolean {
+        if (iniciandoSesion) return true
         val ultimoAcceso = usuarioDao.obtener(usuarioId)?.fechaUltimoAcceso ?: return false
         val inactivo = Duration.between(ultimoAcceso, reloj.ahora()) > TiempoMaximoInactividad
         if (inactivo) autenticador.cerrarSesion()

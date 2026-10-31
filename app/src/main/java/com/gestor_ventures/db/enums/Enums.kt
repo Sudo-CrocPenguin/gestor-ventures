@@ -41,3 +41,6 @@ enum class TipoAlerta { CAIDA_VENTAS, GASTO_ELEVADO, META_EN_RIESGO }
 
 /** HU-41. Origen de la notificación push. */
 enum class TipoNotificacion { ALERTA_IA, RECORDATORIO_AGENDA }
+
+/** Estado de un vendedor invitado al equipo: la invitación existe, o ya aceptó. */
+enum class EstadoMiembro { PENDIENTE, ACTIVO }

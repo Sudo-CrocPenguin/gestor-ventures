@@ -59,9 +59,13 @@ import com.gestor_ventures.front.util.formatHour
 import com.gestor_ventures.front.util.formatLongDate
 import java.time.LocalDate
 import java.time.LocalTime
+import com.gestor_ventures.front.components.tourTarget
 
 @Composable
-fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
+fun AgendaRoute(
+    onVincularWhatsApp: () -> Unit,
+    viewModel: AgendaViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
     // HU-26. El permiso se pide solo cuando hace falta: al elegir un recordatorio, y no al abrir
@@ -107,13 +111,19 @@ fun AgendaRoute(viewModel: AgendaViewModel = hiltViewModel()) {
         onAbrirCita = { viewModel.abrirCita(it.id) },
         onCerrarCita = viewModel::cerrarCita,
         onEditarCita = viewModel::editarCitaElegida,
+        onRecordarCita = viewModel::recordarCitaElegida,
         onEditarPedido = viewModel::editarPedidoElegido,
         onPedirCancelar = viewModel::pedirConfirmacionDeCancelar,
         onConfirmarCancelar = viewModel::confirmarCancelacion,
         onDescartarCancelar = viewModel::descartarCancelacion,
         onAbrirWhatsApp = { enlace ->
+            val desdeLaEmpresa = uiState.aviso?.whatsappEmpresa != null
             viewModel.cerrarAviso()
-            contexto.startActivity(Intent(Intent.ACTION_VIEW, enlace.toUri()))
+            abrirWhatsApp(contexto, enlace, desdeLaEmpresa)
+        },
+        onVincularWhatsApp = {
+            viewModel.cerrarAviso()
+            onVincularWhatsApp()
         },
         onCerrarAviso = viewModel::cerrarAviso,
     )
@@ -155,11 +165,13 @@ fun AgendaScreen(
     onAbrirCita: (Cita) -> Unit,
     onCerrarCita: () -> Unit,
     onEditarCita: () -> Unit,
+    onRecordarCita: () -> Unit,
     onEditarPedido: () -> Unit,
     onPedirCancelar: () -> Unit,
     onConfirmarCancelar: () -> Unit,
     onDescartarCancelar: () -> Unit,
     onAbrirWhatsApp: (String) -> Unit,
+    onVincularWhatsApp: () -> Unit,
     onCerrarAviso: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -176,6 +188,7 @@ fun AgendaScreen(
                 seleccionada = uiState.vista,
                 etiqueta = { stringResource(it.labelRes()) },
                 onSeleccionar = onVistaChange,
+                modifier = Modifier.tourTarget("agenda_vistas"),
             )
 
             EncabezadoDePeriodo(
@@ -220,7 +233,9 @@ fun AgendaScreen(
         if (uiState.ofreceCitas || uiState.ofrecePedidos) {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxWidth()) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .tourTarget("agenda_acciones"),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (uiState.ofreceCitas) {
@@ -310,9 +325,19 @@ fun AgendaScreen(
 
     uiState.citaElegida?.let { cita ->
         val abierta = cita.estado != EstadoCita.CANCELADA
+        // Sin teléfono no hay a quién escribirle por WhatsApp: la opción se ve pero apagada, con
+        // el motivo, para que no parezca que la app no la tiene.
+        val tieneTelefono = uiState.clientes.firstOrNull { it.id == cita.clienteId }?.telefono != null
         GvAccionesSheet(
             titulo = cita.nombreCliente,
             acciones = listOf(
+                AccionSheet(
+                    texto = stringResource(R.string.agenda_recordar_cita),
+                    iconRes = R.drawable.ic_message,
+                    habilitada = abierta && tieneTelefono,
+                    detalle = if (abierta && !tieneTelefono) stringResource(R.string.agenda_recordar_sin_telefono) else null,
+                    onClick = onRecordarCita,
+                ),
                 AccionSheet(
                     texto = stringResource(R.string.agenda_editar),
                     iconRes = R.drawable.ic_pencil,
@@ -340,7 +365,12 @@ fun AgendaScreen(
     }
 
     uiState.aviso?.let { aviso ->
-        AvisarAlCliente(aviso = aviso, onAbrirWhatsApp = onAbrirWhatsApp, onCerrar = onCerrarAviso)
+        AvisarAlCliente(
+            aviso = aviso,
+            onAbrirWhatsApp = onAbrirWhatsApp,
+            onVincularWhatsApp = onVincularWhatsApp,
+            onCerrar = onCerrarAviso,
+        )
     }
 }
 
@@ -388,18 +418,33 @@ private fun ConfirmarCancelacion(
 private fun AvisarAlCliente(
     aviso: AvisoAlCliente,
     onAbrirWhatsApp: (String) -> Unit,
+    onVincularWhatsApp: () -> Unit,
     onCerrar: () -> Unit,
 ) {
     val nombre = aviso.nombreCliente.trim().substringBefore(' ')
     val fecha = formatLongDate(aviso.fecha).replaceFirstChar { it.lowercase() }
     val hora = aviso.hora?.let(::formatHour).orEmpty()
     val mensaje = when (aviso.tipo) {
+        TipoAviso.CitaRecordatorio -> mensajeDeRecordatorio(aviso, nombre, fecha, hora)
         TipoAviso.CitaCambiada -> stringResource(R.string.agenda_aviso_cita_cambiada, nombre, fecha, hora)
         TipoAviso.CitaCancelada -> stringResource(R.string.agenda_aviso_cita_cancelada, nombre, fecha, hora)
         TipoAviso.PedidoCambiado -> stringResource(R.string.agenda_aviso_pedido_cambiado, nombre, fecha)
         TipoAviso.PedidoCancelado -> stringResource(R.string.agenda_aviso_pedido_cancelado, nombre, fecha)
     }
     val enlace = enlaceDeWhatsApp(aviso.telefono, mensaje) ?: return
+
+    // El recordatorio es el único aviso que sale a nombre de la empresa: si no hay WhatsApp
+    // vinculado se pide vincularlo, y si lo hay se muestra el mensaje listo para enviar.
+    if (aviso.tipo == TipoAviso.CitaRecordatorio) {
+        RecordatorioCitaDialog(
+            aviso = aviso,
+            mensaje = mensaje,
+            onEnviar = { onAbrirWhatsApp(enlace) },
+            onVincular = onVincularWhatsApp,
+            onCerrar = onCerrar,
+        )
+        return
+    }
 
     AlertDialog(
         onDismissRequest = onCerrar,
@@ -417,6 +462,40 @@ private fun AvisarAlCliente(
         },
     )
 }
+
+/**
+ * HU-26. El recordatorio de una cita según su servicio ("Te recuerdo tu cita de manicure…"), y
+ * sin él si la cita no lo trae. Termina con la firma de la empresa.
+ */
+@Composable
+private fun mensajeDeRecordatorio(aviso: AvisoAlCliente, nombre: String, fecha: String, hora: String): String {
+    val servicio = aviso.servicio?.replaceFirstChar { it.lowercase() }
+    return if (servicio != null) {
+        stringResource(R.string.agenda_recordatorio_con_servicio, nombre, servicio, fecha, hora, aviso.nombreNegocio)
+    } else {
+        stringResource(R.string.agenda_recordatorio_sin_servicio, nombre, fecha, hora, aviso.nombreNegocio)
+    }
+}
+
+/**
+ * Abre el chat de WhatsApp con el mensaje escrito. Si el aviso sale a nombre de la empresa se
+ * intenta primero con WhatsApp Business, que es donde está el número del negocio; si no está
+ * instalada, se abre con el WhatsApp que haya.
+ */
+private fun abrirWhatsApp(contexto: android.content.Context, enlace: String, desdeLaEmpresa: Boolean) {
+    val intencion = Intent(Intent.ACTION_VIEW, enlace.toUri())
+    if (desdeLaEmpresa) {
+        try {
+            contexto.startActivity(Intent(intencion).setPackage(PaqueteWhatsAppBusiness))
+            return
+        } catch (_: android.content.ActivityNotFoundException) {
+            // No tiene WhatsApp Business: se sigue con la intención normal.
+        }
+    }
+    contexto.startActivity(intencion)
+}
+
+private const val PaqueteWhatsAppBusiness = "com.whatsapp.w4b"
 
 /** Los estados a los que se pasa un pedido a mano. Cancelar es otra acción, con confirmación (HU-28). */
 private val EstadosQueSeEligen = listOf(
@@ -573,6 +652,8 @@ private fun VistaPrevia(uiState: AgendaUiState) {
                 onAbrirCita = {},
                 onCerrarCita = {},
                 onEditarCita = {},
+                onRecordarCita = {},
+                onVincularWhatsApp = {},
                 onEditarPedido = {},
                 onPedirCancelar = {},
                 onConfirmarCancelar = {},

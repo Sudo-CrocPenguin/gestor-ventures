@@ -259,10 +259,10 @@ private fun FilaDeCompra(compra: CompraUi, modifier: Modifier = Modifier) {
                 formatHour(compra.fechaHora.toLocalTime()),
             ),
             iconRes = R.drawable.ic_plus,
-            iconContainerColor = GestorVenturesTheme.colors.successContainer,
-            iconColor = GestorVenturesTheme.colors.success,
+            iconContainerColor = GestorVenturesTheme.colors.ingresoContainer,
+            iconColor = GestorVenturesTheme.colors.ingreso,
             trailing = {
-                MoneyText(monto = compra.monto, color = GestorVenturesTheme.colors.success)
+                MoneyText(monto = compra.monto, color = GestorVenturesTheme.colors.ingreso)
             },
         )
     }

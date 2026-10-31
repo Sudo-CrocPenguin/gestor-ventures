@@ -33,6 +33,8 @@ import com.gestor_ventures.front.components.QuickActionButton
 import com.gestor_ventures.front.theme.GestorVenturesTheme
 import com.gestor_ventures.front.util.formatLongDate
 import java.time.LocalDate
+import com.gestor_ventures.front.components.tourTarget
+import com.gestor_ventures.front.components.GvPrimaryButton
 
 @Composable
 fun InicioRoute(
@@ -41,6 +43,8 @@ fun InicioRoute(
     onAbrirCaja: () -> Unit,
     onDefinirMeta: () -> Unit,
     onVerAlertas: () -> Unit,
+    onRegistrarNegocio: () -> Unit,
+    onVerAgenda: () -> Unit,
     viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -51,6 +55,8 @@ fun InicioRoute(
         onAbrirCaja = onAbrirCaja,
         onDefinirMeta = onDefinirMeta,
         onVerAlertas = onVerAlertas,
+        onRegistrarNegocio = onRegistrarNegocio,
+        onVerAgenda = onVerAgenda,
     )
 }
 
@@ -63,6 +69,8 @@ fun InicioScreen(
     onDefinirMeta: () -> Unit,
     onVerAlertas: () -> Unit,
     modifier: Modifier = Modifier,
+    onRegistrarNegocio: () -> Unit = {},
+    onVerAgenda: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -76,8 +84,15 @@ fun InicioScreen(
             fecha = uiState.fecha,
             alertasNuevas = uiState.alertasNuevas,
         )
-        // HU-08. El aviso de meta cumplida va antes que las acciones: es la noticia del día.
-        if (uiState.metaCumplida) {
+        // Una cuenta que ya existía, en un dispositivo sin sus negocios: se le explica y se le da el
+        // botón, en vez de mandarla a un formulario sin preguntar.
+        if (uiState.sinNegocio) {
+            SinNegocioCard(onRegistrarNegocio = onRegistrarNegocio)
+            return@Column
+        }
+        // HU-08. El aviso de meta cumplida va antes que las acciones: es la noticia del día. Es
+        // del dueño: un vendedor no ve la meta del negocio.
+        if (uiState.metaCumplida && !uiState.esVendedor) {
             MetaCumplidaCard(onDefinirMeta = onDefinirMeta)
         }
         // Acostada, la tablet tiene ancho de sobra y alto de menos: el resumen se queda a la
@@ -85,14 +100,29 @@ fun InicioScreen(
         // vuelve a ser una sola columna, en este mismo orden.
         GvDosColumnas(
             izquierda = {
-                ResumenHoyCard(resumen = uiState.resumenHoy, onVerFinanzas = onVerFinanzas)
+                if (uiState.esVendedor) {
+                    // El vendedor no ve las cifras del negocio: arranca por lo que le toca hoy.
+                    PendientesHoyCard(pendientes = uiState.pendientesHoy, onVerAgenda = onVerAgenda)
+                } else {
+                    ResumenHoyCard(
+                        resumen = uiState.resumenHoy,
+                        onVerFinanzas = onVerFinanzas,
+                        modifier = Modifier.tourTarget("inicio_resumen"),
+                    )
+                }
             },
             derecha = {
                 AccionesRapidas(onRegistrarVenta = onRegistrarVenta, onAbrirCaja = onAbrirCaja)
                 CajaDelTurnoCard(caja = uiState.cajaAbierta)
 
-                // HU-38. Los avisos no esperan a que alguien entre a notificaciones.
-                if (uiState.alertas.isNotEmpty()) {
+                // Lo que falta por hacer hoy, aparte de lo que ya se vendió.
+                if (!uiState.esVendedor) {
+                    PendientesHoyCard(pendientes = uiState.pendientesHoy, onVerAgenda = onVerAgenda)
+                }
+
+                // HU-38. Los avisos no esperan a que alguien entre a notificaciones. Son del
+                // dueño del negocio.
+                if (uiState.alertas.isNotEmpty() && !uiState.esVendedor) {
                     AlertasCard(alertas = uiState.alertas, onVerTodas = onVerAlertas)
                 }
 
@@ -100,10 +130,33 @@ fun InicioScreen(
                 if (uiState.ultimasVentas.isNotEmpty()) {
                     UltimasVentasCard(
                         ventas = uiState.ultimasVentas,
-                        onVerHistorial = onVerFinanzas,
+                        // El historial vive en Finanzas, que el vendedor no tiene.
+                        onVerHistorial = if (uiState.esVendedor) null else onVerFinanzas,
                     )
                 }
             },
+        )
+    }
+}
+
+/** La cuenta no tiene negocios en este dispositivo: qué pasa y cómo seguir. */
+@Composable
+private fun SinNegocioCard(onRegistrarNegocio: () -> Unit, modifier: Modifier = Modifier) {
+    GvCard(modifier) {
+        Text(
+            text = stringResource(R.string.inicio_sin_negocio_titulo),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = stringResource(R.string.inicio_sin_negocio_texto),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 6.dp, bottom = 16.dp),
+        )
+        GvPrimaryButton(
+            text = stringResource(R.string.inicio_sin_negocio_accion),
+            onClick = onRegistrarNegocio,
         )
     }
 }
@@ -127,7 +180,7 @@ private fun MetaCumplidaCard(onDefinirMeta: () -> Unit, modifier: Modifier = Mod
         Text(
             text = stringResource(R.string.inicio_meta_cumplida_detalle),
             style = MaterialTheme.typography.bodySmall,
-            color = GestorVenturesTheme.colors.success,
+            color = GestorVenturesTheme.colors.ingreso,
         )
     }
 }
@@ -188,7 +241,8 @@ private fun AccionesRapidas(
             highlighted = true,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .tourTarget("inicio_venta"),
         )
         QuickActionButton(
             text = stringResource(R.string.inicio_abrir_caja),
@@ -196,7 +250,8 @@ private fun AccionesRapidas(
             onClick = onAbrirCaja,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .tourTarget("inicio_caja"),
         )
     }
 }
